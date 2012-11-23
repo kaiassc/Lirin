@@ -3,14 +3,29 @@
 class Map {
 	
 	protected $MapTitle;
+	protected $MapDescription = "";
 	protected $Force1 = [ "Name" => "Force 1" ];
 	protected $Force2 = [ "Name" => "Force 2" ];
 	protected $Force3 = [ "Name" => "Force 3" ];
 	protected $Force4 = [ "Name" => "Force 4" ];
+	protected $Mint;
+	
+	protected $SuppressOutput = FALSE;
+	protected $ShowAnalysis = FALSE;
+	protected $RetainXML = FALSE;
 	
 	public function __construct(){
-		MintMapTitle($this->MapTitle);
 		
+		// Settings
+		RetainTmpXML($this->RetainXML);
+		if ( $this->SuppressOutput ){ SuppressOutput(); }
+		if ( $this->ShowAnalysis ){ ShowAnalysis(); }
+		
+		if($this->Mint){
+			Mint($this->Mint[0], $this->Mint[1]);
+			MintMapTitle($this->MapTitle);
+			MintMapDesc($this->MapDescription);
+		}
 		
 		// Force Business
 		$this->Force1["Force"] = Force1; $this->Force2["Force"] = Force2; $this->Force3["Force"] = Force3; $this->Force4["Force"] = Force4;
@@ -24,11 +39,12 @@ class Map {
 		
 		
 		
-		$this->main();		
+		
+		$this->Main();		
 	}
 	
-	public function main(){
-		
+	public function Main(){
+		Error("You need to define a main function to put your triggers in");
 	}
 	
 }
