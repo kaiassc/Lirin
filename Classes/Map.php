@@ -1,4 +1,4 @@
-<?php require_once($_SERVER['DOCUMENT_ROOT']."/Compiler/Oreo/initialize.php");
+<?php require_once("$_SERVER[DOCUMENT_ROOT]/Compiler/Oreo/initialize.php");
 
 class Map {
 	
@@ -8,7 +8,9 @@ class Map {
 	protected $Force2 = [ "Name" => "Force 2" ];
 	protected $Force3 = [ "Name" => "Force 3" ];
 	protected $Force4 = [ "Name" => "Force 4" ];
+	
 	protected $Mint;
+	protected $ClassFolder = "Classes";
 	
 	protected $SuppressOutput = FALSE;
 	protected $ShowAnalysis = FALSE;
@@ -26,6 +28,7 @@ class Map {
 			MintMapTitle($this->MapTitle);
 			MintMapDesc($this->MapDescription);
 		}
+		SetClassFolder($this->ClassFolder);
 		
 		// Force Business
 		$this->Force1["Force"] = Force1; $this->Force2["Force"] = Force2; $this->Force3["Force"] = Force3; $this->Force4["Force"] = Force4;
