@@ -9,12 +9,12 @@ class Map {
 	protected $Force3 = array( "Name" => "Force 3" );
 	protected $Force4 = array( "Name" => "Force 4" );
 	
-	public $Mint;
-	public $ClassFolder = "Classes";
+	protected $Mint;
+	protected $ClassFolder = "Classes";
 	
-	public $SuppressOutput = FALSE;
-	public $ShowAnalysis = FALSE;
-	public $RetainXML = FALSE;
+	protected $SuppressOutput = FALSE;
+	protected $ShowAnalysis = FALSE;
+	protected $RetainXML = FALSE;
 	
 	//
 	

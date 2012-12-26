@@ -1,4 +1,4 @@
-<?php require_once("Classes/Map.php");
+<?php require_once("Classes/Map.php"); require_once("Custom/Actions.php"); require_once("Custom/Conditions.php");
 
 class Lirin extends Map {
 	
