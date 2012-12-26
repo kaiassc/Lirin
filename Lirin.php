@@ -57,11 +57,43 @@ class Lirin extends Map {
 		for($i=0;$i<7;$i++){ 
 			MintLocation("Extra", 16, 16, 16, 16);
 		}
-		$main = MintLocation("Main", 16,16,16,16);
+		MintLocation("Main", 16,16,16,16);
 		$main = new ExtendableLocation("Main");
 		
 		// Triggers
+		$tempdc1 = new TempDC();
+		$tempdc2 = new TempDC();
+		$tempdc3 = new TempDC();
+		$CodeStorage = new LirinStorage($tempdc1, $tempdc2, $tempdc3);
 		
+		$success = new TempSwitch();
+		$P1->_if( Elapsed(AtMost, 30) )->then(
+			$CodeStorage->storeCode(11, 6, 22, $success),
+			_if( $success )->then(
+				$CodeStorage->export(),
+			''),
+		'');
+		
+		
+		$this->REBIRTH();
+	}
+	
+	private function REBIRTH(){
+		// Players
+		$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
+		$P5 = new Player(P5); $P6 = new Player(P6); $P7 = new Player(P7); $P8 = new Player(P8);
+		$All = new Player(P1,P2,P3,P4,P5,P6,P7,P8);
+		$visioners = new Player(P1, P2, P3);
+		$humans = new Player(P3, P4, P5);
+		$allyComp = new Player(P7);
+		$enemyComp = new Player(P8);
+		$comps = new Player(P4,P5,P6,P7,P8);
+		$PArray = array(1 => $P1, 2 => $P2, 3 => $P3, 4 => $P4, 5 => $P5, 6 => $P6, 7 => $P7, 8 => $P8);
+		
+		
+		$this->P8->_if(  )->then(
+			
+		'');
 	}
 	
 }

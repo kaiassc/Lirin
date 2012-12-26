@@ -32,11 +32,8 @@ class LirinLocation extends Location {
 	
 	public function placeAt($x, $y){
 		
-		
-		
-		
-		
-		
 	}
+	
+	
 	
 }

@@ -16,6 +16,10 @@ class Map {
 	protected $ShowAnalysis = FALSE;
 	protected $RetainXML = FALSE;
 	
+	//
+	
+	protected $P1, $P2, $P3, $P4, $P5, $P6, $P7, $P8; 
+	
 	public function __construct(){
 		
 		// Settings
@@ -41,7 +45,14 @@ class Map {
 		}
 		
 		
-		
+		$this->P1 = new Player(P1);
+		$this->P2 = new Player(P2);
+		$this->P3 = new Player(P3);
+		$this->P4 = new Player(P4);
+		$this->P5 = new Player(P5);
+		$this->P6 = new Player(P6);
+		$this->P7 = new Player(P7);
+		$this->P8 = new Player(P8);
 		
 		$this->Main();		
 	}
