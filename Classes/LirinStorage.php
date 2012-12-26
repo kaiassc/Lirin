@@ -11,7 +11,6 @@ class LirinStorage{
 	
 	private $player = null;
 	private $totalBits = 0;
-	private $currentBit = 1;
 	
 	// old
 	//private $dc = array();
