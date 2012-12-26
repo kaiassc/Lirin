@@ -4,13 +4,12 @@ class Lirin extends Map {
 	
 	protected $MapTitle = "Lirin";
 	protected $MapDescription = "";
-	protected $Force1 = [ "Name" => "Visioners",    "Players" => [P1 => Computer, P2 => Computer, P3 => Computer] ];
-	protected $Force2 = [ "Name" => "Humans",       "Players" => [P4 => Human, P5 => Human, P6 => Human] ];
-	protected $Force3 = [ "Name" => "Allied Comp",  "Players" => [P7 => Computer] ];
-	protected $Force4 = [ "Name" => "Enemy Comp",   "Players" => [P8 => Computer] ];
+	protected $Force1 = array( "Name" => "Visioners",    "Players" => [P1 => Computer, P2 => Computer, P3 => Computer] );
+	protected $Force2 = array( "Name" => "Humans",       "Players" => [P4 => Human, P5 => Human, P6 => Human] );
+	protected $Force3 = array( "Name" => "Allied Comp",  "Players" => [P7 => Computer] );
+	protected $Force4 = array( "Name" => "Enemy Comp",   "Players" => [P8 => Computer] );
 	
 	function Main(){
-		include_once("$_SERVER[DOCUMENT_ROOT]/UserSpecific.php");
 		
 		// Players
 		$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
@@ -56,20 +55,23 @@ class Lirin extends Map {
 		$main = new ExtendableLocation("Main");
 		
 		// Triggers
-		$tempdc1 = new TempDC();
-		$tempdc2 = new TempDC();
-		$tempdc3 = new TempDC();
-		$CodeStorage = new LirinStorage($tempdc1, $tempdc2, $tempdc3);
+		$tempdc1 = new TempDC(100);
+		$tempdc2 = new TempDC(100);
+		$tempdc3 = new TempDC(100);
+		//$CodeStorage = new LirinStorage($tempdc1, $tempdc2, $tempdc3);
 		
 		$success = new TempSwitch();
 		$P1->_if( Elapsed(AtMost, 30) )->then(
-			$CodeStorage->storeCode(11, 6, 22, $success),
+			//$CodeStorage->storeCode(11, 6, 22, $success),
 			_if( $success )->then(
-				$CodeStorage->export(),
+				//$CodeStorage->export(),
 			e)->_else(
 				Display("You used an unrecognized character!"),
 			''),
 			$success->release(),
+			$tempdc1->release(),
+			$tempdc2->release(),
+			$tempdc3->release(),
 		'');
 		
 		
@@ -81,4 +83,5 @@ class Lirin extends Map {
 	
 }
 
+require_once("$_SERVER[DOCUMENT_ROOT]/Compiler/UserSpecific.php");
 new Lirin();

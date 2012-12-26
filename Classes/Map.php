@@ -4,10 +4,10 @@ class Map {
 	
 	protected $MapTitle;
 	protected $MapDescription = "";
-	protected $Force1 = [ "Name" => "Force 1" ];
-	protected $Force2 = [ "Name" => "Force 2" ];
-	protected $Force3 = [ "Name" => "Force 3" ];
-	protected $Force4 = [ "Name" => "Force 4" ];
+	protected $Force1 = array( "Name" => "Force 1" );
+	protected $Force2 = array( "Name" => "Force 2" );
+	protected $Force3 = array( "Name" => "Force 3" );
+	protected $Force4 = array( "Name" => "Force 4" );
 	
 	public $Mint;
 	public $ClassFolder = "Classes";
@@ -27,11 +27,11 @@ class Map {
 		if ( $this->SuppressOutput ){ SuppressOutput(); }
 		if ( $this->ShowAnalysis ){ ShowAnalysis(); }
 		
-		if($this->Mint){
+		if( $this->Mint ){ 
 			Mint($this->Mint[0], $this->Mint[1]);
-			MintMapTitle($this->MapTitle);
-			MintMapDesc($this->MapDescription);
 		}
+		MintMapTitle($this->MapTitle);
+		MintMapDesc($this->MapDescription);
 		SetClassFolder($this->ClassFolder);
 		
 		// Force Business
@@ -59,6 +59,10 @@ class Map {
 	
 	public function Main(){
 		Error("You need to define a main function to put your triggers in");
+	}
+	
+	public function __destruct(){
+		
 	}
 	
 }

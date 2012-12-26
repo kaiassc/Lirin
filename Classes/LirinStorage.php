@@ -48,8 +48,8 @@ class LirinStorage{
 		}
 		
 		$neededstorage = (int)ceil($this->totalBits/31);
-		for($i=1; $i<=$neededstorage; $i++){
-			if($player !== null){
+		for($i=0; $i<=$neededstorage; $i++){
+			if($player instanceof Player){
 				$this->storagedcs[] = new Deathcounter($player);
 			}
 			else{
