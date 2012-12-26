@@ -4,10 +4,10 @@ class Lirin extends Map {
 	
 	protected $MapTitle = "Lirin";
 	protected $MapDescription = "";
-	protected $Force1 = array( "Name" => "Visioners",    "Players" => [P1 => Computer, P2 => Computer, P3 => Computer] );
-	protected $Force2 = array( "Name" => "Humans",       "Players" => [P4 => Human, P5 => Human, P6 => Human] );
-	protected $Force3 = array( "Name" => "Allied Comp",  "Players" => [P7 => Computer] );
-	protected $Force4 = array( "Name" => "Enemy Comp",   "Players" => [P8 => Computer] );
+	protected $Force1 = array( "Name" => "Visioners",    "Players" => array(P1 => Computer, P2 => Computer, P3 => Computer) );
+	protected $Force2 = array( "Name" => "Humans",       "Players" => array(P4 => Human, P5 => Human, P6 => Human) );
+	protected $Force3 = array( "Name" => "Allied Comp",  "Players" => array(P7 => Computer) );
+	protected $Force4 = array( "Name" => "Enemy Comp",   "Players" => array(P8 => Computer) );
 	
 	function Main(){
 		
