@@ -9,14 +9,9 @@ class Lirin extends Map {
 	protected $Force3 = [ "Name" => "Allied Comp",  "Players" => [P7 => Computer] ];
 	protected $Force4 = [ "Name" => "Enemy Comp",   "Players" => [P8 => Computer] ];
 	
-	protected $Mint   = [ "C:/Wamp/www/Lirin/LirIn.scx", "C:/Program Files/Starcraft/maps/download/mint/LirinOut.scx" ];
-	protected $ClassFolder = "C:/Wamp/www/Lirin/Classes";
-	
-	protected $SuppressOutput = false;
-	protected $ShowAnalysis =   false;
-	protected $RetainXML =      false;
-	
 	function Main(){
+		include_once("$_SERVER[DOCUMENT_ROOT]/UserSpecific.php");
+		
 		// Players
 		$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
 		$P5 = new Player(P5); $P6 = new Player(P6); $P7 = new Player(P7); $P8 = new Player(P8);
