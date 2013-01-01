@@ -6,19 +6,24 @@ class BSUnit extends IndexedUnit {
 	
 	// Private
 	
-	/* @var Deathcounter */ public $type;
-	/* @var Deathcounter */ public $attackTime;
-	/* @var Deathcounter */ public $attackTarget;
-	/* @var Deathcounter */ public $health;
-	/* @var Deathcounter */ public $maxhealth;
-	/* @var Deathcounter */ public $mana;
-	/* @var Deathcounter */ public $damage;
-	/* @var Deathcounter */ public $armor;
+	/**#@+
+	 * @var Deathcounter
+	 */
+	public $type;
+	public $attackTime;
+	public $attackTarget;
+	public $health;
+	public $maxhealth;
+	public $mana;
+	public $damage;
+	public $armor;
+	/**#@-*/
 	
 	public function __construct($index, $unit=NULL, $player=NULL, $location=NULL){
 		parent::__construct($index, $unit, $player, $location);
 		
-		
+		$this->type->add(1);
+		$this->attackTime->add(1);
 	}
 	
 	

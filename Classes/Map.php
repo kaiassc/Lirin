@@ -1,4 +1,5 @@
-<?php require_once("$_SERVER[DOCUMENT_ROOT]/Compiler/Oreo/initialize.php");
+<?php require_once("$_SERVER[DOCUMENT_ROOT]Compiler/Oreo/"."initialize.php");
+
 
 class Map {
 	
@@ -16,11 +17,18 @@ class Map {
 	protected $ShowAnalysis = FALSE;
 	protected $RetainXML = FALSE;
 	
-	//
+	static $xdim = 256;
+	static $ydim = 256;
 	
 	protected $P1, $P2, $P3, $P4, $P5, $P6, $P7, $P8; 
 	
 	public function __construct(){
+		if( static::$xdim ){
+			Map::$xdim = static::$xdim;
+		}
+		if( static::$ydim ){
+			Map::$ydim = static::$ydim;
+		}
 		
 		// Settings
 		RetainTmpXML($this->RetainXML);

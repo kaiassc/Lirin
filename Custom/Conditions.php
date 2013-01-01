@@ -70,9 +70,55 @@
 		*/
 		
 	}
-	
-	
-	
+
+	/**
+	 * If the player playing the game is the player running 
+	 * the trigger then it evaluates as TRUE. Uses EPDs.
+	 * 
+	 * @return string
+	 */
+	function IsCurrentPlayer(){
+		static $initialized = false;
+		static $IsCurrentPlayer;
+		if($initialized === false){
+			$initialized = true;
+			$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
+			$P5 = new Player(P5); $P6 = new Player(P6); $P7 = new Player(P7); $P8 = new Player(P8);
+			$All = new Player(AllPlayers);
+			$IsCurrentPlayer = new PermSwitch();
+			$CP = new EPD(-122682);
+			
+			$All->prepend->always(
+				$IsCurrentPlayer->clear(),
+			'');
+			
+			$P1->prepend->_if( $CP->exactly(0) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P2->prepend->_if( $CP->exactly(1) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P3->prepend->_if( $CP->exactly(2) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P4->prepend->_if( $CP->exactly(3) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P5->prepend->_if( $CP->exactly(4) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P6->prepend->_if( $CP->exactly(5) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P7->prepend->_if( $CP->exactly(6) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+			$P8->prepend->_if( $CP->exactly(7) )->then(
+				$IsCurrentPlayer->set(),
+			'');
+		}
+		return $IsCurrentPlayer->is_set();
+	}
 	
 	
 	
