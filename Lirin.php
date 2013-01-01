@@ -139,5 +139,5 @@ class Lirin extends Map {
 	
 }
 
-require_once("$_SERVER[DOCUMENT_ROOT]"."Compiler/UserSpecific.php");
+require_once("$_SERVER[DOCUMENT_ROOT]/"."Compiler/UserSpecific.php");
 new Lirin();

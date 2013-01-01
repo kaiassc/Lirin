@@ -138,10 +138,11 @@ class SoundManager {
 		$text = '';
 		
 		$maxbit = $basedc->binaryPower();
-		for($i=$maxbit;$i>=4;$i--){
+		for($i=$maxbit;$i>=5;$i--){
 			$power = pow(2,$i);
 			$text .= _if( $basedc->atLeast($power) )->then(
 				$this->subFromAll($otherdcs, $power),
+				$basedc->sub($power),
 				$tempdc->add($power),
 			'');
 			
@@ -155,10 +156,11 @@ class SoundManager {
 		$text = '';
 		
 		$maxbit = $basedc->binaryPower();
-		for($i=$maxbit;$i>=4;$i--){
+		for($i=$maxbit;$i>=5;$i--){
 			$power = pow(2,$i);
 			$text .= _if( $basedc->atLeast($power) )->then(
 				$this->addToAll($otherdcs, $power),
+				$basedc->sub($power),
 			'');
 			
 		}
@@ -327,7 +329,7 @@ class SoundManager {
 			$filepath = "$folder/2D/$name-L.wav";
 			if ( !file_exists($filepath)){
 				if( file_exists($mainpath) ){
-					$exec = "$_SERVER[DOCUMENT_ROOT]Lirin/Wavs/2D/SoX/convert.bat $mainpath";
+					$exec = "$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs/2D/SoX/convert.bat $mainpath";
 					system($exec);
 					if ( !file_exists($filepath)){
 						Error("It seems creating the 2D wavs failed. Exec string: $exec");
