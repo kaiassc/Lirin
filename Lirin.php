@@ -16,9 +16,6 @@ class Lirin extends Map {
 		
 		$SoundManager = new SoundManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
 		
-		$door = new Sound("door");
-		$doorc = new Sound("doorc");
-		
 		// Players
 		$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
 		$P5 = new Player(P5); $P6 = new Player(P6); $P7 = new Player(P7); $P8 = new Player(P8);
@@ -63,76 +60,7 @@ class Lirin extends Map {
 		$main = new ExtendableLocation("Main");
 		
 		// Triggers
-		/*
-		$tempdc1 = new TempDC(100);
-		$tempdc2 = new TempDC(100);
-		$tempdc3 = new TempDC(100);
-		//$CodeStorage = new LirinStorage($tempdc1, $tempdc2, $tempdc3);
-
-		$success = new TempSwitch();
-		$P1->_if( Elapsed(AtMost, 30) )->then(
-			//$CodeStorage->storeCode(11, 6, 22, $success),
-			_if( $success )->then(
-				//$CodeStorage->export(),
-			e)->_else(
-				Display("You used an unrecognized character!"),
-			''),
-			$success->release(),
-			$tempdc1->release(),
-			$tempdc2->release(),
-			$tempdc3->release(),
-		'');
 		
-		$A = new KeyStroke("A");
-		$S = new KeyStroke("S");
-		$D = new KeyStroke("D");
-		
-		MintWav("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs/door-L.wav","door-L");
-		MintWav("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs/door-R.wav","door-R");
-		
-		$P4->_if( $A->pressed() )->then(
-			PlayWav("door-R"),
-			PlayWav("door-R"),
-			PlayWav("door-R"),
-			PlayWav("door-L"),
-		'');
-		$P4->_if( $S->pressed() )->then(
-			PlayWav("door-L"),
-			PlayWav("door-R"),
-			PlayWav("door-L"),
-			PlayWav("door-R"),
-			PlayWav("door-L"),
-			PlayWav("door-R"),
-		'');
-		$P4->_if( $D->pressed() )->then(
-			PlayWav("door-L"),
-			PlayWav("door-L"),
-			PlayWav("door-L"),
-			PlayWav("door-R"),
-		'');
-		*/
-		
-		
-		
-		$A = new KeyStroke("A");
-		$D = new KeyStroke("D");
-		
-		$herox = new Deathcounter(Map::$xdim*32);
-		$heroy = new Deathcounter(Map::$ydim*32);
-		
-		$P4->_if( $A->pressed() )->then(
-			$door->play(),
-		'');
-		$P4->_if( $D->pressed() )->then(
-			$doorc->playAt(500, 250),
-			$door->playAt($herox, $heroy),
-			$doorc->playAt($herox, $heroy),
-		'');
-		
-		
-		$humans->_if( IsCurrentPlayer() )->then(
-			$SoundManager->CreateEngine(),
-		'');
 		
 	}
 	
