@@ -86,6 +86,8 @@ class SoundManager {
 			$this->countUpDCs($Xdcs, $tempx),
 			$this->countUpDCs($Ydcs, $tempy),
 			Display("test5"),
+			$this->subFromAll($Xdcs, 10000),
+			$this->subFromAll($Ydcs, 10000),
 			$screenx->release(),
 			$screeny->release(),
 			$tempx->release(),
@@ -205,7 +207,7 @@ class SoundManager {
 			}
 			elseif(is_int($y)){
 				$centered = $y-6*32;
-				$min = max(0, $centered-15*32);
+				$min = $centered-15*32;
 				$max = $y+15*32;
 				$ycondition = $yepd->between($min,$max);
 			}
@@ -218,27 +220,19 @@ class SoundManager {
 			}
 			elseif(is_int($y)){
 				$centered = $x-10*32;
-				$xcondCenter = $xepd->between(max(0,$centered-5*32),$centered+5*32);
-				$xcondRight  = $xepd->between(max(0,$centered+5*32+1),$centered+15*32);
-				$xcondLeft   = $xepd->between(max(0,$centered-15*32),$centered-5*32-1);
+				$xcondCenter = $xepd->between($centered-5*32,$centered+5*32);
+				$xcondRight  = $xepd->between($centered+5*32+1,$centered+15*32);
+				$xcondLeft   = $xepd->between($centered-15*32,$centered-5*32-1);
 			}
 			
+			$sound = new Sound("$name");
 			$text .= _if( $activated, $ycondition, $xcondCenter )->then(
-				PlayWav("$name-L"),
-				PlayWav("$name-R"),
-				PlayWav("$name-L"),
-				PlayWav("$name-R"),
-				PlayWav("$name-L"),
-				PlayWav("$name-R"),
+				$sound->play(),
 			'');
 			$text .= _if( $activated, $ycondition, $xcondRight )->then(
-				PlayWav("$name-L"),
-				PlayWav("$name-L"),
 				PlayWav("$name-R"),
 			'');
 			$text .= _if( $activated, $ycondition, $xcondLeft )->then(
-				PlayWav("$name-R"),
-				PlayWav("$name-R"),
 				PlayWav("$name-L"),
 			'');
 			
@@ -255,6 +249,7 @@ class SoundManager {
 	////
 	// Commands
 	//
+	
 	public function getPlayerCommand($name, $player){
 		$this->mintRegular($name);
 		echo $player;
@@ -296,15 +291,17 @@ class SoundManager {
 		
 		$dcindex = (int)floor($index*2 / 30);
 		$dcbit = $index*2 % 30;
+		$value = pow(2,$dcbit);
 		
 		// If there aren't enough deathcounters, make another
 		if( $dcindex >= count($this->AtDCs) ){
 			$this->AtDCs[] = new Deathcounter();
 		}
 		
-		return $this->AtDCs[$dcindex]->add($dcbit);
+		/*test*/$new = $this->AtDCs[0];
+		
+		return $this->AtDCs[$dcindex]->add($value).$new->leaderboard();
 	}
-	
 	
 	
 	////
@@ -349,6 +346,19 @@ class SoundManager {
 			$this->WavNames[] = $name;
 		}
 	}
-
+	
+	////
+	// External
+	//
+	
+	static function wavDur($file) {
+		$fp = fopen($file, 'r');
+		$size_in_bytes = filesize($file);
+		fseek($fp, 20);
+		$rawheader = fread($fp, 16);
+		$header = unpack('vtype/vchannels/Vsamplerate/Vbytespersec/valignment/vbits', $rawheader);
+		$sec = $size_in_bytes/$header['bytespersec'];
+		return $sec;
+	}
 	
 }
