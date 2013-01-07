@@ -45,6 +45,7 @@ class SoundManager {
 			return static::$instance;
 		} else {
 			Error("You need to make an instance of SoundManager first");
+			return false;
 		}
 	}
 	

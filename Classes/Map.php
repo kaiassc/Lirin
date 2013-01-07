@@ -69,6 +69,13 @@ class Map {
 		Error("You need to define a main function to put your triggers in");
 	}
 	
+	static function getWidth(){
+		return self::$xdim;
+	}
+	static function getHeight(){
+		return self::$ydim;
+	}
+	
 	public function __destruct(){
 		
 	}

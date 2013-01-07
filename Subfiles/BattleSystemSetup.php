@@ -4,32 +4,101 @@
 	$all = new Player(P1, P2, P3, P4, P5, P6, P7, P8);
 	global $heroP1, $heroP2, $heroP3, $roam1, $roam2, $roam3, $mercP1, $mercP2, $mercP3, $bossP1, $bossP2, $bossP3, $enemyUnit;
 	global $healthA, $healthB, $healthC, $armorA, $armorB, $armorC;
-
+	
 	
 	
 	//BLOCK 1: IDs 0-6
-	$type = new Deathcounter($all, 15); $heroP1->type = $type->P4; $heroP2->type = $type->P5; $heroP3->type = $type->P6;
-		$roam1->type = $type->P2; $roam2->type = $type->P3; $roam3->type = $type->P7; $enemyUnit[0]->type = $type->P8;
-	$attackTime = new Deathcounter($all, 15); $heroP1->attackTime = $attackTime->P4; $heroP2->attackTime = $attackTime->P5; $heroP3->attackTime = $attackTime->P6;
-		$roam1->attackTime = $attackTime->P2; $roam2->attackTime = $attackTime->P3; $roam3->attackTime = $attackTime->P7; $enemyUnit[0]->attackTime = $attackTime->P8;
-	$attackTarget = new Deathcounter($all, 18); $heroP1->attackTarget = $attackTarget->P4; $heroP2->attackTarget = $attackTarget->P5; $heroP3->attackTarget = $attackTarget->P6;
-		$roam1->attackTarget = $attackTarget->P2; $roam2->attackTarget = $attackTarget->P3; $roam3->attackTarget = $attackTarget->P7; $enemyUnit[0]->attackTarget = $attackTarget->P8;
-	$healthA = $health = new Deathcounter($all, 127); $heroP1->health = $health->P4; $heroP2->health = $health->P5; $heroP3->health = $health->P6;
-		$roam1->health = $health->P2; $roam2->health = $health->P3; $roam3->health = $health->P7; $enemyUnit[0]->health = $health->P8;
-	$maxhealth = new Deathcounter($all, 127); $heroP1->maxhealth = $maxhealth->P4; $heroP2->maxhealth = $maxhealth->P5; $heroP3->maxhealth = $maxhealth->P6;
-		$roam1->maxhealth = $maxhealth->P2; $roam2->maxhealth = $maxhealth->P3; $roam3->maxhealth = $maxhealth->P7; $enemyUnit[0]->maxhealth = $maxhealth->P8;
-	$mana = new Deathcounter($all, 127); $heroP1->mana = $mana->P4; $heroP2->mana = $mana->P5; $heroP3->mana = $mana->P6;
-		$roam1->mana = $mana->P2; $roam2->mana = $mana->P3; $roam3->mana = $mana->P7; $enemyUnit[0]->mana = $mana->P8;
-	$damage = new Deathcounter($all, 127); $heroP1->damage = $damage->P4; $heroP2->damage = $damage->P5; $heroP3->damage = $damage->P6;
-		$roam1->damage = $damage->P2; $roam2->damage = $damage->P3; $roam3->damage = $damage->P7; $enemyUnit[0]->damage = $damage->P8;
-	$armorA = $armor = new Deathcounter($all, 127); $heroP1->armor = $armor->P4; $heroP2->armor = $armor->P5; $heroP3->armor = $armor->P6;
-		$roam1->armor = $armor->P2; $roam2->armor = $armor->P3; $roam3->armor = $armor->P7; $enemyUnit[0]->armor = $armor->P8;
+	$type = new Deathcounter($all, 15);
+	$heroP1->type = $type->P4; 
+	$heroP2->type = $type->P5; 
+	$heroP3->type = $type->P6;
+	$roam1->type = $type->P2; 
+	$roam2->type = $type->P3; 
+	$roam3->type = $type->P7; 
+	$enemyUnit[0]->type = $type->P8;
+	
+	$attackTime = new Deathcounter($all, 15);
+	$heroP1->attackTime = $attackTime->P4; 
+	$heroP2->attackTime = $attackTime->P5; 
+	$heroP3->attackTime = $attackTime->P6; 
+	$roam1->attackTime = $attackTime->P2; 
+	$roam2->attackTime = $attackTime->P3; 
+	$roam3->attackTime = $attackTime->P7; 
+	$enemyUnit[0]->attackTime = $attackTime->P8; 
+	
+	$attackTarget = new Deathcounter($all, 18); 
+	$heroP1->attackTarget = $attackTarget->P4; 
+	$heroP2->attackTarget = $attackTarget->P5; 
+	$heroP3->attackTarget = $attackTarget->P6; 
+	$roam1->attackTarget = $attackTarget->P2; 
+	$roam2->attackTarget = $attackTarget->P3; 
+	$roam3->attackTarget = $attackTarget->P7; 
+	$enemyUnit[0]->attackTarget = $attackTarget->P8; 
+	
+	$healthA = $health = new Deathcounter($all, 127); 
+	$heroP1->health = $health->P4; 
+	$heroP2->health = $health->P5; 
+	$heroP3->health = $health->P6;
+	$roam1->health = $health->P2; 
+	$roam2->health = $health->P3; 
+	$roam3->health = $health->P7; 
+	$enemyUnit[0]->health = $health->P8;
+	
+	$maxhealth = new Deathcounter($all, 127); 
+	$heroP1->maxhealth = $maxhealth->P4; 
+	$heroP2->maxhealth = $maxhealth->P5; 
+	$heroP3->maxhealth = $maxhealth->P6;
+	$roam1->maxhealth = $maxhealth->P2; 
+	$roam2->maxhealth = $maxhealth->P3; 
+	$roam3->maxhealth = $maxhealth->P7; 
+	$enemyUnit[0]->maxhealth = $maxhealth->P8;
+	
+	$mana = new Deathcounter($all, 127); 
+	$heroP1->mana = $mana->P4; 
+	$heroP2->mana = $mana->P5; 
+	$heroP3->mana = $mana->P6;
+	$roam1->mana = $mana->P2; 
+	$roam2->mana = $mana->P3; 
+	$roam3->mana = $mana->P7; 
+	$enemyUnit[0]->mana = $mana->P8;
+	
+	$damage = new Deathcounter($all, 127); 
+	$heroP1->damage = $damage->P4; 
+	$heroP2->damage = $damage->P5; 
+	$heroP3->damage = $damage->P6;
+	$roam1->damage = $damage->P2; 
+	$roam2->damage = $damage->P3; 
+	$roam3->damage = $damage->P7; 
+	$enemyUnit[0]->damage = $damage->P8;
+	
+	$armorA = $armor = new Deathcounter($all, 127);
+	$heroP1->armor = $armor->P4; 
+	$heroP2->armor = $armor->P5; 
+	$heroP3->armor = $armor->P6;
+	$roam1->armor = $armor->P2; 
+	$roam2->armor = $armor->P3; 
+	$roam3->armor = $armor->P7; 
+	$enemyUnit[0]->armor = $armor->P8;
 
 	//BLOCK 2: IDs 7-13
-	$type = new Deathcounter($all, 15); $mercP1->type = $type->P4; $mercP2->type = $type->P5; $mercP3->type = $type->P6;
-		$enemyUnit[1]->type = $type->P2; $enemyUnit[2]->type = $type->P3; $enemyUnit[3]->type = $type->P7; $enemyUnit[4]->type = $type->P8;
-	$attackTime = new Deathcounter($all, 15); $mercP1->attackTime = $attackTime->P4; $mercP2->attackTime = $attackTime->P5; $mercP3->attackTime = $attackTime->P6;
-		$enemyUnit[1]->attackTime = $attackTime->P2; $enemyUnit[2]->attackTime = $attackTime->P3; $enemyUnit[3]->attackTime = $attackTime->P7; $enemyUnit[4]->attackTime = $attackTime->P8;
+	$type = new Deathcounter($all, 15); 
+	$mercP1->type = $type->P4; 
+	$mercP2->type = $type->P5; 
+	$mercP3->type = $type->P6;
+	$enemyUnit[1]->type = $type->P2; 
+	$enemyUnit[2]->type = $type->P3;
+	$enemyUnit[3]->type = $type->P7; 
+	$enemyUnit[4]->type = $type->P8;
+	
+	$attackTime = new Deathcounter($all, 15); 
+	$mercP1->attackTime = $attackTime->P4; 
+	$mercP2->attackTime = $attackTime->P5; 
+	$mercP3->attackTime = $attackTime->P6;
+	$enemyUnit[1]->attackTime = $attackTime->P2; 
+	$enemyUnit[2]->attackTime = $attackTime->P3; 
+	$enemyUnit[3]->attackTime = $attackTime->P7; 
+	$enemyUnit[4]->attackTime = $attackTime->P8;
+	
 	$attackTarget = new Deathcounter($all, 18); $mercP1->attackTarget = $attackTarget->P4; $mercP2->attackTarget = $attackTarget->P5; $mercP3->attackTarget = $attackTarget->P6;
 		$enemyUnit[1]->attackTarget = $attackTarget->P2; $enemyUnit[2]->attackTarget = $attackTarget->P3; $enemyUnit[3]->attackTarget = $attackTarget->P7; $enemyUnit[4]->attackTarget = $attackTarget->P8;
 	$healthB = $health = new Deathcounter($all, 127); $mercP1->health = $health->P4; $mercP2->health = $health->P5; $mercP3->health = $health->P6;
@@ -63,7 +132,7 @@
 
 	//MISC. HERO/MERC STATS
 	$x = new Deathcounter($players, 2047); $heroP1->x = $x->P4; $heroP2->x = $x->P5; $heroP3->x = $x->P6;
-	$y = new Deathcounter($players, 511); $heroP1->y = $y->P4; $heroP2->y = $y->P5; $heroP3->y = $y->P6;
+	$y = new Deathcounter($players, 511);  $heroP1->y = $y->P4; $heroP2->y = $y->P5; $heroP3->y = $y->P6;
 	
 	
 	
