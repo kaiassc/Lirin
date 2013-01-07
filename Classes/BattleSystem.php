@@ -7,7 +7,6 @@ class BattleSystem {
 	/* @var BSUnit[] */ static private $Enemies = array();
 	/* @var BSUnit[] */ static private $Roamers = array();
 	/* @var BSUnit[] */ static private $Bosses  = array();
-	/* @var BSUnit[] */ static private $BSUnits = array();
 	
 	/* @var Deathcounter[] */ private $typeDCs          = array();
 	/* @var Deathcounter[] */ private $attackTimeDCs    = array();
@@ -25,16 +24,13 @@ class BattleSystem {
 	/* @var BSUnit[][] */ private $dcgroups;
 	
 	function __construct(){
-		self::$BSUnits = array_merge($this->Heroes, $this->Bosses, $this->Enemies, $this->Roamers);
+		
 		
 	}
 	
 	function Setup(){
 		
 		$All = new Player(P1, P2, P3, P4, P5, P6, P7, P8);
-		
-		//units
-		$enemyUnit = array();
 		
 		$this->dcgroups = array(
 			
@@ -106,7 +102,7 @@ class BattleSystem {
 		
 		$P1 = new Player(P1);
 		
-		foreach($this::BSUnits as $bsunit){
+		foreach(self::getBSUnits() as $bsunit){
 			$success = new TempSwitch();
 			
 			$P1->_if( $bsunit->swings() )->then(
@@ -223,9 +219,12 @@ class BattleSystem {
 	////
 	// Getters
 	//
-	
+
+	/**
+	 * @return BSUnit[]
+	 */
 	static function getBSUnits(){
-		return self::$BSUnits;
+		return array_merge(self::$Heroes, self::$Roamers, self::$Enemies, self::$Bosses);
 	}
 	
 	static function getHeroes(){
