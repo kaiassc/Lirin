@@ -63,6 +63,7 @@ class Lirin extends Map {
 		
 				
 		$BattleSystem->Setup();
+		$BattleSystem->CreateEngine();
 		
 		
 		$A = new KeyStroke("A");

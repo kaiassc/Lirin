@@ -1,4 +1,4 @@
-<?php
+<?php require_once("BS/BSUnit.php"); require_once("BS/Boss.php"); require_once("BS/Enemy.php"); require_once("BS/Hero.php"); require_once("BS/Roamer.php"); 
 
 
 class BattleSystem {
@@ -103,20 +103,11 @@ class BattleSystem {
 		$P1 = new Player(P1);
 		
 		foreach(self::getBSUnits() as $bsunit){
-			$success = new TempSwitch();
 			
 			$P1->_if( $bsunit->swings() )->then(
-				
-				// sets heroes ->attackTarget dc to the BSid of its target
-				$bsunit->findTarget($success),
-				
-				_if( $success )->then(
-					//$hero->dealDamageToTarget(),
-					$this->dealDamage($bsunit->damage, $bsunit->attackTarget),
-				''),
-				
-				$success->release(),
+				$this->dealDamage($bsunit->damage, $bsunit->attackTarget),
 			'');
+			
 		}
 		
 		

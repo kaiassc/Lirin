@@ -25,8 +25,6 @@ class BSUnit extends IndexedUnit {
 		
 		$this->dcplayer = $dcplayer;
 		
-		$this->type->add(1);
-		$this->attackTime->add(1);
 	}
 	
 	
@@ -94,7 +92,7 @@ class BSUnit extends IndexedUnit {
 			if($bsunit->BSid !== $this->BSid){
 				// if targetted, set the attackTarget to its ID
 				$text .= _if( $this->isTargeting($bsunit->Index) )->then(
-					$this->attackTarget = $bsunit->BSid,
+					$this->attackTarget->setTo($bsunit->BSid),
 					$success->set(),
 				'');
 			}
