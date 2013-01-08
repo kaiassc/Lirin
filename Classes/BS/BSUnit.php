@@ -82,7 +82,7 @@ class BSUnit extends IndexedUnit {
 		/**/
 
 		// temporary
-		//needs to be a condition; "$switch->is_set()"
+		// needs to be a condition; "$switch->is_set()"
 		return $this->attackCooldown(AtLeast, 1);
 	}
 	
