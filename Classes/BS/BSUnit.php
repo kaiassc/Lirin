@@ -20,7 +20,7 @@ class BSUnit extends IndexedUnit {
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
 		
-		$index = 1;
+		$index = $BSid;
 		parent::__construct($index, $unit, $player, $location);
 		
 		$this->dcplayer = GetPlayerShorthand($dcplayer);
