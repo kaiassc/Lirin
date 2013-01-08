@@ -107,7 +107,6 @@ class BattleSystem {
 			$P1->_if( $bsunit->swings() )->then(
 				$this->dealDamage($bsunit->damage, $bsunit->attackTarget),
 			'');
-			
 		}
 		
 		
@@ -202,10 +201,11 @@ class BattleSystem {
 			$lastvalue = $neededvalue;
 		}
 		
-		$text .= _if( $notyetfound )->then( $armor->setTo(100), $notyetfound->clear() );
+		$text .= _if( $notyetfound )->then( $armor->setTo(100), $notyetfound->release() );
 		
 		return $text;
 	}
+	
 	
 	////
 	// Getters

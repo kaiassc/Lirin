@@ -23,36 +23,34 @@ class BSUnit extends IndexedUnit {
 		$index = 1;
 		parent::__construct($index, $unit, $player, $location);
 		
-		$this->dcplayer = $dcplayer;
+		$this->dcplayer = GetPlayerShorthand($dcplayer);
 		
 	}
 	
+	private function getTargets(){
+		return BattleSystem::getBSUnits();
+	}
 	
 	/////
 	//CONDITIONS
 	//
 	
 	public function swings(){
-		/**/
-		$P1 = new Player(P1);
-		$IDs = array();
-		foreach(BattleSystem::getBSUnits() as $bsunit){
-			$IDs[] = $bsunit->Index;
-		}
+		$reserve = new TempSwitch();
 		$switch = new TempSwitch();
 		
-		$P1->_if( $this->attackCooldown(AtLeast, 1) )->then(
+		$text = _if( $this->attackCooldown(AtLeast, 1) )->then(
 			$this->attackTime->add(1),
 			
 			// and just started swinging
 			_if( $this->attackTime->exactly(1) )->then( 
-				$this->getSpecificTargetIDs($this->attackTarget, $IDs),
+				$this->getSpecificTargetIDs($this->attackTarget, $this->getTargets()),
 				$switch->set(),
 			''),
 			
 			// and didn't just start swinging
 			_if( $this->attackTime->atLeast(2) )->then( 
-				$this->checkSpecificTargetIDs($this->attackTarget, $switch, $IDs),
+				$this->checkSpecificTargetIDs($this->attackTarget, $switch, $this->getTargets()),
 			''),
 			
 			_if( $switch->is_clear() )->then( 
@@ -79,11 +77,8 @@ class BSUnit extends IndexedUnit {
 			''),
 			
 		'');
-		/**/
-
-		// temporary
-		// needs to be a condition; "$switch->is_set()"
-		return $this->attackCooldown(AtLeast, 1);
+		
+		return CreateCondition($reserve, $switch, $text);
 	}
 	
 	

@@ -65,7 +65,7 @@ class Lirin extends Map {
 		$BattleSystem->Setup();
 		$BattleSystem->CreateEngine();
 		
-		
+		/*
 		$A = new KeyStroke("A");
 		$D = new KeyStroke("D");
 		
@@ -91,6 +91,7 @@ class Lirin extends Map {
 		$humans->_if( IsCurrentPlayer() )->then(
 			$SoundManager->CreateEngine(),
 		'');
+		*/
 		
 	}
 	
