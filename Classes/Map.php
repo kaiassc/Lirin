@@ -44,7 +44,7 @@ class Map {
 		
 		// Force Business
 		$this->Force1["Force"] = Force1; $this->Force2["Force"] = Force2; $this->Force3["Force"] = Force3; $this->Force4["Force"] = Force4;
-		$forces = [$this->Force1, $this->Force2, $this->Force3, $this->Force4];
+		$forces = array($this->Force1, $this->Force2, $this->Force3, $this->Force4);
 		foreach($forces as $force){
 			MintForceSettings($force["Force"], $force["Name"], $force["Allied"], $force["Shared Vistion"], $force["Randomize Start"], $force["Allied Victory"]);
 			foreach( $force["Players"] as $player=>$type){
