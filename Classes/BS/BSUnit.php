@@ -33,7 +33,14 @@ class BSUnit extends IndexedUnit {
 	//
 	
 	public function swings(){
-		/**
+		/**/
+		$P1 = new Player(P1);
+		$IDs = array();
+		foreach(BattleSystem::getBSUnits() as $bsunit){
+			$IDs[] = $bsunit->Index;
+		}
+		$switch = new TempSwitch();
+		
 		$P1->_if( $this->attackCooldown(AtLeast, 1) )->then(
 			$this->attackTime->add(1),
 			
@@ -49,7 +56,7 @@ class BSUnit extends IndexedUnit {
 			''),
 			
 			_if( $switch->is_clear() )->then( 
-				$this->attackTarget->add(100), 
+				$this->attackTime->add(100), 
 				$this->attackTarget->setTo(0),
 			''),
 			
