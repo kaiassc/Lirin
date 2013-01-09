@@ -65,7 +65,6 @@ class BSUnit extends IndexedUnit {
 			// and just started swinging
 			_if( $this->attackTime->exactly(1) )->then( 
 				$this->findTarget($switch),
-				$switch->set(),
 			''),
 			
 			// and didn't just start swinging
@@ -120,6 +119,10 @@ class BSUnit extends IndexedUnit {
 				'');
 			}
 		}
+		$text .= _if( $success->is_clear() )->then(
+			$this->attackTarget->setTo(1700),
+			$success->set(),
+		'');
 		
 		return $text;
 	}
