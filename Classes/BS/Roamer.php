@@ -9,6 +9,9 @@ class Roamer extends BSUnit {
 		
 	}
 	
+	protected function getTargets(){
+		return BattleSystem::getBSUnits();
+	}
 	
 	/////
 	//CONDITIONS

@@ -16,7 +16,7 @@ class Hero extends BSUnit {
 		
 	}
 	
-	private function getTargets(){
+	protected function getTargets(){
 		return BattleSystem::getBSUnits();
 	}
 	

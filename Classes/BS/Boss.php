@@ -9,7 +9,9 @@ class Boss extends BSUnit {
 		
 	}
 	
-	
+	protected function getTargets(){
+		return array_merge(BattleSystem::getHeroes(), BattleSystem::getRoamers());
+	}
 	/////
 	//CONDITIONS
 	//

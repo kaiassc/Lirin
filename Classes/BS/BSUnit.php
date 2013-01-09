@@ -2,6 +2,8 @@
 
 class BSUnit extends IndexedUnit {
 	
+	/* @var int */          public $BSid;
+	/* @var String */       public $dcplayer;
 	
 	/* @var Deathcounter */ public $type;
 	/* @var Deathcounter */ public $attackTime;
@@ -15,11 +17,11 @@ class BSUnit extends IndexedUnit {
 	/* @var Deathcounter */ public $x;
 	/* @var Deathcounter */ public $y;
 	
-	/* @var int */      public $BSid;
-	/* @var String */   public $dcplayer;
+
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
-		
+		$this->BSid = $BSid;
+
 		$index = $BSid;
 		parent::__construct($index, $unit, $player, $location);
 		
@@ -27,8 +29,26 @@ class BSUnit extends IndexedUnit {
 		
 	}
 	
-	private function getTargets(){
+	protected function getTargets(){
 		return BattleSystem::getBSUnits();
+	}
+	
+	private function getGroupIDsContainingTarget(){
+		static $array = array();
+		if( empty($array) ){
+			$index = 0;
+			$targets = $this->getTargets();
+			foreach(BattleSystem::$dcgroups as $group){
+				foreach($group as $bsunit){
+					if(in_array($bsunit,$targets)){
+						$array[] = $index;
+						break;
+					}
+				}
+				$index++;
+			}
+		}
+		return $array;
 	}
 	
 	/////
@@ -44,13 +64,13 @@ class BSUnit extends IndexedUnit {
 			
 			// and just started swinging
 			_if( $this->attackTime->exactly(1) )->then( 
-				$this->getSpecificTargetIDs($this->attackTarget, $this->getTargets()),
+				$this->findTarget($switch),
 				$switch->set(),
 			''),
 			
 			// and didn't just start swinging
 			_if( $this->attackTime->atLeast(2) )->then( 
-				$this->checkSpecificTargetIDs($this->attackTarget, $switch, $this->getTargets()),
+				$this->verifyTarget($switch),
 			''),
 			
 			_if( $switch->is_clear() )->then( 
@@ -90,7 +110,7 @@ class BSUnit extends IndexedUnit {
 		$text = $success->clear();
 		
 		// for each BSunit
-		foreach(BattleSystem::getBSUnits() as $bsunit){
+		foreach($this->getTargets() as $bsunit){
 			// excluding itself
 			if($bsunit->BSid !== $this->BSid){
 				// if targetted, set the attackTarget to its ID
@@ -99,6 +119,80 @@ class BSUnit extends IndexedUnit {
 					$success->set(),
 				'');
 			}
+		}
+		
+		return $text;
+	}
+	
+	private function verifyTarget(TempSwitch $success){
+		$text = $success->clear();
+		
+		// for each BSunit
+		foreach($this->getTargets() as $bsunit){
+			// excluding itself
+			if($bsunit->BSid !== $this->BSid){
+				// if same target as before, then success!
+				$text .= _if( $this->isTargeting($bsunit->Index), $this->attackTarget->exactly($bsunit->BSid) )->then(
+					$success->set(),
+				'');
+			}
+		}
+		
+		return $text;
+	}
+		
+	public function dealDamageToTarget(){
+		
+		$dcgroupid = new TempDC(7);
+		$tempdc = new TempDC(127);
+		
+		$text = repeat(1,
+			
+			// set ally
+			BattleSystem::setAllyByTarget($this->attackTarget, $dcgroupid),
+			
+			// load target's armor
+			$this->loadArmor($tempdc, $dcgroupid),
+			
+			// armor calculation
+			BattleSystem::convertToVulnerability($tempdc),
+			$tempdc->multiplyBy($this->damage),
+			$tempdc->max(12700),
+			_if( $tempdc->atMost(50) )->then( $tempdc->setTo(50) ),
+			
+			// deal damage
+			$this->dealDamage($tempdc, $dcgroupid),
+			
+			// restore
+			SetAlly(AllPlayers),
+			$tempdc->release(),
+			$dcgroupid->release(),
+			$this->attackTarget->setTo(0),
+			
+		'');
+		
+		return $text;
+	}
+	
+	private function dealDamage(Deathcounter $damagex100, Deathcounter $groupid){
+		$text = '';
+		$GroupIDs = $this->getGroupIDsContainingTarget();
+		foreach($GroupIDs as $id){
+			$text .= _if( $groupid->exactly($id) )->then( 
+				BattleSystem::$healthDCs[$id]->Allies->subDivBecome($damagex100, 100),
+			'');
+		}
+		
+		return $text;
+	}
+	
+	private function loadArmor(Deathcounter $receivingdc, Deathcounter $groupid){
+		$text = '';
+		$GroupIDs = $this->getGroupIDsContainingTarget();
+		foreach($GroupIDs as $id){
+			$text .= _if( $groupid->exactly($id) )->then( 
+				$receivingdc->setTo(BattleSystem::$armorDCs[$id]->Allies),
+			'');
 		}
 		
 		return $text;
