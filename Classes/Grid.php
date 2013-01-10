@@ -17,7 +17,7 @@ class Grid{
 		self::$xoffset = $x_offset;
 		self::$resolution = $resolution;
 		
-		// Create units along the bottom
+		// Create units along the bottom/
 		Error("HEAHGIGIAEHG");
 		
 		//MintUnit("Terran Comsat Station", P12, 2246, 1164);
