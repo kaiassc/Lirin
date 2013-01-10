@@ -114,9 +114,7 @@ class Grid{
 			}
 			
 			$xmove -= 3;
-			
-			echo("HERE: $xmove\n");
-				
+							
 		}
 
 		/**
@@ -209,7 +207,7 @@ class Grid{
 				$swap = 1;
 			}
 			
-			$y = round(($ycoord-1)/Grid::$resolution);
+			$y = (int)round(($ycoord-1)/Grid::$resolution);
 			$text .= Grid::$YLoc[$y]->centerOn(P12, $lastunit, $lastlocation);
 			$lastlocation = Grid::$YLoc[$y];
 						
