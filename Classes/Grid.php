@@ -93,7 +93,7 @@ class Grid{
 			
 			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
 			if( $xmove > Grid::$xdimension*32 || $xmove < 0 )
-				ERROR('X coordinate is off the playing field');
+				ERROR('X coordinate is out of the playing field');
 			
 			$xmove += 3;
 			
@@ -194,27 +194,28 @@ class Grid{
 			$swap = 0;
 			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
 			$lastunit = Grid::$unit;
-			if( $ycoord > Grid::$xdimension*32 || $ycoord < 0 )
-				ERROR('Y coordinate is off the playing field');
+			if( $ycoord > Grid::$ydimension*32 || $ycoord < 0 )
+				ERROR('Y coordinate is out of the playing field');
 
-			if( $ycoord < Grid::$ydimension*32/2 - 3 ){
+			if( $ycoord < Grid::$ydimension*32/2 - 4 ){
 				$text .= Grid::$shiftUp->centerOn(P12, Grid::$unit, $lastlocation);
 				$lastlocation = Grid::$shiftUp;
 				$lastunit = "Map Revealer";
 			}
 			else{
-				$ycoord = Grid::$ydimension*32 + 1 - $ycoord;
+				$ycoord = Grid::$ydimension*32 - $ycoord;
 				$swap = 1;
 			}
 			
-			$y = (int)round(($ycoord-1)/Grid::$resolution);
+			$y = (int)round( ($ycoord-1) / Grid::$resolution);
+			
 			$text .= Grid::$YLoc[$y]->centerOn(P12, $lastunit, $lastlocation);
 			$lastlocation = Grid::$YLoc[$y];
-						
+			
 			$ycoord = ($ycoord+3) % Grid::$resolution;
 			if( $swap == 0 ){ $ycoord -= 3; }
-			else{ $ycoord = 3 - $ycoord; }
-				
+			else{ $ycoord = 4 - $ycoord; }
+							
 			$text .= Grid::$main->centerOn($lastlocation);
 
 
