@@ -4,54 +4,75 @@ class Grid{
 
 	static private $xdimension;
 	static private $ydimension;
-	
+	static private $resolution;
 	static private $xoffset;
 	
-	static private $resolution;
+	static private $unit;
+	
+	static public $slideLeft1;
+	static public $slideLeft8;
+	static public $slideLeft64;
+	
+	static public $sandbox;
+	static public $origin;
+	static public $shiftLeft;
+	static public $shiftUp;
+	
+	static public $YLoc = array();
+	
+	static public $main;
 	
 	
-	function __construct(int $x_dimension, int $y_dimension, int $x_offset, int $resolution){
+	function __construct($x_dimension, $y_dimension, $resolution, $x_offset = 0, $unit = "Terran Comsat Station"){
 		
 		self::$xdimension = $x_dimension;
 		self::$ydimension = $y_dimension;
-		self::$xoffset = $x_offset;
 		self::$resolution = $resolution;
+		self::$xoffset = $x_offset;
+		self::$unit = $unit;
 		
 		// Create units along the bottom/
-		Error("HEAHGIGIAEHG");
-		
-		//MintUnit("Terran Comsat Station", P12, 2246, 1164);
-		//MintUnit(1049,P2, 2246, 1164);
-		for($i=1;$i<=128;$i++){
-			MintUnit(1049,P2, (64+$i)*32,(256-8)*32);
+		for($i=0; $i<$x_dimension*32/$resolution; $i++){
+			MintUnit(Grid::$unit, P12, $x_offset*32+$i*$resolution, (Map::getHeight()-3)*32, Invincible);
 		}
 		
+		$vert = (Map::getHeight()-$y_dimension)/2;
+		MintLocation("sandbox", $x_offset*32, $vert*32, ($x_offset+$x_dimension)*32, (Map::getHeight()-$vert)*32);
+		self::$sandbox = new LirinLocation("sandbox");
+		MintLocation("gridOrigin", ($x_dimension+$x_offset)*32+32, (Map::getHeight()-3)*32+32, ($x_dimension+$x_offset)*32-32, (Map::getHeight()-3)*32-32);
+		self::$origin = new LirinLocation("gridOrigin");
+		MintLocation("ShiftLeft",0,0,Map::getWidth()*32*2,0);
+		self::$shiftLeft = new LirinLocation("ShiftLeft");
+		MintLocation("ShiftUp",0,0,0,Map::getHeight()*32*2);
+		self::$shiftUp = new LirinLocation("ShiftUp");
 		
+		for($i=0;$i<=$y_dimension*32/$resolution/2;$i++){
+			MintLocation("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
+			self::$YLoc[] = new LirinLocation("YLoc$i");
+		}
 		
+		MintLocation("SlideLeft1", 62-$resolution*2*1, 0, 0, 0);
+		self::$slideLeft1 = new LirinLocation("SlideLeft1");
+		MintLocation("SlideLeft8", 0, 0, $resolution*2*8-62, 0);
+		self::$slideLeft8 = new LirinLocation("SlideLeft8");
+		MintLocation("SlideLeft64", 0, 0, $resolution*2*64-62, 0);
+		self::$slideLeft64 = new LirinLocation("SlideLeft64");
+		
+		MintLocation("main", 8, 8, 8, 8);
+		self::$main = new ExtendableLocation("main");
 		
 	}
 	
 	
 
 	
-	//for($i=0; $i<$x_dimension*32/$resolution; $i++){
-		//	MintUnit("Comsat Station", P12, $x_offset*32+$i*$resolution, /*(Map::height()-10)*/1*32, Invincible);
-		//}
+	
 	
 	/////
 	//ACTIONS
 	//
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
 	public function putMain($xcoord, $ycoord) {
 		//ERROR
 		if( func_num_args() != 2 ){
@@ -66,56 +87,39 @@ class Grid{
 
 
 		$text = '';
+		$lastlocation = Grid::$origin;
 
 		if( is_numeric($xcoord) ) {
-
-			if( $xcoord > 625 ){
-				$xcoord = 625;
-			}
-			if( $xcoord < 16 ){
-				$xcoord = 16;
-			}
-			if( $xcoord > 383 ){
-				$xcoord = 383;
-			}
-			if( $xcoord < 0 ){
-				$xcoord = 0;
-			}
-			$xmove = 625 - $xcoord;
 			
-			$main = new Location('_Main');
-			$X32 = new Location('_Grid32');
-			$origin = new Location('_GridOrigin');
+			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
+			if( $xmove > Grid::$xdimension*32 || $xmove < 0 )
+				ERROR('X coordinate is off the playing field');
 			
-			if( $xmove >= 32 ){
-				$text .= $X32->centerOn($origin);
-				$endtext = $main->centerOn($X32);
-				$xmove -= 3;
+			$xmove += 3;
+			
+			while( $xmove >= Grid::$resolution*64 ){
+				$text .= Grid::$slideLeft64->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*64;
+				$lastlocation = Grid::$slideLeft64;
 			}
-			else if( $xmove > 0 ){
-				$text .= MoveLocation('_GridX1', 'Player 12', 'Map Revealer', '_GridOrigin');
-				$endtext = MoveLocation('_Main', 'Player 12', 'Map Revealer', '_GridX1');
+			while( $xmove >= Grid::$resolution*8 ){
+				$text .= Grid::$slideLeft8->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*8;
+				$lastlocation = Grid::$slideLeft8;
 			}
-			else{
-				$endtext = MoveLocation('_Main', 'Player 12', 'Map Revealer', '_GridOrigin');
+			while( $xmove >= Grid::$resolution*1 ){
+				$text .= Grid::$slideLeft1->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*1;
+				$lastlocation = Grid::$slideLeft1;
 			}
-			while( $xmove >= 32 ){
-				$text .= MoveLocation('_GridX32', 'Player 12', 'Right Wall Flame Trap', '_GridX32');
-				$xmove -= 32;
-			}
-			if( $xmove > 0 && $xcoord <= 593){
-				$text .= MoveLocation('_GridX1', 'Player 12', 'Map Revealer', '_GridX32');
-				$endtext = MoveLocation('_Main', 'Player 12', 'Map Revealer', '_GridX1');
-			}
-			while( $xmove > 0 ){
-				$text .= MoveLocation('_GridX1', 'Player 12', 'Right Wall Flame Trap', '_GridX1');
-				$xmove--;
-			}
-			$text .= $endtext;
-
+			
+			$xmove -= 3;
+			
+			echo("HERE: $xmove\n");
+				
 		}
 
-
+		/**
 		if( $xcoord instanceof Deathcounter ) {
 
 			$switch = new TempSwitch();
@@ -185,27 +189,41 @@ class Grid{
 					$switch->kill();
 
 		}
-
+		*/
 
 		if( is_numeric($ycoord) ) {
+			
+			$swap = 0;
+			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
+			$lastunit = Grid::$unit;
+			if( $ycoord > Grid::$xdimension*32 || $ycoord < 0 )
+				ERROR('Y coordinate is off the playing field');
 
-			if( $ycoord < 192 ){
-				$text .= MoveLocation('_YSwitch0', 'Player 12', 'Map Revealer', '_Main');
-				$text .= MoveLocation('_Main', 'Player 12', 'Map Revealer', '_YSwitch0');
+			if( $ycoord < Grid::$ydimension*32/2 - 3 ){
+				$text .= Grid::$shiftUp->centerOn(P12, Grid::$unit, $lastlocation);
+				$lastlocation = Grid::$shiftUp;
+				$lastunit = "Map Revealer";
 			}
 			else{
-				$ycoord = 383 - $ycoord;
+				$ycoord = Grid::$ydimension*32 + 1 - $ycoord;
+				$swap = 1;
 			}
-			if( $ycoord > 0 ){
-				$text .= MoveLocation('_GridY'.($ycoord-1), 'Player 12', 'Map Revealer', '_Main');
-				$text .= MoveLocation('_Main', 'Player 12', 'Map Revealer', '_GridY'.($ycoord-1));
-			}
+			
+			$y = round(($ycoord-1)/Grid::$resolution);
+			$text .= Grid::$YLoc[$y]->centerOn(P12, $lastunit, $lastlocation);
+			$lastlocation = Grid::$YLoc[$y];
+						
+			$ycoord = ($ycoord+3) % Grid::$resolution;
+			if( $swap == 0 ){ $ycoord -= 3; }
+			else{ $ycoord = 3 - $ycoord; }
+				
+			$text .= Grid::$main->centerOn($lastlocation);
 
-			return $text;
 
 		}
 
 
+		/**
 		if( $ycoord instanceof Deathcounter ) {
 
 			$switch = new TempSwitch();
@@ -246,11 +264,11 @@ class Grid{
 			'');
 			$text .= $ymove->kill().
 					$switch->kill();
+		 */
 
-			return $text;
+		return $text;
 
-		}
-		*/
+	}
 
 
 
