@@ -240,20 +240,23 @@ class Grid{
 
 			$ytemp = new TempDC(Map::getHeight()*32);
 			
-			$text .= _if( $ycoord->atMost(Grid::$ydimension*32/2 - 5) )->then(
+			$text .= _if( $ycoord->atMost(Map::getHeight()*32/2 - 5) )->then(
 				Grid::$shiftUp->centerOn(Grid::$main),
 				Grid::$main->centerOn(Grid::$shiftUp),
 				$ytemp->setTo($ycoord),
 			'');
-			$text .= _if( $ycoord->atLeast(Grid::$ydimension*32/2 - 4) )->then(
+			$text .= _if( $ycoord->atLeast(Map::getHeight()*32/2 - 4) )->then(
 				$ytemp->setTo(Map::getHeight()*32),
 				$ytemp->subtract($ycoord),
 			'');
 			
-			$text .= $ycoord->subtract( (Map::getHeight()-Grid::$ydimension)/2*32 - 1 );
+			$text .= $ytemp->subtract( (Map::getHeight()-Grid::$ydimension)/2*32 - 1 );
 			
 			$ignore = new TempSwitch();
 			$text .= $ignore->set();
+			
+			$P4 = new Player(P4);
+			$text .= $P4->setGas($ytemp);
 			
 			for($i=Grid::$ydimension*32/Grid::$resolution/2; $i>0; $i--){
 				$text .= _if( $ignore->is_set(), $ytemp->atLeast($i*Grid::$resolution-3) )->then(
@@ -277,6 +280,11 @@ class Grid{
 		return $text;
 		
 	}
+	
+	
+	
+	
+	
 	
 	
 
