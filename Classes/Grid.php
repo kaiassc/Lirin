@@ -73,7 +73,7 @@ class Grid{
 	//
 
 	
-	public function putMainRes($xcoord, $ycoord, TempSwitch $success) {
+	static function putMainRes($xcoord, $ycoord, TempSwitch $success) {
 	
 		//ERROR
 		if( func_num_args() != 3 ){
@@ -483,12 +483,6 @@ class Grid{
 		return $text;
 
 	}
-
-
-
-
-
-
 
 
 

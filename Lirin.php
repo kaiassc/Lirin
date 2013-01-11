@@ -14,8 +14,9 @@ class Lirin extends Map {
 	
 	function Main(){
 		
-		$SoundManager = new SoundManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
+		$SFXManager = new SFXManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
 		$BattleSystem = new BattleSystem();
+		$Grid = new Grid(128, 96, 32, 8/*px*/);
 		
 		
 		// Players
@@ -31,16 +32,17 @@ class Lirin extends Map {
 		 
 		
 		MintUnit("Start Location", $All, 250, 1400);
-		MintMapRevealers(Map::$xdim,Map::$ydim,P4);
+		MintMapRevealers(Map::getWidth(),Map::getHeight(),P4);
 		
 		for($i=1;$i<=128;$i++){
-			MintUnit(1049,P2, (64+$i)*32,(256-8)*32);
+			//MintUnit(1049,P2, (64+$i)*32,(256-8)*32);
 		}
+		
+		$poop = new IndexedUnit(1594);
 		
 		// Locations
 		$shiftleft = MintLocation("Shift Left",0,0,256*32*2,0);
 		$shiftup = MintLocation("Shift Up",0,0,0,256*32*2);
-		$playersection = MintLocation("Player Section", 64,640,8182,7552);
 		$sandbox = MintLocation("sandbox",0,0,256*32,256*32);
 		$AoE0x0 = MintLocation("AoE0x0",16,16,16,16);
 		$AoE1x1 = MintLocation("AoE1x1",0,0,1*32,1*32);
@@ -51,9 +53,9 @@ class Lirin extends Map {
 		
 		$XLoc = array();
 		$YLoc = array();
-		for($i=1;$i<=64;$i++){ $XLoc[$i] = MintLocation("XLoc$i",0,0,$i*128,0); }
-		for($i=1;$i<=64;$i++){ $YLoc[$i] = MintLocation("YLoc$i",0,0,0,$i*128); }
-		$gridorigin = MintLocation("Grid Origin", 256*32, 256*32, 256*32, 256*32);
+		//for($i=1;$i<=64;$i++){ $XLoc[$i] = MintLocation("XLoc$i",0,0,$i*128,0); }
+		//for($i=1;$i<=64;$i++){ $YLoc[$i] = MintLocation("YLoc$i",0,0,0,$i*128); }
+		//$gridorigin = MintLocation("Grid Origin", 256*32, 256*32, 256*32, 256*32);
 		
 		for($i=0;$i<7;$i++){ 
 			MintLocation("Extra", 16, 16, 16, 16);
@@ -61,37 +63,42 @@ class Lirin extends Map {
 		MintLocation("Main", 16,16,16,16);
 		$main = new ExtendableLocation("Main");
 		
-				
-		$BattleSystem->Setup();
-		$BattleSystem->CreateEngine();
 		
-		/*
+		//$BattleSystem->Setup();
+		//$BattleSystem->CreateEngine();
+		
+		
+		
+		/**/
 		$A = new KeyStroke("A");
 		$D = new KeyStroke("D");
-		
-		$herox = new Deathcounter(Map::$xdim*32);
-		$heroy = new Deathcounter(Map::$ydim*32);
 		
 		$door = new Sound("door");
 		$doorc = new Sound("doorc");
 		
+		$dcx = new Deathcounter(10000);
+		$dcy = new Deathcounter(10000);
+		
 		$P1->justonce(
-			$herox->setTo(2524),
-			$heroy->setTo(1375),
+			$dcx->setTo(2524),
+			$dcy->setTo(1375),
 		'');
 		
 		$P4->_if( $A->pressed() )->then(
-			$door->playAt($herox, $heroy),
+			$SFXManager->getRumbleAtCommand(50,2524,1375),
+			$door->playAt($dcx, $dcy),
 		'');
+		
 		$P4->_if( $D->pressed() )->then(
 			$doorc->playAt(2524, 1375),
 		'');
+		/**/
+		
 		
 		
 		$humans->_if( IsCurrentPlayer() )->then(
-			$SoundManager->CreateEngine(),
+			$SFXManager->CreateEngine(),
 		'');
-		*/
 		
 	}
 	

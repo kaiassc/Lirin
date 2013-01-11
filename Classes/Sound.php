@@ -2,7 +2,7 @@
 
 class Sound {
 	
-	/** @var $Manager SoundManager */
+	/* @var SFXManager */ 
 	protected static $Manager = null;
 	
 	private $Name;
@@ -10,7 +10,7 @@ class Sound {
 	function __construct($name){
 		if( !is_string($name) ){ Error("You need to pass in a string for the wav's name (e.g. 'loudbang')"); }
 		if( !isset(static::$Manager) ){
-			static::$Manager = SoundManager::getInstance();
+			static::$Manager = SFXManager::getInstance();
 		}
 		
 		$this->Name = $name;

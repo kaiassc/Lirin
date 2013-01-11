@@ -32,7 +32,7 @@ class BattleSystem {
 		
 		$All = new Player(P1, P2, P3, P4, P5, P6, P7, P8);
 		
-		$this->dcgroups = array(
+		self::$dcgroups = array(
 			
 			array(
 				self::$Roamers[] = new Roamer(P2, 1),
@@ -63,20 +63,40 @@ class BattleSystem {
 				self::$Enemies[] =  new Enemy(P7, 20),
 				self::$Enemies[] =  new Enemy(P8, 21),
 			),
+			/*
+			array(
+				self::$Enemies[] =  new Enemy(P2, 22), 
+				self::$Enemies[] =  new Enemy(P3, 23),
+				self::$Enemies[] =  new Enemy(P4, 24),
+				self::$Enemies[] =  new Enemy(P5, 25),
+				self::$Enemies[] =  new Enemy(P6, 26),
+				self::$Enemies[] =  new Enemy(P7, 27),
+				self::$Enemies[] =  new Enemy(P8, 28),
+			),
 			
+			array(
+				self::$Enemies[] =  new Enemy(P2, 29), 
+				self::$Enemies[] =  new Enemy(P3, 30),
+				self::$Enemies[] =  new Enemy(P4, 31),
+				self::$Enemies[] =  new Enemy(P5, 32),
+				self::$Enemies[] =  new Enemy(P6, 33),
+				self::$Enemies[] =  new Enemy(P7, 34),
+				self::$Enemies[] =  new Enemy(P8, 35),
+			),
+			*/
 		);
 		
 		
 		// Assign each BSUnit their deathcounters for the proper players
-		foreach($this->dcgroups as $group){
+		foreach(self::$dcgroups as $group){
 			/* @var BSUnit[] $group */
 			self::$typeDCs[] =         $type =         new Deathcounter($All, 15);
 			self::$attackTimeDCs[] =   $attackTime =   new Deathcounter($All, 15);
-			self::$attackTargetDCs[] = $attackTarget = new Deathcounter($All, 18);
+			self::$attackTargetDCs[] = $attackTarget = new Deathcounter($All, 21);
 			self::$healthDCs[] =       $health =       new Deathcounter($All, 127);
-			self::$maxhealthDCs[] =    $maxhealth =    new Deathcounter($All, 127); 
+			self::$maxhealthDCs[] =    $maxhealth =    new Deathcounter($All, 127);
 			self::$manaDCs[] =         $mana =         new Deathcounter($All, 127);
-			self::$damageDCs[] =       $damage =       new Deathcounter($All, 127); 
+			self::$damageDCs[] =       $damage =       new Deathcounter($All, 127);
 			self::$armorDCs[] =        $armor =        new Deathcounter($All, 127);
 			self::$xDCs[] =            $x =            new Deathcounter($All, Map::getWidth()*32);
 			self::$yDCs[] =            $y =            new Deathcounter($All, Map::getHeight()*32);
@@ -119,13 +139,12 @@ class BattleSystem {
 		$hero2 = self::$Heroes[1];
 		$hero3 = self::$Heroes[2];
 		
-		//Error(var_export($hero1, true));
-		//$hero1->damage;
 		$P1->justonce(
+			SetAlly(AllPlayers),
 			self::$healthDCs[0]->Allies->setTo(100),    self::$healthDCs[1]->Allies->setTo(100),    self::$healthDCs[2]->Allies->setTo(100),
 			self::$maxhealthDCs[0]->Allies->setTo(100), self::$maxhealthDCs[1]->Allies->setTo(100), self::$maxhealthDCs[2]->Allies->setTo(100),
 			self::$damageDCs[0]->Allies->setTo(33),     self::$damageDCs[1]->Allies->setTo(33),     self::$damageDCs[2]->Allies->setTo(33),
-			self::$armorDCs[0]->Allies->setTo(91),      self::$armorDCs[1]->Allies->setTo(33),      self::$armorDCs[2]->Allies->setTo(0),
+			self::$armorDCs[0]->Allies->setTo(91),      self::$armorDCs[1]->Allies->setTo(66),      self::$armorDCs[2]->Allies->setTo(33),
 			
 			$hero1->damage->setTo(100),         $hero2->damage->setTo(100),         $hero3->damage->setTo(100),
 		'');
@@ -144,28 +163,21 @@ class BattleSystem {
 			Give(P12, "Zerg Hydralisk", 3, P8, "sandbox"), Give(P12, Men, 6, P7, "sandbox"),
 		'');
 		
+		$P8->always(
+			SetAlly(P4),
+		'');
 	}
 	
 	function CreateEngine(){
 		
 		$P1 = new Player(P1);
-		$P4 = new Player(P4);
 		
 		foreach(self::getBSUnits() as $bsunit){
 			
-		#	$P1->_if( $bsunit->swings() )->then(
-		#		$bsunit->dealDamageToTarget(),
-		#	'');
-			
-		}
-		
-		foreach(self::$Heroes as $hero){
-			
-			$P4->_if( $hero->swings() )->then(
-				Display("Bam"),
-				Display("MY GOD YOU SWANG! Target: {$hero->attackTarget}"),
-				$hero->attackTarget->setTo(0),
+			$P1->_if( $bsunit->swings() )->then(
+				$bsunit->dealDamageToTarget(),
 			'');
+			
 		}
 		
 	}

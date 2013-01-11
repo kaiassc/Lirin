@@ -34,19 +34,26 @@ class BSUnit extends IndexedUnit {
 	}
 	
 	private function getGroupIDsContainingTarget(){
-		static $array = array();
-		if( empty($array) ){
-			$index = 0;
-			$targets = $this->getTargets();
-			foreach(BattleSystem::$dcgroups as $group){
-				foreach($group as $bsunit){
-					if(in_array($bsunit,$targets)){
-						$array[] = $index;
+		$array = array();
+		$index = 0;
+		$targets = $this->getTargets();
+		foreach(BattleSystem::$dcgroups as $group){
+			$success = false;
+			foreach($group as $bsunit){
+				foreach($targets as $target){
+					if($target->BSid === $bsunit->BSid){
+						$success = true;
 						break;
 					}
 				}
-				$index++;
+				if( $success === true ){
+					break;
+				}
 			}
+			if( $success === true ){
+				$array[] = $index;
+			}
+			$index++;
 		}
 		return $array;
 	}
@@ -60,21 +67,23 @@ class BSUnit extends IndexedUnit {
 		$switch = new TempSwitch();
 		
 		$text = _if( $this->attackCooldown(AtLeast, 1) )->then(
+			// count how long you've been attacking
 			$this->attackTime->add(1),
 			
-			// and just started swinging
+			// if first loop, record your target
 			_if( $this->attackTime->exactly(1) )->then( 
 				$this->findTarget($switch),
 			''),
 			
-			// and didn't just start swinging
+			// if isn't first loop, verify that the target is the same as before
 			_if( $this->attackTime->atLeast(2) )->then( 
 				$this->verifyTarget($switch),
-			''),
-			
-			_if( $switch->is_clear() )->then( 
-				$this->attackTime->add(100), 
-				$this->attackTarget->setTo(0),
+				
+				// if verification fails then make attack time too high
+				_if( $switch->is_clear() )->then( 
+					$this->attackTime->add(100), 
+					$this->attackTarget->setTo(0),
+				''),
 			''),
 			
 			$switch->clear(),
@@ -91,10 +100,10 @@ class BSUnit extends IndexedUnit {
 				$switch->set(),
 			''),
 			
-			_if( $this->attackCooldown(AtMost, 2) )->then( 
-				$this->attackTime->setTo(0),
-			''),
-			
+		'');
+		
+		$text .= _if( $this->attackCooldown(AtMost, 2) )->then( 
+			$this->attackTime->setTo(0),
 		'');
 		
 		return CreateCondition($reserve, $switch, $text);
@@ -120,8 +129,7 @@ class BSUnit extends IndexedUnit {
 			}
 		}
 		$text .= _if( $success->is_clear() )->then(
-			$this->attackTarget->setTo(1700),
-			$success->set(),
+			$this->attackTarget->setTo(0),
 		'');
 		
 		return $text;
@@ -148,6 +156,8 @@ class BSUnit extends IndexedUnit {
 		
 		$dcgroupid = new TempDC(7);
 		$tempdc = new TempDC(127);
+		
+		$P4 = new Player(P4);
 		
 		$text = repeat(1,
 			
