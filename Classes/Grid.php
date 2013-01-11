@@ -124,7 +124,7 @@ class Grid{
 		$text .= always(
 			$actions,
 		'');
-		
+		//
 		
 		
 		return $text;
