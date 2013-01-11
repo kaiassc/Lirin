@@ -72,6 +72,213 @@ class Grid{
 	//ACTIONS
 	//
 
+	
+	public function putMainRes($xcoord, $ycoord, TempSwitch $success) {
+	
+		//ERROR
+		if( func_num_args() != 3 ){
+			Error('COMPILER ERROR FOR PUTMAINRES(): INCORRECT NUMBER OF ARGUMENTS (NEEDS 3: DEATHCOUNTER OR CONSTANT (INTEGER), DEATHCOUNTER OR CONSTANT (INTEGER), SWITCH)');
+		}
+		if( !(is_numeric($xcoord) || $xcoord instanceof Deathcounter) ) {
+			Error('COMPILER ERROR FOR PUTMAINRES(): ARGUMENT 1 NEEDS TO BE A DEATHCOUNTER OR A CONSTANT (INTEGER)');
+		}
+		if( !(is_numeric($ycoord) || $ycoord instanceof Deathcounter) ) {
+			Error('COMPILER ERROR FOR PUTMAINRES(): ARGUMENT 2 NEEDS TO BE A DEATHCOUNTER OR A CONSTANT (INTEGER)');
+		}
+		
+		
+		$text = '';
+		
+		//check if the coordinate is on the playing field or not
+		$condition = '';
+		if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
+			$text = $success->clear();
+			if( $xcoord instanceof Deathcounter ) {
+				$condition .= $xcoord->atLeast(Grid::$xoffset*32).$xcoord->atMost((Grid::$xoffset+Grid::$xdimension)*32);
+			}
+			if( $ycoord instanceof Deathcounter ) {
+				$ydiff = (Map::getHeight()-Grid::$ydimension)/2;
+				$condition .= $ycoord->atLeast($ydiff*32).$ycoord->atMost((Map::getHeight()-$ydiff)*32);
+			}
+			$text .= _if( $condition )->then(
+				$success->set(),
+			'');
+		}
+		
+		
+		
+		$lastlocation = Grid::$origin;
+
+		if( is_numeric($xcoord) ) {
+			
+			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
+			if( $xmove > Grid::$xdimension*32 || $xmove < 0 )
+				ERROR('X coordinate is out of the playing field');
+			
+			$xmove += 3;
+			
+			while( $xmove >= Grid::$resolution*64 ){
+				$text .= Grid::$slideLeft64->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*64;
+				$lastlocation = Grid::$slideLeft64;
+			}
+			while( $xmove >= Grid::$resolution*8 ){
+				$text .= Grid::$slideLeft8->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*8;
+				$lastlocation = Grid::$slideLeft8;
+			}
+			while( $xmove >= Grid::$resolution*1 ){
+				$text .= Grid::$slideLeft1->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*1;
+				$lastlocation = Grid::$slideLeft1;
+			}
+										
+		}
+		
+		
+		
+		
+		if( $xcoord instanceof Deathcounter ) {
+
+			$currentMax = (Grid::$xoffset+Grid::$xdimension)*32+3;
+			$xtemp = new TempDC($currentMax);
+			$text .= $xtemp->setTo($currentMax);
+			
+			$text .= $xtemp->subtract($xcoord);
+			
+			//slide 64s
+			$text .= Grid::$slideLeft64->centerOn(Grid::$origin);
+			$pow = getBinaryPower( floor( $currentMax / (Grid::$resolution*64) ) );
+			for($i=$pow; $i>=0; $i--){
+				$actions = '';
+				$k = pow(2,$i);
+				for($j=$k; $j>=1; $j--){
+					$actions .= Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64);
+				}
+				
+				$text .= _if( $xtemp->atLeast($k*Grid::$resolution*64) )->then(
+					$xtemp->subtract($k*Grid::$resolution*64),
+					$actions,
+				'');
+			}
+			
+			//slide 8s
+			$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
+			$pow = 2;
+			$currentMax = $currentMax % (Grid::$resolution*8);
+			for($i=$pow; $i>=0; $i--){
+				$actions = '';
+				$k = pow(2,$i);
+				for($j=$k; $j>=1; $j--){
+					$actions .= Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8);
+				}
+				
+				$text .= _if( $xtemp->atLeast($k*Grid::$resolution*8) )->then(
+					$xtemp->subtract($k*Grid::$resolution*8),
+					$actions,
+				'');
+			}
+			
+			//slide 1s
+			$text .= Grid::$slideLeft1->centerOn(Grid::$slideLeft8);
+			$pow = 2;
+			for($i=$pow; $i>=0; $i--){
+				$actions = '';
+				$k = pow(2,$i);
+				for($j=$k; $j>=1; $j--){
+					$actions .= Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1);
+				}
+				
+				$text .= _if( $xtemp->atLeast($k*Grid::$resolution*1) )->then(
+					$xtemp->subtract($k*Grid::$resolution*1),
+					$actions,
+				'');
+			}
+			
+			//lock main
+			$text .= Grid::$main->centerOn(Grid::$slideLeft1);
+			$text .= $xtemp->kill();
+			$lastlocation = Grid::$main;
+
+		}
+		
+		
+		
+		
+		if( is_numeric($ycoord) ) {
+			
+			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
+			$lastunit = Grid::$unit;
+			if( $ycoord > Grid::$ydimension*32 || $ycoord < 0 )
+				ERROR('Y coordinate is out of the playing field');
+
+			if( $ycoord < Grid::$ydimension*32/2 - 4 ){
+				$text .= Grid::$shiftUp->centerOn(P12, Grid::$unit, $lastlocation);
+				$lastlocation = Grid::$shiftUp;
+				$lastunit = "Map Revealer";
+			}
+			else{
+				$ycoord = Grid::$ydimension*32 - $ycoord;
+			}
+			
+			$y = (int)round( ($ycoord-1) / Grid::$resolution);
+			
+			$text .= Grid::$YLoc[$y]->centerOn(P12, $lastunit, $lastlocation);
+			$lastlocation = Grid::$YLoc[$y];
+							
+			$text .= Grid::$main->centerOn($lastlocation);
+
+
+		}
+		
+		
+		if( $ycoord instanceof Deathcounter ) {
+			
+			if( is_numeric($xcoord) ) {
+				$text .= Grid::$main->centerOn(P12, Grid::$unit, $lastlocation);
+			}
+
+			$ytemp = new TempDC(Map::getHeight()*32);
+			
+			$text .= _if( $ycoord->atMost(Grid::$ydimension*32/2 - 5) )->then(
+				Grid::$shiftUp->centerOn(Grid::$main),
+				Grid::$main->centerOn(Grid::$shiftUp),
+				$ytemp->setTo($ycoord),
+			'');
+			$text .= _if( $ycoord->atLeast(Grid::$ydimension*32/2 - 4) )->then(
+				$ytemp->setTo(Map::getHeight()*32),
+				$ytemp->subtract($ycoord),
+			'');
+			
+			$text .= $ycoord->subtract( (Map::getHeight()-Grid::$ydimension)/2*32 - 1 );
+			
+			$ignore = new TempSwitch();
+			$text .= $ignore->set();
+			
+			for($i=Grid::$ydimension*32/Grid::$resolution/2; $i>0; $i--){
+				$text .= _if( $ignore->is_set(), $ytemp->atLeast($i*Grid::$resolution-3) )->then(
+					Grid::$YLoc[$i]->centerOn(Grid::$main),
+					Grid::$main->centerOn(Grid::$YLoc[$i]),
+					$ignore->clear(),
+				'');
+			}
+			$text .= _if( $ignore->is_set() )->then(
+				Grid::$YLoc[0]->centerOn(Grid::$main),
+				Grid::$main->centerOn(Grid::$YLoc[0]),
+				$ignore->kill(),
+			'');
+			
+			$text .= $ytemp->kill();
+			
+		}
+		
+		
+		
+		return $text;
+		
+	}
+	
+	
 
 	public function putMain($xcoord, $ycoord) {
 		//ERROR
