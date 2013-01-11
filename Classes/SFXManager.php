@@ -23,8 +23,6 @@ class SFXManager {
 	/* @var Deathcounter */   private static $LastOffsetX;
 	/* @var Deathcounter */   private static $LastOffsetY;
 	
-	/* @var Permswitch[] */   private static $RSwitches = array();
-	
 	
 	function __construct($wavfolder){
 		if (!is_dir($wavfolder)){ Error('Invalid $wavfolder. Directory does not exist'); }
@@ -42,25 +40,11 @@ class SFXManager {
 		self::$ScreenY = new Deathcounter(Map::getHeight()*32);
 		self::$LastOffsetX = new Deathcounter(65);
 		self::$LastOffsetY = new Deathcounter(65);
-		self::$RSwitches[0] = new PermSwitch();
-		self::$RSwitches[1] = new PermSwitch();
-		self::$RSwitches[2] = new PermSwitch();
-		self::$RSwitches[3] = new PermSwitch();
-		self::$RSwitches[4] = new PermSwitch();
-		self::$RSwitches[5] = new PermSwitch();
 		
 		$P1 = new Player(P1);
 		
 		$P1->always(
 			GetScreen(self::$ScreenX, self::$ScreenY, Map::getWidth(), Map::getHeight()),
-			/**
-			self::$RSwitches[0]->randomize(),
-			self::$RSwitches[1]->randomize(),
-			self::$RSwitches[2]->randomize(),
-			self::$RSwitches[3]->randomize(),
-			self::$RSwitches[4]->randomize(),
-			self::$RSwitches[5]->randomize(),
-			/**/
 		'');
 		
 	}
@@ -128,6 +112,7 @@ class SFXManager {
 		$rumble = $this->RumbleLevel;
 		
 		$centerview = new TempSwitch();
+		$loadoffset = new TempSwitch();
 		
 		$text .= _if( self::$LastOffsetX->atLeast(1) )->then(
 			self::$LastOffsetX->subtract(1),
@@ -139,46 +124,21 @@ class SFXManager {
 			
 		'');
 		
-		/**/
 		$text .= $xoffset->randomize(1,8);
 		$text .= $yoffset->randomize(1,8);
-		/**/
 		
 		$text .= _if( $rumble->atLeast(1) )->then(
 			
-			/**
-			_if( self::$RSwitches[0] )->then(
-				$xoffset->add(4),
-			''),
-			_if( self::$RSwitches[1] )->then(
-				$xoffset->add(2),
-			''),
-			_if( self::$RSwitches[2] )->then(
-				$xoffset->add(1),
-			''),
-			_if( self::$RSwitches[3] )->then(
-				$yoffset->add(4),
-			''),
-			_if( self::$RSwitches[4] )->then(
-				$yoffset->add(2),
-			''),
-			_if( self::$RSwitches[5] )->then(
-				$yoffset->add(1),
-			''),
-			/**
-			
-			$xoffset->setTo(2),
-			$yoffset->setTo(7),
-			
-			/**/
 			_if( $rumble->atMost(25) )->then(
 				$xoffset->divideBy(2),
 				$yoffset->divideBy(2),
+				$xoffset->add(2),
+				$yoffset->add(2),
 			''),
-			/**/
 			
 			$rumble->subtract(15),
 			$centerview->set(),
+			$loadoffset->set(),
 			
 			$xoffset->multiplyBy(8),
 			$yoffset->multiplyBy(8),
@@ -220,17 +180,16 @@ class SFXManager {
 			
 			self::$ScreenX->sub(10*32),
 			self::$ScreenY->sub(200),
-			
-			self::$LastOffsetX->becomeDel($xoffset),
-			self::$LastOffsetY->becomeDel($yoffset),
+
+			_if( $loadoffset )->then(
+				self::$LastOffsetX->becomeDel($xoffset),
+				self::$LastOffsetY->becomeDel($yoffset),
+			''),
 			
 			$centerview->release(),
+			$loadoffset->release(),
 			$success->release(),
 		'');
-		
-		#$text .= Display("hey");
-		#//$text .= Grid::reset();
-		#$text .= Display("hey");
 		
 		$text .= $xoffset->release();
 		$text .= $yoffset->release();
