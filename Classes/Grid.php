@@ -17,6 +17,7 @@ class Grid{
 	static public $origin;
 	static public $shiftLeft;
 	static public $shiftUp;
+	static public $topLeft;
 	
 	static public $YLoc = array();
 	
@@ -45,6 +46,8 @@ class Grid{
 		self::$shiftLeft = new LirinLocation("ShiftLeft");
 		MintLocation("ShiftUp",0,0,0,Map::getHeight()*32*2);
 		self::$shiftUp = new LirinLocation("ShiftUp");
+		MintLocation("TopLeft",0,0,0,0);
+		self::$topLeft = new LirinLocation("TopLeft");
 		
 		for($i=0;$i<=$y_dimension*32/$resolution/2;$i++){
 			MintLocation("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
@@ -72,6 +75,63 @@ class Grid{
 	//ACTIONS
 	//
 
+	static function reset() {
+		
+		$text = '';
+		
+		$text .= always(
+			Grid::$slideLeft1->centerOn(Grid::$topLeft),
+			Grid::$slideLeft8->centerOn(Grid::$topLeft),
+			Grid::$slideLeft64->centerOn(Grid::$topLeft),
+			Grid::$sandbox->centerOn(Grid::$topLeft),
+			Grid::$origin->centerOn(Grid::$topLeft),
+			Grid::$shiftLeft->centerOn(Grid::$topLeft),
+			Grid::$shiftUp->centerOn(Grid::$topLeft),
+			Grid::$main->centerOn(Grid::$topLeft),
+		'');
+		
+		
+		$actions = '';
+		for($i=0; $i<=60; $i++){
+			$actions .= Grid::$YLoc[$i]->centerOn(Grid::$topLeft);
+		}
+		$text .= always(
+			$actions,
+		'');
+		
+		$actions = '';
+		for($i=61; $i<=120; $i++){
+			$actions .= Grid::$YLoc[$i]->centerOn(Grid::$topLeft);
+		}
+		$text .= always(
+			$actions,
+		'');
+		
+		
+		$actions = '';
+		for($i=121; $i<=180; $i++){
+			$actions .= Grid::$YLoc[$i]->centerOn(Grid::$topLeft);
+		}
+		$text .= always(
+			$actions,
+		'');
+		
+		
+		$actions = '';
+		for($i=181; $i<=192; $i++){
+			$actions .= Grid::$YLoc[$i]->centerOn(Grid::$topLeft);
+		}
+		$text .= always(
+			$actions,
+		'');
+		
+		
+		
+		return $text;
+		
+	}
+	
+	
 	
 	static function putMainRes($xcoord, $ycoord, TempSwitch $success) {
 	
@@ -246,7 +306,7 @@ class Grid{
 				$ytemp->setTo($ycoord),
 			'');
 			$text .= _if( $ycoord->atLeast(Map::getHeight()*32/2 - 4) )->then(
-				$ytemp->setTo(Map::getHeight()*32),
+				$ytemp->setTo(Map::getHeight()*32-1),
 				$ytemp->subtract($ycoord),
 			'');
 			
@@ -254,9 +314,6 @@ class Grid{
 			
 			$ignore = new TempSwitch();
 			$text .= $ignore->set();
-			
-			$P4 = new Player(P4);
-			$text .= $P4->setGas($ytemp);
 			
 			for($i=Grid::$ydimension*32/Grid::$resolution/2; $i>0; $i--){
 				$text .= _if( $ignore->is_set(), $ytemp->atLeast($i*Grid::$resolution-3) )->then(
