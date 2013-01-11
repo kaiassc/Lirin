@@ -16,7 +16,7 @@ class SFXManager {
 	/* @var Deathcounter[] */ private $AtDCs = array();
 	/* @var Deathcounter[] */ private $RumbleDCs = array();
 	
-	/* @var Deathcounter */   private $RumbleLevel;
+	/* @var Deathcounter */   public $RumbleLevel;
 	
 	/* @var Deathcounter */   private static $ScreenX;
 	/* @var Deathcounter */   private static $ScreenY;
@@ -115,15 +115,14 @@ class SFXManager {
 		
 		$text .= _if( self::$LastOffsetX->atLeast(1) )->then(
 			self::$LastOffsetX->subtract(1),
-			self::$ScreenX->addDel(self::$LastOffsetX),
-			self::$ScreenY->addDel(self::$LastOffsetY),
-			self::$ScreenX->subtract(32),
-			self::$ScreenY->subtract(32),
+			self::$ScreenX->subtractDel(self::$LastOffsetX),
+			self::$ScreenY->subtractDel(self::$LastOffsetY),
+			self::$ScreenX->add(32),
+			self::$ScreenY->add(32),
 			$centerview->set(),
 			
 		'');
 		
-		/**/
 		$text .= _if( $rumble->atLeast(1) )->then(
 			
 			_if( $rumble->atLeast(50) )->then(
@@ -154,14 +153,19 @@ class SFXManager {
 			
 			$xoffset->add(1),
 		'');
-		/**/
 		
 		$success = new TempSwitch();
 		$text .= _if( $centerview )->then(			
 			self::$ScreenX->add(10*32),
-			self::$ScreenY->add(6*32),
+			self::$ScreenY->add(200),
+			
+			// Adjust for bottom half of map
+			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2 - 4))->then(
+				self::$ScreenY->add(8),
+			''),
 			
 			Grid::putMainRes(self::$ScreenX, self::$ScreenY, $success),
+			
 			_if( $success )->then(
 				Grid::$main->centerView(),
 				Display("Rumble!"),
@@ -170,8 +174,12 @@ class SFXManager {
 				Display("Out of bounds!"),
 			''),
 			
+			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2 - 4))->then(
+				self::$ScreenY->subtract(8),
+			''),
+			
 			self::$ScreenX->sub(10*32),
-			self::$ScreenY->sub(6*32),
+			self::$ScreenY->sub(200),
 			
 			self::$LastOffsetX->becomeDel($xoffset),
 			self::$LastOffsetY->becomeDel($yoffset),

@@ -1,10 +1,10 @@
 <?php
 	
+	/*
 	$players = new Player(P4, P5, P6);
 	$all = new Player(P1, P2, P3, P4, P5, P6, P7, P8);
 	global $heroP1, $heroP2, $heroP3, $roam1, $roam2, $roam3, $mercP1, $mercP2, $mercP3, $bossP1, $bossP2, $bossP3, $enemyUnit;
 	global $healthA, $healthB, $healthC, $armorA, $armorB, $armorC;
-	
 	
 	
 	//BLOCK 1: IDs 0-6
@@ -182,6 +182,6 @@
 		$enemyUnit[8]->type->setTo(0), $enemyUnit[8]->health->setTo(100), $enemyUnit[8]->maxhealth->setTo(100), $enemyUnit[8]->mana->setTo(0), $enemyUnit[8]->damage->setTo(33), $enemyUnit[8]->armor->setTo(0), 
 	'');
 
-	
+	*/
 	
 ?>
