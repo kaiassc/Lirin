@@ -160,7 +160,7 @@ class SFXManager {
 			self::$ScreenY->add(200),
 			
 			// Adjust for bottom half of map
-			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2 - 4))->then(
+			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2-4))->then(
 				self::$ScreenY->add(8),
 			''),
 			
@@ -174,7 +174,7 @@ class SFXManager {
 				Display("Out of bounds!"),
 			''),
 			
-			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2 - 4))->then(
+			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2-4))->then(
 				self::$ScreenY->subtract(8),
 			''),
 			
