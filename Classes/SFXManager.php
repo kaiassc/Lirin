@@ -155,7 +155,8 @@ class SFXManager {
 		'');
 		
 		$success = new TempSwitch();
-		$text .= _if( $centerview )->then(			
+		
+		$text .= _if( $centerview )->then(
 			self::$ScreenX->add(10*32),
 			self::$ScreenY->add(200),
 			
@@ -167,10 +168,9 @@ class SFXManager {
 			Grid::putMainRes(self::$ScreenX, self::$ScreenY, $success),
 			_if( $success )->then(
 				Grid::$main->centerView(),
-				Display("Rumble!"),
 			''),
 			_if( $success->is_clear() )->then(
-				Display("Out of bounds!"),
+				$loadoffset->clear(),
 			''),
 			
 			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2-8))->then(
