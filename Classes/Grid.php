@@ -32,6 +32,7 @@ class Grid{
 		self::$xoffset = $x_offset;
 		self::$unit = $unit;
 		
+		//if no offset specified, determine it
 		if($x_offset === null){
 			$x_offset = (int)round((Map::getWidth()-$x_dimension)/2);
 		}
