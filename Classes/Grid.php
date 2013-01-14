@@ -24,7 +24,7 @@ class Grid{
 	static public $main;
 	
 	
-	function __construct($x_dimension, $y_dimension, $resolution, $x_offset = 0, $unit = "Terran Comsat Station"){
+	function __construct($x_dimension, $y_dimension, $resolution, $x_offset = null, $unit = "Terran Comsat Station"){
 		
 		self::$xdimension = $x_dimension;
 		self::$ydimension = $y_dimension;
@@ -32,9 +32,13 @@ class Grid{
 		self::$xoffset = $x_offset;
 		self::$unit = $unit;
 		
+		if($x_offset === null){
+			$x_offset = (int)round((Map::getWidth()-$x_dimension)/2);
+		}
+		
 		// Create units along the bottom/
 		for($i=0; $i<$x_dimension*32/$resolution; $i++){
-			MintUnit(Grid::$unit, P12, $x_offset*32+$i*$resolution, (Map::getHeight()-3)*32, Invincible);
+			UnitManager::MintUnit(Grid::$unit, P12, $x_offset*32+$i*$resolution, (Map::getHeight()-3)*32, Invincible);
 		}
 		
 		$vert = (Map::getHeight()-$y_dimension)/2;
