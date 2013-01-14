@@ -35,6 +35,7 @@ class UnitManager {
 		}
 		if($unit === "Map Revealer" || $unit === "Start Location"){
 			self::$DontCount[] = array($unit, $player, $x, $y, null);
+			return;
 		}
 		
 		$props = null;
@@ -151,6 +152,8 @@ class UnitManager {
 		foreach(self::$DontCount as $array){
 			$Inspecific[] = $array;
 		}
+		$dcIndex = 0;
+		$dcMax = count(self::$DontCount);
 		$unIndex = 0;
 		$unMax = count(self::$Unspecified);
 		$spIndex = 0;
@@ -168,7 +171,16 @@ class UnitManager {
 				$unIndex++;
 				continue;
 			}
-			if($spIndex >= $spMax){ break; }
+			if($spIndex >= $spMax){ 
+				if($dcIndex < $dcMax){
+					list($unit, $player, $x, $y, $props) = self::$DontCount[$dcIndex];
+					MintUnit($unit, $player, $x, $y, $props);
+					$dcIndex++;
+					continue;
+				} else {
+					break;
+				}
+			}
 			
 			// buffer unit
 			MintUnit($buffer, P12, 64, 64, Invincible);
