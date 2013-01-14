@@ -55,7 +55,7 @@ class Grid{
 		self::$topLeft = new LirinLocation("TopLeft");
 		
 		for($i=0;$i<=$y_dimension*32/$resolution/2;$i++){
-			LocationManager::MintLocation("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
+			LocationManager::MintLocationWithAnyIndex("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
 			self::$YLoc[] = new LirinLocation("YLoc$i");
 		}
 		
