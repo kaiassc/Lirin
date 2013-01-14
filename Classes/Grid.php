@@ -67,7 +67,7 @@ class Grid{
 		self::$slideLeft64 = new LirinLocation("SlideLeft64");
 		
 		LocationManager::MintLocationWithIndex("main", 8, 8, 8, 8, 147);
-		self::$main = new ExtendableLocation("main");
+		self::$main = new ExtendableLocation("main", 4);
 		
 	}
 	
