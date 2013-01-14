@@ -43,27 +43,27 @@ class Grid{
 		}
 		
 		$vert = (Map::getHeight()-$y_dimension)/2;
-		LocationManager::MintLocationWithAnyIndex("sandbox", $x_offset*32, $vert*32, ($x_offset+$x_dimension)*32, (Map::getHeight()-$vert)*32);
+		LocationManager::MintLocation("sandbox", $x_offset*32, $vert*32, ($x_offset+$x_dimension)*32, (Map::getHeight()-$vert)*32);
 		self::$sandbox = new LirinLocation("sandbox");
-		LocationManager::MintLocationWithAnyIndex("gridOrigin", ($x_dimension+$x_offset)*32+32, (Map::getHeight()-3)*32+32, ($x_dimension+$x_offset)*32-32, (Map::getHeight()-3)*32-32);
+		LocationManager::MintLocation("gridOrigin", ($x_dimension+$x_offset)*32+32, (Map::getHeight()-3)*32+32, ($x_dimension+$x_offset)*32-32, (Map::getHeight()-3)*32-32);
 		self::$origin = new LirinLocation("gridOrigin");
-		LocationManager::MintLocationWithAnyIndex("ShiftLeft",0,0,Map::getWidth()*32*2,0);
+		LocationManager::MintLocation("ShiftLeft",0,0,Map::getWidth()*32*2,0);
 		self::$shiftLeft = new LirinLocation("ShiftLeft");
-		LocationManager::MintLocationWithAnyIndex("ShiftUp",0,0,0,Map::getHeight()*32*2);
+		LocationManager::MintLocation("ShiftUp",0,0,0,Map::getHeight()*32*2);
 		self::$shiftUp = new LirinLocation("ShiftUp");
-		LocationManager::MintLocationWithAnyIndex("TopLeft",0,0,0,0);
+		LocationManager::MintLocation("TopLeft",0,0,0,0);
 		self::$topLeft = new LirinLocation("TopLeft");
 		
 		for($i=0;$i<=$y_dimension*32/$resolution/2;$i++){
-			LocationManager::MintLocationWithAnyIndex("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
+			LocationManager::MintLocation("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
 			self::$YLoc[] = new LirinLocation("YLoc$i");
 		}
 		
-		LocationManager::MintLocationWithAnyIndex("SlideLeft1", 62-$resolution*2*1, 0, 0, 0);
+		LocationManager::MintLocation("SlideLeft1", 62-$resolution*2*1, 0, 0, 0);
 		self::$slideLeft1 = new LirinLocation("SlideLeft1");
-		LocationManager::MintLocationWithAnyIndex("SlideLeft8", 0, 0, $resolution*2*8-62, 0);
+		LocationManager::MintLocation("SlideLeft8", 0, 0, $resolution*2*8-62, 0);
 		self::$slideLeft8 = new LirinLocation("SlideLeft8");
-		LocationManager::MintLocationWithAnyIndex("SlideLeft64", 0, 0, $resolution*2*64-62, 0);
+		LocationManager::MintLocation("SlideLeft64", 0, 0, $resolution*2*64-62, 0);
 		self::$slideLeft64 = new LirinLocation("SlideLeft64");
 		
 		LocationManager::MintLocationWithIndex("main", 8, 8, 8, 8, 147);
@@ -335,6 +335,8 @@ class Grid{
 		
 		
 		$text = '';
+		$horizSlide = '';
+		$vertSlide = '';
 		
 		//check if the coordinate is on the playing field or not
 		$condition = '';
@@ -357,8 +359,9 @@ class Grid{
 		
 		
 		
-		//location to make putMainRes(const, const) more efficient
+		//location and unit to make putMainRes(const, const) more efficient
 		$lastlocation = Grid::$origin;
+		$lastunit = Grid::$unit;
 
 		//X is a constant integer
 		if( is_numeric($xcoord) ) {
@@ -392,6 +395,14 @@ class Grid{
 			
 			//restore xmove to see how many pixels main should shift left or right (used at the bottom)
 			$xmove -= 3;
+			
+			//pixel shift
+			if ($xmove > 0)
+				$horizSlide = Grid::$main->slideLeft($xmove);
+			elseif ($xmove < 0)
+				$horizSlide = Grid::$main->slideRight($xmove*-1);
+			else
+				$horizSlide = '';
 							
 		}
 		
@@ -458,8 +469,36 @@ class Grid{
 			
 			//lock main
 			$text .= Grid::$main->centerOn(Grid::$slideLeft1);
+			
+			//pixel shift
+			$text .= _if($xtemp->exactly(7))->then(
+				Grid::$main->slideLeft(4),
+			'');
+			$text .= _if($xtemp->exactly(6))->then(
+				Grid::$main->slideLeft(3),
+			'');
+			$text .= _if($xtemp->exactly(5))->then(
+				Grid::$main->slideLeft(2),
+			'');
+			$text .= _if($xtemp->exactly(4))->then(
+				Grid::$main->slideLeft(1),
+			'');
+			$text .= _if($xtemp->exactly(2))->then(
+				Grid::$main->slideRight(1),
+			'');
+			$text .= _if($xtemp->exactly(1))->then(
+				Grid::$main->slideRight(2),
+			'');
+			$text .= _if($xtemp->exactly(0))->then(
+				Grid::$main->slideRight(3),
+			'');
+			
+			
 			$text .= $xtemp->kill();
 			$lastlocation = Grid::$main;
+			$lastunit = "Map Revealer";
+			
+			
 
 		}
 		
@@ -472,8 +511,6 @@ class Grid{
 			$swap = 0;
 			//start Y at playing field (subtract any edge)
 			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
-			//lastunit, like lastlocation, is just used to make constant grids more efficient
-			$lastunit = Grid::$unit;
 			
 			//error check
 			if( $ycoord > Grid::$ydimension*32 || $ycoord < 0 )
@@ -481,7 +518,7 @@ class Grid{
 
 			//top half of map
 			if( $ycoord < Grid::$ydimension*32/2 - 4 ){
-				$text .= Grid::$shiftUp->centerOn(P12, Grid::$unit, $lastlocation);
+				$text .= Grid::$shiftUp->centerOn(P12, $lastunit, $lastlocation);
 				$lastlocation = Grid::$shiftUp;
 				$lastunit = "Map Revealer";
 			}
@@ -503,6 +540,14 @@ class Grid{
 			
 			//center main
 			$text .= Grid::$main->centerOn($lastlocation);
+			
+			//pixel shift
+			if ($ycoord > 0)
+				$vertSlide = Grid::$main->slideDown($ycoord);
+			elseif ($ycoord < 0)
+				$vertSlide = Grid::$main->slideUp($ycoord*-1);
+			else
+				$vertSlide = '';
 
 
 		}
@@ -512,13 +557,15 @@ class Grid{
 		//Y is a deathcounter
 		if( $ycoord instanceof Deathcounter ) {
 			
-			//if X was a consatnt, snap main to the nearest X coordinate (it wasn't there for efficiency's sake)
+			//if X was a constant, snap main to the nearest X coordinate (it wasn't there for efficiency's sake)
 			if( is_numeric($xcoord) ) {
 				$text .= Grid::$main->centerOn(P12, Grid::$unit, $lastlocation);
 			}
 
 			//Y temp so we don't have to use the argument passed in
 			$ytemp = new TempDC(Map::getHeight()*32);
+			$pixtemp = new TempDC(7);
+			$bottom = new TempSwitch();
 			
 			//top half of map, just snap main to top half
 			$text .= _if( $ycoord->atMost(Map::getHeight()*32/2 - 5) )->then(
@@ -530,6 +577,7 @@ class Grid{
 			$text .= _if( $ycoord->atLeast(Map::getHeight()*32/2 - 4) )->then(
 				$ytemp->setTo(Map::getHeight()*32-1),
 				$ytemp->subtract($ycoord),
+				$bottom->set(),
 			'');
 			
 			//subtract the edge to start where the playing field starts
@@ -542,6 +590,7 @@ class Grid{
 			//snap main to closest y location
 			for($i=Grid::$ydimension*32/Grid::$resolution/2; $i>0; $i--){
 				$text .= _if( $ignore->is_set(), $ytemp->atLeast($i*Grid::$resolution-3) )->then(
+					$ytemp->subtract($i*Grid::$resolution-3),
 					Grid::$YLoc[$i]->centerOn(Grid::$main),
 					Grid::$main->centerOn(Grid::$YLoc[$i]),
 					$ignore->clear(),
@@ -549,15 +598,59 @@ class Grid{
 			}
 			//if no location has been placed, it has to be YLoc[0]
 			$text .= _if( $ignore->is_set() )->then(
+				$ytemp->add(3),
 				Grid::$YLoc[0]->centerOn(Grid::$main),
 				Grid::$main->centerOn(Grid::$YLoc[0]),
 				$ignore->kill(),
 			'');
 			
-			$text .= $ytemp->kill();
+			//correct pixels
+			$ytemp->Max(7);
+			
+			$text .= _if($bottom->is_clear())->then(
+				$pixtemp->become($ytemp),
+			'');
+			$text .= _if($bottom->is_set())->then(
+				$pixtemp->setTo(7),
+				$pixtemp->subtractDel($ytemp),
+				$pixtemp->add(1),
+				$bottom->kill(),
+			'');
+			
+			//pixel shift
+			$text .= _if($pixtemp->exactly(8))->then(
+				Grid::$main->slideDown(4),
+			'');
+			$text .= _if($pixtemp->exactly(7))->then(
+				Grid::$main->slideDown(3),
+			'');
+			$text .= _if($pixtemp->exactly(6))->then(
+				Grid::$main->slideDown(2),
+			'');
+			$text .= _if($pixtemp->exactly(5))->then(
+				Grid::$main->slideDown(1),
+			'');
+			$text .= _if($pixtemp->exactly(3))->then(
+				Grid::$main->slideUp(1),
+			'');
+			$text .= _if($pixtemp->exactly(2))->then(
+				Grid::$main->slideUp(2),
+			'');
+			$text .= _if($pixtemp->exactly(1))->then(
+				Grid::$main->slideUp(3),
+			'');
+			$text .= _if($pixtemp->exactly(0))->then(
+				Grid::$main->slideUp(4),
+			'');
+			
+			$ytemp->kill();
+			$text .= $pixtemp->kill();
 			
 		}
 		
+		
+		$text .= $horizSlide;
+		$text .= $vertSlide;
 
 		return $text;
 
