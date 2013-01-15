@@ -26,6 +26,10 @@ class Hero extends BSUnit {
 			RemoveUnitAtLocation($oplyr, "Protoss Zealot", 1, Anywhere),
 		'');
 		
+		if($player === null){
+			$player = $dcplayer;
+		}
+		
 		parent::__construct($dcplayer, $BSid, $unit, $player, $location);
 		
 		$targets = BattleSystem::getBSUnits();
