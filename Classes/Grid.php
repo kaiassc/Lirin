@@ -100,6 +100,8 @@ class Grid{
 		
 		//check if the coordinate is on the playing field or not
 		if($success !== null){
+			/* @var Deathcounter $xcoord */
+			/* @var Deathcounter $ycoord */
 			$condition = '';
 			if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
 				$text = $success->clear();
@@ -125,6 +127,7 @@ class Grid{
 
 		//X is a constant integer
 		if( is_numeric($xcoord) ) {
+			/* @var int $xcoord */
 			
 			//xmove is a coordinate that starts at the grid's origin and counts over
 			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
@@ -159,6 +162,7 @@ class Grid{
 		
 		//X is a deathcounter
 		if( $xcoord instanceof Deathcounter ) {
+			/* @var Deathcounter $xcoord */
 
 			$currentMax = (Grid::$xoffset+Grid::$xdimension)*32+3;
 			$xtemp = new TempDC($currentMax);
@@ -226,6 +230,7 @@ class Grid{
 		
 		//Y is a constant
 		if( is_numeric($ycoord) ) {
+			/* @var int $ycoord */
 			
 			//start Y at playing field (subtract any edge)
 			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
@@ -261,6 +266,7 @@ class Grid{
 		
 		//Y is a deathcounter
 		if( $ycoord instanceof Deathcounter ) {
+			/* @var Deathcounter $ycoord */
 			
 			//if X was a consatnt, snap main to the nearest X coordinate (it wasn't there for efficiency's sake)
 			if( is_numeric($xcoord) ) {
@@ -340,6 +346,8 @@ class Grid{
 		
 		//check if the coordinate is on the playing field or not
 		if($success !== null){
+			/* @var Deathcounter $xcoord */
+			/* @var Deathcounter $ycoord */
 			$condition = '';
 			if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
 				$text = $success->clear();
@@ -367,6 +375,7 @@ class Grid{
 
 		//X is a constant integer
 		if( is_numeric($xcoord) ) {
+			/* @var int $xcoord */
 			
 			//xmove is a coordinate that starts at the grid's origin and counts over
 			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
@@ -412,6 +421,7 @@ class Grid{
 		
 		//X is a deathcounter
 		if( $xcoord instanceof Deathcounter ) {
+			/* @var Deathcounter $xcoord */
 
 			$currentMax = (Grid::$xoffset+Grid::$xdimension)*32+3;
 			$xtemp = new TempDC($currentMax);
@@ -439,7 +449,6 @@ class Grid{
 			//slide 8s
 			$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
 			$pow = 2;
-			$currentMax = $currentMax % (Grid::$resolution*8);
 			for($i=$pow; $i>=0; $i--){
 				$actions = '';
 				$k = pow(2,$i);
@@ -508,6 +517,7 @@ class Grid{
 		
 		//Y is a constant
 		if( is_numeric($ycoord) ) {
+			/* @var int $ycoord */
 			
 			//swap == 0 if top, == 1 if bottom
 			$swap = 0;
@@ -558,6 +568,7 @@ class Grid{
 		
 		//Y is a deathcounter
 		if( $ycoord instanceof Deathcounter ) {
+			/* @var Deathcounter $ycoord */
 			
 			//if X was a constant, snap main to the nearest X coordinate (it wasn't there for efficiency's sake)
 			if( is_numeric($xcoord) ) {

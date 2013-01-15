@@ -19,7 +19,7 @@ class Lirin extends Map {
 		$Grid = new Grid(128, 96, 8/*px*/, 32);
 		$UnitManager = new UnitManager(0);
 		$LocationManager = new LocationManager();
-		$Loc = new Loc;
+		$Loc = new Loc();
 		$Loc->populate();
 		
 		// Players
