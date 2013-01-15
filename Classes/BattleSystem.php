@@ -118,26 +118,11 @@ class BattleSystem {
 		
 		// TESTING
 		$P1 = new Player(P1);
-		$P2 = new Player(P2);
-		$P3 = new Player(P3);
-		$P4 = new Player(P4);
-		$P5 = new Player(P5);
-		$P6 = new Player(P6);
-		$P7 = new Player(P7);
 		$P8 = new Player(P8);
 		
-		$P1->justonce( //SetAlly(P4), SetAlly(P5), SetAlly(P6),
-			//Give(P12, "Protoss Zealot", 1, P9, "sandbox"),       Give(P12, "Protoss Zealot", 1, P10, "sandbox"),       Give(P12, "Protoss Zealot", 1, P11, "sandbox"),
-			//Give(P12, "Protoss Dragoon", 1, P9, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P10, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P11, "sandbox"),
-			//Give(P12, "Protoss High Templar", 1, P9, "sandbox"), Give(P12, "Protoss High Templar", 1, P10, "sandbox"), Give(P12, "Protoss High Templar", 1, P11, "sandbox"),
-			//Give(P12, "Zerg Hydralisk", 1, P9, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P10, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P11, "sandbox"),
-			self::$healthDCs[0]->leaderboard(),
-		'');
-		
-		
-		$hero1 = self::$Heroes[0];
-		$hero2 = self::$Heroes[1];
-		$hero3 = self::$Heroes[2];
+		/* @var BSUnit $hero1 */ $hero1 = self::$Heroes[0];
+		/* @var BSUnit $hero2 */ $hero2 = self::$Heroes[1];
+		/* @var BSUnit $hero3 */ $hero3 = self::$Heroes[2];
 		
 		$P1->justonce(
 			SetAlly(P2),
