@@ -82,7 +82,7 @@ class Grid{
 	
 	
 	//put main closest to coordinate using the resolution (no pixel shifts)
-	static function putMainRes($xcoord, $ycoord, TempSwitch $success) {
+	static function putMainRes($xcoord, $ycoord, TempSwitch $success = null) {
 	
 		//ERROR
 		if( func_num_args() != 3 ){
@@ -99,24 +99,25 @@ class Grid{
 		$text = '';
 		
 		//check if the coordinate is on the playing field or not
-		$condition = '';
-		if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
-			$text = $success->clear();
-			if( $xcoord instanceof Deathcounter ) {
-				$condition .= $xcoord->atLeast(Grid::$xoffset*32).$xcoord->atMost((Grid::$xoffset+Grid::$xdimension)*32);
+		if($success !== null){
+			$condition = '';
+			if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
+				$text = $success->clear();
+				if( $xcoord instanceof Deathcounter ) {
+					$condition .= $xcoord->atLeast(Grid::$xoffset*32).$xcoord->atMost((Grid::$xoffset+Grid::$xdimension)*32);
+				}
+				if( $ycoord instanceof Deathcounter ) {
+					$ydiff = (Map::getHeight()-Grid::$ydimension)/2;
+					$condition .= $ycoord->atLeast($ydiff*32).$ycoord->atMost((Map::getHeight()-$ydiff)*32);
+				}
+				$text .= _if( $condition )->then(
+					$success->set(),
+				'');
 			}
-			if( $ycoord instanceof Deathcounter ) {
-				$ydiff = (Map::getHeight()-Grid::$ydimension)/2;
-				$condition .= $ycoord->atLeast($ydiff*32).$ycoord->atMost((Map::getHeight()-$ydiff)*32);
+			else{
+				$text .= $success->set();
 			}
-			$text .= _if( $condition )->then(
-				$success->set(),
-			'');
 		}
-		else{
-			$text .= $success->set();
-		}
-		
 		
 		
 		//location to make putMainRes(const, const) more efficient
@@ -185,7 +186,6 @@ class Grid{
 			//slide 8s
 			$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
 			$pow = 2;
-			$currentMax = $currentMax % (Grid::$resolution*8);
 			for($i=$pow; $i>=0; $i--){
 				$actions = '';
 				$k = pow(2,$i);
@@ -320,7 +320,7 @@ class Grid{
 	
 	
 	// Function to snap Main to the input pixel
-	public function putMain($xcoord, $ycoord, TempSwitch $success) {
+	public function putMain($xcoord, $ycoord, TempSwitch $success = null) {
 		
 		//ERROR
 		if( func_num_args() != 3 ){
@@ -339,22 +339,24 @@ class Grid{
 		$vertSlide = '';
 		
 		//check if the coordinate is on the playing field or not
-		$condition = '';
-		if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
-			$text = $success->clear();
-			if( $xcoord instanceof Deathcounter ) {
-				$condition .= $xcoord->atLeast(Grid::$xoffset*32).$xcoord->atMost((Grid::$xoffset+Grid::$xdimension)*32);
+		if($success !== null){
+			$condition = '';
+			if( $xcoord instanceof Deathcounter || $ycoord instanceof Deathcounter ) {
+				$text = $success->clear();
+				if( $xcoord instanceof Deathcounter ) {
+					$condition .= $xcoord->atLeast(Grid::$xoffset*32).$xcoord->atMost((Grid::$xoffset+Grid::$xdimension)*32);
+				}
+				if( $ycoord instanceof Deathcounter ) {
+					$ydiff = (Map::getHeight()-Grid::$ydimension)/2;
+					$condition .= $ycoord->atLeast($ydiff*32).$ycoord->atMost((Map::getHeight()-$ydiff)*32);
+				}
+				$text .= _if( $condition )->then(
+					$success->set(),
+				'');
 			}
-			if( $ycoord instanceof Deathcounter ) {
-				$ydiff = (Map::getHeight()-Grid::$ydimension)/2;
-				$condition .= $ycoord->atLeast($ydiff*32).$ycoord->atMost((Map::getHeight()-$ydiff)*32);
+			else{
+				$text .= $success->set();
 			}
-			$text .= _if( $condition )->then(
-				$success->set(),
-			'');
-		}
-		else{
-			$text .= $success->set();
 		}
 		
 		
