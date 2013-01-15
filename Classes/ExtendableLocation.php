@@ -15,7 +15,8 @@ class ExtendableLocation extends LirinLocation{
 
 		// create the required extended units
 		for($i=1;$i<=$maxslide*2;$i++){
-			UnitManager::MintUnit(1049, P2, (Map::getWidth()/6+$i)*32, (Map::getHeight()-8)*32);
+			//UnitManager::MintUnit(1049, P2, (Map::getWidth()/6+$i)*32, (Map::getHeight()-8)*32);
+			UnitManager::MintUnit(1049, P2, (36+$i)*32, (106)*32);
 		}
 		
 		parent::__construct($name);

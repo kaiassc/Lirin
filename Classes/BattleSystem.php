@@ -40,16 +40,16 @@ class BattleSystem {
 				self::$Heroes[]  =   new Hero(P4, 3),
 				self::$Heroes[]  =   new Hero(P5, 4),
 				self::$Heroes[]  =   new Hero(P6, 5),
-				self::$Roamers[] =  new Enemy(P7, 6),
+				self::$Roamers[] = new Roamer(P7, 6),
 				self::$Enemies[] =  new Enemy(P8, 7),
 			),
 			
 			array(
 				self::$Enemies[] =  new Enemy(P2, 8), 
 				self::$Enemies[] =  new Enemy(P3, 9),
-				self::$Enemies[] =  new Enemy(P4, 10), // formerly merc
-				self::$Enemies[] =  new Enemy(P5, 11), // formerly merc
-				self::$Enemies[] =  new Enemy(P6, 12), // formerly merc
+				# self::$Enemies[] =  new Enemy(P4, 10), // formerly merc
+				# self::$Enemies[] =  new Enemy(P5, 11), // formerly merc
+				# self::$Enemies[] =  new Enemy(P6, 12), // formerly merc
 				self::$Enemies[] =  new Enemy(P7, 13),
 				self::$Enemies[] =  new Enemy(P8, 14),
 			),
@@ -57,33 +57,33 @@ class BattleSystem {
 			array(
 				self::$Enemies[] =  new Enemy(P2, 15),
 				self::$Enemies[] =  new Enemy(P3, 16),
-				self::$Bosses[]  =   new Boss(P4, 17),
-				self::$Bosses[]  =   new Boss(P5, 18),
-				self::$Bosses[]  =   new Boss(P6, 19),
+				# self::$Bosses[]  =   new Boss(P4, 17),
+				# self::$Bosses[]  =   new Boss(P5, 18),
+				# self::$Bosses[]  =   new Boss(P6, 19),
 				self::$Enemies[] =  new Enemy(P7, 20),
 				self::$Enemies[] =  new Enemy(P8, 21),
 			),
-			/*
+			/**/
 			array(
 				self::$Enemies[] =  new Enemy(P2, 22), 
 				self::$Enemies[] =  new Enemy(P3, 23),
-				self::$Enemies[] =  new Enemy(P4, 24),
-				self::$Enemies[] =  new Enemy(P5, 25),
-				self::$Enemies[] =  new Enemy(P6, 26),
+				# self::$Enemies[] =  new Enemy(P4, 24),
+				# self::$Enemies[] =  new Enemy(P5, 25),
+				# self::$Enemies[] =  new Enemy(P6, 26),
 				self::$Enemies[] =  new Enemy(P7, 27),
 				self::$Enemies[] =  new Enemy(P8, 28),
 			),
 			
 			array(
 				self::$Enemies[] =  new Enemy(P2, 29), 
-				self::$Enemies[] =  new Enemy(P3, 30),
-				self::$Enemies[] =  new Enemy(P4, 31),
-				self::$Enemies[] =  new Enemy(P5, 32),
-				self::$Enemies[] =  new Enemy(P6, 33),
-				self::$Enemies[] =  new Enemy(P7, 34),
-				self::$Enemies[] =  new Enemy(P8, 35),
+				self::$Bosses[] =    new Boss(P3, 30),
+				# self::$Enemies[] =  new Enemy(P4, 31),
+				# self::$Enemies[] =  new Enemy(P5, 32),
+				# self::$Enemies[] =  new Enemy(P6, 33),
+				self::$Bosses[] =    new Boss(P7, 34),
+				self::$Bosses[] =    new Boss(P8, 35),
 			),
-			*/
+			/**/
 		);
 		
 		
@@ -127,10 +127,10 @@ class BattleSystem {
 		$P8 = new Player(P8);
 		
 		$P1->justonce( //SetAlly(P4), SetAlly(P5), SetAlly(P6),
-			Give(P12, "Protoss Zealot", 1, P9, "sandbox"),       Give(P12, "Protoss Zealot", 1, P10, "sandbox"),       Give(P12, "Protoss Zealot", 1, P11, "sandbox"),
-			Give(P12, "Protoss Dragoon", 1, P9, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P10, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P11, "sandbox"),
-			Give(P12, "Protoss High Templar", 1, P9, "sandbox"), Give(P12, "Protoss High Templar", 1, P10, "sandbox"), Give(P12, "Protoss High Templar", 1, P11, "sandbox"),
-			Give(P12, "Zerg Hydralisk", 1, P9, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P10, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P11, "sandbox"),
+			//Give(P12, "Protoss Zealot", 1, P9, "sandbox"),       Give(P12, "Protoss Zealot", 1, P10, "sandbox"),       Give(P12, "Protoss Zealot", 1, P11, "sandbox"),
+			//Give(P12, "Protoss Dragoon", 1, P9, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P10, "sandbox"),      Give(P12, "Protoss Dragoon", 1, P11, "sandbox"),
+			//Give(P12, "Protoss High Templar", 1, P9, "sandbox"), Give(P12, "Protoss High Templar", 1, P10, "sandbox"), Give(P12, "Protoss High Templar", 1, P11, "sandbox"),
+			//Give(P12, "Zerg Hydralisk", 1, P9, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P10, "sandbox"),       Give(P12, "Zerg Hydralisk", 1, P11, "sandbox"),
 			self::$healthDCs[0]->leaderboard(),
 		'');
 		
@@ -140,31 +140,43 @@ class BattleSystem {
 		$hero3 = self::$Heroes[2];
 		
 		$P1->justonce(
-			SetAlly(AllPlayers),
-			self::$healthDCs[0]->Allies->setTo(100),    self::$healthDCs[1]->Allies->setTo(100),    self::$healthDCs[2]->Allies->setTo(100),
-			self::$maxhealthDCs[0]->Allies->setTo(100), self::$maxhealthDCs[1]->Allies->setTo(100), self::$maxhealthDCs[2]->Allies->setTo(100),
-			self::$damageDCs[0]->Allies->setTo(33),     self::$damageDCs[1]->Allies->setTo(33),     self::$damageDCs[2]->Allies->setTo(33),
-			self::$armorDCs[0]->Allies->setTo(91),      self::$armorDCs[1]->Allies->setTo(66),      self::$armorDCs[2]->Allies->setTo(33),
+			SetAlly(P2),
+			SetAlly(P3),
+			SetAlly(P4),
+			SetAlly(P5),
+			SetAlly(P6),
+			SetAlly(P7),
+			SetAlly(P8),
+			self::$healthDCs[0]->AllPlayers->setTo(100),    self::$healthDCs[1]->AllPlayers->setTo(100),    self::$healthDCs[2]->AllPlayers->setTo(100),
+			self::$maxhealthDCs[0]->AllPlayers->setTo(100), self::$maxhealthDCs[1]->AllPlayers->setTo(100), self::$maxhealthDCs[2]->AllPlayers->setTo(100),
+			self::$damageDCs[0]->AllPlayers->setTo(33),     self::$damageDCs[1]->AllPlayers->setTo(33),     self::$damageDCs[2]->AllPlayers->setTo(33),
+			self::$armorDCs[0]->AllPlayers->setTo(91),      self::$armorDCs[1]->AllPlayers->setTo(66),      self::$armorDCs[2]->AllPlayers->setTo(33),
+			
+			self::$healthDCs[3]->AllPlayers->setTo(100),    self::$healthDCs[4]->AllPlayers->setTo(100),    
+			self::$maxhealthDCs[3]->AllPlayers->setTo(100), self::$maxhealthDCs[4]->AllPlayers->setTo(100), 
+			self::$damageDCs[3]->AllPlayers->setTo(33),     self::$damageDCs[4]->AllPlayers->setTo(33),     
+			self::$armorDCs[3]->AllPlayers->setTo(91),      self::$armorDCs[4]->AllPlayers->setTo(66),      
 			
 			$hero1->damage->setTo(100),         $hero2->damage->setTo(100),         $hero3->damage->setTo(100),
 		'');
 		
-		$P4->justonce(
-			 Give(P9, "Protoss Zealot", 1, P4, "sandbox"), Give(P9, Men, All, P12, "sandbox"),
-		'');
-		$P5->justonce(
-			Give(P10, "Protoss Zealot", 1, P5, "sandbox"), Give(P10, Men, All, P12, "sandbox"),
-		'');
-		$P6->justonce(
-			Give(P11, "Protoss Zealot", 1, P6, "sandbox"), Give(P11, Men, All, P12, "sandbox"),
-		'');
-		$P8->justonce(
-			RemoveUnitAtLocation(P9, Men, All, "sandbox"), RemoveUnitAtLocation(P10, Men, All, "sandbox"), RemoveUnitAtLocation(P11, Men, All, "sandbox"),
-			Give(P12, "Zerg Hydralisk", 3, P8, "sandbox"), Give(P12, Men, 6, P7, "sandbox"),
-		'');
+		
+		//$P4->justonce(
+		//	 Give(P9, "Protoss Zealot", 1, P4, "sandbox"), Give(P9, Men, All, P12, "sandbox"),
+		//'');
+		//$P5->justonce(
+		//	Give(P10, "Protoss Zealot", 1, P5, "sandbox"), Give(P10, Men, All, P12, "sandbox"),
+		//'');
+		//$P6->justonce(
+		//	Give(P11, "Protoss Zealot", 1, P6, "sandbox"), Give(P11, Men, All, P12, "sandbox"),
+		//'');
+		//$P8->justonce(
+		//	RemoveUnitAtLocation(P9, Men, All, "sandbox"), RemoveUnitAtLocation(P10, Men, All, "sandbox"), RemoveUnitAtLocation(P11, Men, All, "sandbox"),
+		//	Give(P12, "Zerg Hydralisk", 3, P8, "sandbox"), Give(P12, Men, 6, P7, "sandbox"),
+		//'');
 		
 		$P8->always(
-			SetAlly(P4),
+			SetAlly(AllPlayers),
 		'');
 	}
 	
@@ -191,6 +203,14 @@ class BattleSystem {
 			SetEnemy(AllPlayers),
 			$dcgroupid->setTo(0),
 			
+			_if( $attackTarget->atLeast(29) )->then( 
+				$attackTarget->subtract(28), 
+				$dcgroupid->add(4),
+			''),
+			_if( $attackTarget->atLeast(22) )->then( 
+				$attackTarget->subtract(21), 
+				$dcgroupid->add(3),
+			''),
 			_if( $attackTarget->atLeast(15) )->then( 
 				$attackTarget->subtract(14), 
 				$dcgroupid->add(2),

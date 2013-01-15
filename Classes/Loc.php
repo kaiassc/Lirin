@@ -23,7 +23,7 @@ class Loc {
 	/* @var LirinLocation[] */ static $YLoc = array();
 	
 	function populate(){
-		self::$main         = new ExtendableLocation("main");
+		self::$main         = Grid::$main;
 		self::$aoe1x1       = LocationManager::MintLocation("aoe1x1", 0, 0, 1*32, 1*32);
 		self::$aoe2x2       = LocationManager::MintLocation("aoe2x2", 0, 0, 2*32, 2*32);
 		self::$aoe3x3       = LocationManager::MintLocation("aoe3x3", 0, 0, 3*32, 3*32);

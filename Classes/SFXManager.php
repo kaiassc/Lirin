@@ -23,6 +23,8 @@ class SFXManager {
 	/* @var Deathcounter */   private static $LastOffsetX;
 	/* @var Deathcounter */   private static $LastOffsetY;
 	
+	/* @var Permswitch[] */   private static $RSwitches = array();
+	
 	
 	function __construct($wavfolder){
 		if (!is_dir($wavfolder)){ Error('Invalid $wavfolder. Directory does not exist'); }
@@ -41,10 +43,17 @@ class SFXManager {
 		self::$LastOffsetX = new Deathcounter(65);
 		self::$LastOffsetY = new Deathcounter(65);
 		
+		$randomizeswitches = '';
+		for($i=0; $i<=5; $i++){
+			self::$RSwitches[$i] = new PermSwitch();
+			$randomizeswitches .= self::$RSwitches[$i]->randomize();
+		}
+		
 		$P1 = new Player(P1);
 		
 		$P1->always(
 			GetScreen(self::$ScreenX, self::$ScreenY, Map::getWidth(), Map::getHeight()),
+			$randomizeswitches,
 		'');
 		
 	}
@@ -124,17 +133,29 @@ class SFXManager {
 			
 		'');
 		
-		$text .= $xoffset->randomize(1,8);
-		$text .= $yoffset->randomize(1,8);
-		
 		$text .= _if( $rumble->atLeast(1) )->then(
 			
-			_if( $rumble->atMost(25) )->then(
-				$xoffset->divideBy(2),
-				$yoffset->divideBy(2),
+			_if(self::$RSwitches[0], $rumble->atMost(25))->then(
+				$xoffset->add(4),
+			''),
+			_if(self::$RSwitches[1])->then(
 				$xoffset->add(2),
+			''),
+			_if(self::$RSwitches[2])->then(
+				$xoffset->add(1),
+			''),
+			_if(self::$RSwitches[3], $rumble->atMost(25))->then(
+				$yoffset->add(4),
+			''),
+			_if(self::$RSwitches[4])->then(
 				$yoffset->add(2),
 			''),
+			_if(self::$RSwitches[5])->then(
+				$yoffset->add(1),
+			''),
+			
+			$xoffset->add(1),
+			$yoffset->add(1),
 			
 			$rumble->subtract(15),
 			$centerview->set(),
@@ -149,8 +170,6 @@ class SFXManager {
 			self::$ScreenY->add($yoffset),
 			self::$ScreenX->subtract(32),
 			self::$ScreenY->subtract(32),
-			
-			$xoffset->add(1),
 			
 		'');
 		

@@ -16,56 +16,43 @@ class Lirin extends Map {
 		
 		$SFXManager = new SFXManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
 		$BattleSystem = new BattleSystem();
-		$Grid = new Grid(128, 96, 32, 8/*px*/);
-		
+		$Grid = new Grid(128, 96, 8/*px*/, 32);
+		$UnitManager = new UnitManager(0);
+		$LocationManager = new LocationManager();
+		$Loc = new Loc;
+		$Loc->populate();
 		
 		// Players
-		$P1 = new Player(P1); $P2 = new Player(P2); $P3 = new Player(P3); $P4 = new Player(P4);
-		$P5 = new Player(P5); $P6 = new Player(P6); $P7 = new Player(P7); $P8 = new Player(P8);
+		$P1 = new Player(P1);
+		$P4 = new Player(P4);
 		$All = new Player(P1,P2,P3,P4,P5,P6,P7,P8);
-		$visioners = new Player(P1, P2, P3);
-		$humans = new Player(P3, P4, P5);
-		$allyComp = new Player(P7);
-		$enemyComp = new Player(P8);
-		$comps = new Player(P4,P5,P6,P7,P8);
-		$PArray = array(1 => $P1, 2 => $P2, 3 => $P3, 4 => $P4, 5 => $P5, 6 => $P6, 7 => $P7, 8 => $P8);
-		 
+		$humans = new Player(P4, P5, P6);
 		
-		MintUnit("Start Location", $All, 250, 1400);
-		MintMapRevealers(Map::getWidth(),Map::getHeight(),P4);
 		
-		for($i=1;$i<=128;$i++){
-			//MintUnit(1049,P2, (64+$i)*32,(256-8)*32);
+		UnitManager::MintUnit("Start Location", $All, 250, 1400);
+		//UnitManager::MintMapRevealers(P4);
+		
+		/**/
+		$BattleSystem->Setup();
+		$BattleSystem->CreateEngine();
+		/**/
+		
+		
+		/**
+		$K1 = new KeyStroke("1"); $K2 = new KeyStroke("2"); $K3 = new KeyStroke("3"); $K4 = new KeyStroke("4"); $K5 = new KeyStroke("5");
+		$P4->_if( $K1->pressed() )->then( BattleSystem::$healthDCs[0]->leaderboard("Health Set 1") );
+		$P4->_if( $K2->pressed() )->then( BattleSystem::$healthDCs[1]->leaderboard("Health Set 2") );
+		$P4->_if( $K3->pressed() )->then( BattleSystem::$healthDCs[2]->leaderboard("Health Set 3") );
+		$P4->_if( $K4->pressed() )->then( BattleSystem::$healthDCs[3]->leaderboard("Health Set 4") );
+		$P4->_if( $K5->pressed() )->then( BattleSystem::$healthDCs[4]->leaderboard("Health Set 5") );
+		
+		foreach($BattleSystem::getEnemies() as $enemy){
+			$enemy->deathTrig();
 		}
-		
-		$poop = new IndexedUnit(1594);
-		
-		// Locations
-		$shiftleft = MintLocation("Shift Left",0,0,256*32*2,0);
-		$shiftup = MintLocation("Shift Up",0,0,0,256*32*2);
-		$sandbox = MintLocation("sandbox",0,0,256*32,256*32);
-		$AoE0x0 = MintLocation("AoE0x0",16,16,16,16);
-		$AoE1x1 = MintLocation("AoE1x1",0,0,1*32,1*32);
-		$AoE2x2 = MintLocation("AoE2x2",0,0,2*32,2*32);
-		$AoE3x3 = MintLocation("AoE3x3",0,0,3*32,3*32);
-		$AoE4x4 = MintLocation("AoE4x4",0,0,4*32,4*32);
-		$AoE5x5 = MintLocation("AoE5x5",0,0,5*32,5*32);
-		
-		$XLoc = array();
-		$YLoc = array();
-		//for($i=1;$i<=64;$i++){ $XLoc[$i] = MintLocation("XLoc$i",0,0,$i*128,0); }
-		//for($i=1;$i<=64;$i++){ $YLoc[$i] = MintLocation("YLoc$i",0,0,0,$i*128); }
-		//$gridorigin = MintLocation("Grid Origin", 256*32, 256*32, 256*32, 256*32);
-		
-		for($i=0;$i<7;$i++){ 
-			MintLocation("Extra", 16, 16, 16, 16);
+		foreach($BattleSystem::getBosses() as $enemy){
+			$enemy->deathTrig();
 		}
-		MintLocation("Main", 16,16,16,16);
-		$main = new ExtendableLocation("Main");
-		
-		
-		//$BattleSystem->Setup();
-		//$BattleSystem->CreateEngine();
+		/**/
 		
 		
 		
@@ -84,21 +71,60 @@ class Lirin extends Map {
 			$dcy->setTo(1375),
 		'');
 		
+		
+		$P4->_if( $A->pressed() )->then(
+		'');
+		
 		$P4->_if( $A->pressed() )->then(
 			$SFXManager->getRumbleAtCommand(50,2524,1375),
-			$door->playAt($dcx, $dcy),
 		'');
+		
+		
 		
 		$P4->_if( $D->pressed() )->then(
 			$doorc->playAt(2524, 1375),
+			$SFXManager->RumbleLevel->add(50),
 		'');
 		/**/
 		
+		$dcx = new Deathcounter(10000);
+		$dcy = new Deathcounter(10000);
 		
+		$humans->justonce(
+			SetAlly(AllPlayers),
+		'');
 		
+		/**/
+		$bam = new Sound("bam");
+		
+		$success = new TempSwitch();
+		$P1->always(
+			$dcx->randomize(6, 120),
+			$dcx->multiplyBy(32),
+			$dcx->add(32*32),
+			
+			$dcy->randomize(10, 89),
+			$dcy->multiplyBy(32),
+			$dcy->add(16*32),
+			
+			Grid::putMainRes($dcx, $dcy, $success),
+			CreateUnitWithProperties(P8, "Terran Command Center", 1, Loc::$main, LiftedOff),
+			KillUnit(P8, "Terran Command Center"),
+			$SFXManager->getRumbleAtCommand(70,$dcx,$dcy),
+			$bam->playAt($dcx, $dcy),
+			
+			
+			$success->release(),
+			
+			
+		'');
+		/**/
 		$humans->_if( IsCurrentPlayer() )->then(
 			$SFXManager->CreateEngine(),
 		'');
+		
+		$LocationManager->CreateEngine();
+		$UnitManager->CreateEngine();
 		
 	}
 	
