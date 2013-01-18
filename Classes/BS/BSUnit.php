@@ -17,15 +17,20 @@ class BSUnit extends IndexedUnit {
 	/* @var Deathcounter */ public $x;
 	/* @var Deathcounter */ public $y;
 	
+	/* @var LirinLocation */ public $Loc;
+	
+	/* @var Deathcounter */ private $replacedc;
+	
 
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
-		$this->BSid = $BSid;
-		
 		parent::__construct($this->Index, $unit, $player, $location);
 		
+		$this->BSid = $BSid;
 		$this->dcplayer = GetPlayerShorthand($dcplayer);
-		
+		$this->replacedc = new Deathcounter(100);
+		$this->Loc = LocationManager::MintLocation("bsunitloc$BSid", 0, 0, 0, 0);
+			
 	}
 	
 	protected function getTargets(){
@@ -108,12 +113,16 @@ class BSUnit extends IndexedUnit {
 		return CreateCondition($reserve, $switch, $text);
 	}
 	
+	public function dies(){
+		
+		return '';
+	}
 	
 	/////
 	//ACTIONS
 	//
 	
-	public function findTarget(TempSwitch $success){
+	private function findTarget(TempSwitch $success){
 		$text = $success->clear();
 		
 		// for each BSunit
@@ -212,8 +221,23 @@ class BSUnit extends IndexedUnit {
 	
 	public function kill(){
 		
+		return '';
 	}
 	
+	public function remove(){
+		
+		return '';
+	}
+	
+	public function spawn(){
+		
+		return '';
+	}
+	
+	public function deathAnimation(){
+		
+		return '';
+	}
 	
 		
 }

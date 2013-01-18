@@ -7,7 +7,7 @@ class Enemy extends BSUnit {
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player = P8, $location=NULL){
 		
-		$y = 20*32; $x = ($BSid*2+33)*32;
+		$y = 64*32; $x = ($BSid*2+33)*32;
 		$this->Index = UnitManager::MintUnitWithAnyIndex("Zerg Hydralisk", P8, $x, $y);
 		
 		$this->xspawn = $x;

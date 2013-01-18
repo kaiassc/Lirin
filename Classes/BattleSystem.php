@@ -30,8 +30,6 @@ class BattleSystem {
 	
 	function Setup(){
 		
-		$All = new Player(P1, P2, P3, P4, P5, P6, P7, P8);
-		
 		self::$dcgroups = array(
 			
 			array(
@@ -88,18 +86,24 @@ class BattleSystem {
 		
 		
 		// Assign each BSUnit their deathcounters for the proper players
+		$owners = new Player(P2, P3, P4, P5, P6, P7, P8);
+		$index = 0;
 		foreach(self::$dcgroups as $group){
+			if($index > 0){
+				$owners = new Player(P2, P3, P7, P8);
+			}
+			$index++;
 			/* @var BSUnit[] $group */
-			self::$typeDCs[] =         $type =         new Deathcounter($All, 15);
-			self::$attackTimeDCs[] =   $attackTime =   new Deathcounter($All, 15);
-			self::$attackTargetDCs[] = $attackTarget = new Deathcounter($All, 21);
-			self::$healthDCs[] =       $health =       new Deathcounter($All, 127);
-			self::$maxhealthDCs[] =    $maxhealth =    new Deathcounter($All, 127);
-			self::$manaDCs[] =         $mana =         new Deathcounter($All, 127);
-			self::$damageDCs[] =       $damage =       new Deathcounter($All, 127);
-			self::$armorDCs[] =        $armor =        new Deathcounter($All, 127);
-			self::$xDCs[] =            $x =            new Deathcounter($All, Map::getWidth()*32);
-			self::$yDCs[] =            $y =            new Deathcounter($All, Map::getHeight()*32);
+			self::$typeDCs[] =         $type =         new Deathcounter($owners, 15);
+			self::$attackTimeDCs[] =   $attackTime =   new Deathcounter($owners, 15);
+			self::$attackTargetDCs[] = $attackTarget = new Deathcounter($owners, 21);
+			self::$healthDCs[] =       $health =       new Deathcounter($owners, 127);
+			self::$maxhealthDCs[] =    $maxhealth =    new Deathcounter($owners, 127);
+			self::$manaDCs[] =         $mana =         new Deathcounter($owners, 127);
+			self::$damageDCs[] =       $damage =       new Deathcounter($owners, 127);
+			self::$armorDCs[] =        $armor =        new Deathcounter($owners, 127);
+			self::$xDCs[] =            $x =            new Deathcounter($owners, Map::getWidth()*32);
+			self::$yDCs[] =            $y =            new Deathcounter($owners, Map::getHeight()*32);
 			
 			foreach($group as $bsunit){
 				$bsunit->type =         $type->{$bsunit->dcplayer};
@@ -125,40 +129,21 @@ class BattleSystem {
 		/* @var BSUnit $hero3 */ $hero3 = self::$Heroes[2];
 		
 		$P1->justonce(
-			SetAlly(P2),
-			SetAlly(P3),
-			SetAlly(P4),
-			SetAlly(P5),
-			SetAlly(P6),
-			SetAlly(P7),
-			SetAlly(P8),
-			self::$healthDCs[0]->AllPlayers->setTo(100),    self::$healthDCs[1]->AllPlayers->setTo(100),    self::$healthDCs[2]->AllPlayers->setTo(100),
-			self::$maxhealthDCs[0]->AllPlayers->setTo(100), self::$maxhealthDCs[1]->AllPlayers->setTo(100), self::$maxhealthDCs[2]->AllPlayers->setTo(100),
-			self::$damageDCs[0]->AllPlayers->setTo(33),     self::$damageDCs[1]->AllPlayers->setTo(33),     self::$damageDCs[2]->AllPlayers->setTo(33),
-			self::$armorDCs[0]->AllPlayers->setTo(91),      self::$armorDCs[1]->AllPlayers->setTo(66),      self::$armorDCs[2]->AllPlayers->setTo(33),
+			SetEnemy(AllPlayers),
+			SetAlly(P2), SetAlly(P3), SetAlly(P7), SetAlly(P8),
+			self::$healthDCs[0]->Allies->setTo(100),    self::$healthDCs[1]->Allies->setTo(100),    self::$healthDCs[2]->Allies->setTo(100),
+			self::$maxhealthDCs[0]->Allies->setTo(100), self::$maxhealthDCs[1]->Allies->setTo(100), self::$maxhealthDCs[2]->Allies->setTo(100),
+			self::$damageDCs[0]->Allies->setTo(33),     self::$damageDCs[1]->Allies->setTo(33),     self::$damageDCs[2]->Allies->setTo(33),
+			self::$armorDCs[0]->Allies->setTo(91),      self::$armorDCs[1]->Allies->setTo(66),      self::$armorDCs[2]->Allies->setTo(33),
 			
-			self::$healthDCs[3]->AllPlayers->setTo(100),    self::$healthDCs[4]->AllPlayers->setTo(100),    
-			self::$maxhealthDCs[3]->AllPlayers->setTo(100), self::$maxhealthDCs[4]->AllPlayers->setTo(100), 
-			self::$damageDCs[3]->AllPlayers->setTo(33),     self::$damageDCs[4]->AllPlayers->setTo(33),     
-			self::$armorDCs[3]->AllPlayers->setTo(91),      self::$armorDCs[4]->AllPlayers->setTo(66),      
+			self::$healthDCs[3]->Allies->setTo(100),    self::$healthDCs[4]->Allies->setTo(100),    
+			self::$maxhealthDCs[3]->Allies->setTo(100), self::$maxhealthDCs[4]->Allies->setTo(100), 
+			self::$damageDCs[3]->Allies->setTo(33),     self::$damageDCs[4]->Allies->setTo(33),     
+			self::$armorDCs[3]->Allies->setTo(91),      self::$armorDCs[4]->Allies->setTo(66),      
 			
 			$hero1->damage->setTo(100),         $hero2->damage->setTo(100),         $hero3->damage->setTo(100),
+			SetAlly(AllPlayers),
 		'');
-		
-		
-		//$P4->justonce(
-		//	 Give(P9, "Protoss Zealot", 1, P4, "sandbox"), Give(P9, Men, All, P12, "sandbox"),
-		//'');
-		//$P5->justonce(
-		//	Give(P10, "Protoss Zealot", 1, P5, "sandbox"), Give(P10, Men, All, P12, "sandbox"),
-		//'');
-		//$P6->justonce(
-		//	Give(P11, "Protoss Zealot", 1, P6, "sandbox"), Give(P11, Men, All, P12, "sandbox"),
-		//'');
-		//$P8->justonce(
-		//	RemoveUnitAtLocation(P9, Men, All, "sandbox"), RemoveUnitAtLocation(P10, Men, All, "sandbox"), RemoveUnitAtLocation(P11, Men, All, "sandbox"),
-		//	Give(P12, "Zerg Hydralisk", 3, P8, "sandbox"), Give(P12, Men, 6, P7, "sandbox"),
-		//'');
 		
 		$P8->always(
 			SetAlly(AllPlayers),

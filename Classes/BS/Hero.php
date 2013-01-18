@@ -2,8 +2,6 @@
 
 class Hero extends BSUnit {
 	
-	
-	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
 		
 		$oplyr = P10;
@@ -14,7 +12,7 @@ class Hero extends BSUnit {
 			$oplyr = P12;
 		}
 		
-		$y = 20*32; $x = ($BSid*2+33)*32;
+		$y = 64*32; $x = ($BSid*2+33)*32;
 		$this->Index = UnitManager::MintUnitWithAnyIndex("Protoss Zealot", $oplyr, $x, $y);
 		
 		$P = new Player($dcplayer);
