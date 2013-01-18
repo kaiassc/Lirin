@@ -13,6 +13,14 @@ class Grid{
 	static public $slideLeft8;
 	static public $slideLeft64;
 	
+	static public $detectX1;
+	static public $detectX8;
+	static public $detectX64;
+	
+	static public $detectY1;
+	static public $detectY8;
+	static public $detectY32;
+	
 	static public $sandbox;
 	static public $origin;
 	static public $shiftLeft;
@@ -20,6 +28,9 @@ class Grid{
 	static public $topLeft;
 	
 	static public $YLoc = array();
+	
+	static public $pixX = array();
+	static public $pixY = array();
 	
 	static public $main;
 	
@@ -66,6 +77,28 @@ class Grid{
 		LocationManager::MintLocation("SlideLeft64", 0, 0, $resolution*2*64-62, 0);
 		self::$slideLeft64 = new LirinLocation("SlideLeft64");
 		
+		LocationManager::MintLocation("detectX1", 0, 0, 0, Map::getHeight()*32);
+		self::$detectX1 = new LirinLocation("detectX1");
+		LocationManager::MintLocation("detectX8", 0, 0, $resolution*2*8, Map::getHeight()*32);
+		self::$detectX8 = new LirinLocation("detectX8");
+		LocationManager::MintLocation("detectX64", 0, 0, $resolution*2*64, Map::getHeight()*32);
+		self::$detectX64 = new LirinLocation("detectX64");
+		
+		self::$detectY1 = new LirinLocation("main");
+		LocationManager::MintLocation("detectY8", 0, 0, 0, $resolution*2*8);
+		self::$detectY8 = new LirinLocation("detectY8");
+		LocationManager::MintLocation("detectY32", 0, 0, 0, $resolution*2*32);
+		self::$detectY32 = new LirinLocation("detectY32");
+		
+		for($i=1;$i<$resolution;$i++){
+			LocationManager::MintLocation("pixX$i", $i*2, 0, 0, Map::getHeight()*32);
+			self::$pixX[] = new LirinLocation("pixX$i");
+		}
+		for($i=1;$i<$resolution;$i++){
+			LocationManager::MintLocation("pixY$i", 0, $i*2, Map::getWidth()*32, 0);
+			self::$pixY[] = new LirinLocation("pixY$i");
+		}
+		
 		LocationManager::MintLocationWithIndex("main", 8, 8, 8, 8, 147);
 		self::$main = new ExtendableLocation("main", 4);
 		
@@ -81,11 +114,232 @@ class Grid{
 	//
 	
 	
+	
+	//scan for the unit
+	static function scan(BSUnit $unit) {
+		
+		$text = '';
+		
+		//clear values for scan
+		$text .= $unit->x->setTo((Grid::$xoffset+Grid::$xdimension)*32);
+		$text .= $unit->y->setTo(0);
+		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
+		
+		//X SCAN
+		
+		//scan X 64
+		$text .= Grid::$detectX64->centerOn(Grid::$origin);
+		$text .= Grid::$slideLeft64->centerOn(Grid::$origin);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90);
+		
+		for($i=1; $i<Grid::$xdimension*32/(Grid::$resolution*64)-1; $i++){
+			$text .= _if( $unit->health(Exactly, 10000) )->then(
+				Grid::$detectX64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+				Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90),
+				$unit->x->subtract(Grid::$resolution*64),
+			'');
+		}
+		$text .= _if( $unit->health(Exactly, 10000) )->then(
+			Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+			$unit->x->subtract(Grid::$resolution*64),
+		'');
+		
+		//scan X 8
+		$text .= Grid::$detectX8->centerOn(Grid::$slideLeft64);
+		$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80);
+		
+		for($i=0; $i<6; $i++){
+			$text .= _if( $unit->health(AtLeast, 9000) )->then(
+				Grid::$detectX8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+				Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80),
+				$unit->x->subtract(Grid::$resolution*8),
+			'');
+		}
+		$text .= _if( $unit->health(AtLeast, 9000) )->then(
+			Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+			$unit->x->subtract(Grid::$resolution*8),
+		'');
+		
+		//scan X 1
+		$text .= Grid::$detectX1->centerOn(Grid::$slideLeft8);
+		$text .= Grid::$slideLeft1->centerOn(Grid::$slideLeft8);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70);
+
+		for($i=0; $i<8; $i++){
+			$text .= _if( $unit->health(AtLeast, 8000) )->then(
+				Grid::$detectX1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+				Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70),
+				$unit->x->subtract(Grid::$resolution*1),
+			'');
+		}
+		$text .= _if( $unit->health(AtLeast, 8000) )->then(
+			Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+			$unit->x->subtract(Grid::$resolution*1),
+		'');
+		
+		//scan X pixel
+		$text .= Grid::$main->centerOn(Grid::$slideLeft1);
+		$text .= Grid::$pixX[0]->centerOn(Grid::$slideLeft1);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixX[0], 60);
+		
+		for($i=1; $i<7; $i++){
+			$text .= _if( $unit->health(AtMost, (61-$i)*100) )->then(
+				Grid::$pixX[$i]->centerOn(Grid::$detectX1),
+				ModifyHealth($unit->Player, Men, All, Grid::$pixX[$i], 60-$i),
+				$unit->x->add(1),
+			'');
+		}
+		$text .= _if( $unit->health(AtMost, 5400) )->then(
+			$unit->x->add(1),
+		'');
+		
+		
+		
+		
+		//Y SCAN
+		$tempY = new TempDC(Grid::$ydimension*32/2);
+		
+		//switch Y
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			Grid::$shiftUp->centerOn(Grid::$main),
+			Grid::$main->centerOn(Grid::$shiftUp),
+		'');
+		
+		//scan Y 32
+		$text .= Grid::$YLoc[0]->centerOn(Grid::$main);
+		$text .= Grid::$detectY32->centerOn(Grid::$YLoc[0]);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50);
+		
+		for($i=1; $i<floor(Grid::$ydimension/2/Grid::$resolution)-1; $i++){
+			$text .= _if( $unit->health(AtLeast, 5100) )->then(
+				Grid::$YLoc[32*$i]->centerOn(Grid::$main),
+				Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50),
+				$tempY->add(Grid::$resolution*32),
+			'');
+		}
+		
+		$text .= _if( $unit->health(AtLeast, 5100) )->then(
+			Grid::$YLoc[32*$i]->centerOn(Grid::$main),
+			Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
+			$tempY->add(Grid::$resolution*32),
+		'');
+		
+		
+		//scan Y 8
+		$text .= Grid::$detectY8->centerOn(Grid::$detectY32);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40);
+		
+		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2*8); $i++){
+			if($i%4==0){ }
+			elseif($i%4==3){
+				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
+					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
+					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
+					$tempY->add(Grid::$resolution*8),
+				'');
+			}
+			else{
+				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
+					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
+					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
+				    ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40),
+					$tempY->add(Grid::$resolution*8),
+				'');
+			}
+		}
+		
+		
+		//scan Y 1
+		$text .= Grid::$detectY1->centerOn(Grid::$detectY8);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30);
+		 
+		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2); $i++){
+			$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000) )->then(
+				Grid::$YLoc[$i]->centerOn(Grid::$main),
+				Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			    ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30),
+				$tempY->add(Grid::$resolution),
+			'');
+		}
+		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			Grid::$YLoc[$i]->centerOn(Grid::$main),
+			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			$tempY->add(Grid::$resolution-1),
+		'');
+		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+			Grid::$YLoc[$i]->centerOn(Grid::$main),
+			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			$tempY->add(Grid::$resolution),
+		'');
+		
+		
+		//scan Y pixel
+		$text .= Grid::$pixY[0]->centerOn(Grid::$detectY1);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixY[0], 20);
+		
+		for($i=1; $i<7; $i++){
+			$text .= _if( $unit->health(AtMost, (21-$i)*100) )->then(
+				Grid::$pixY[$i]->centerOn(Grid::$detectY1),
+				ModifyHealth($unit->Player, Men, All, Grid::$pixY[$i], 20-$i),
+				$tempY->subtract(1),
+			'');
+		}
+		$text .= _if( $unit->health(AtMost, 1400) )->then(
+			$tempY->subtract(1),
+		'');
+		
+		
+		//UNIT TYPE
+		global $unitdata;
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+		    _if( $unit->type->exactly(0) )->then(
+		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
+			    $tempY->add($unitdata["Protoss Zealot"]["up"]),
+		    ''),
+			//others
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+		    _if( $unit->type->exactly(0) )->then(
+		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
+			    $tempY->add($unitdata["Protoss Zealot"]["down"]),
+		    ''),
+			//others
+		'');
+		
+		
+		//correct for bottom of map
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			$unit->y->become($tempY),
+			$unit->y->add((Map::getHeight()-Grid::$ydimension)/2*32),
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+			$unit->y->setTo(Map::getHeight()*32-(Map::getHeight()-Grid::$ydimension)/2*32-1),
+			$unit->y->subtractDel($tempY),
+		'');
+		
+
+		
+		//restore and end
+		$text .= $tempY->kill();
+		$text .= $unit->Loc->centerOn($unit->Player, Men, Grid::$main);
+		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
+		
+		return $text;
+		
+	}
+	
+	
+	
 	//put main closest to coordinate using the resolution (no pixel shifts)
 	static function putMainRes($xcoord, $ycoord, TempSwitch $success = null) {
 	
 		//ERROR
-		if( func_num_args() != 3 ){
+		if( func_num_args() != 2 && func_num_args() != 3 ){
 			Error('COMPILER ERROR FOR PUTMAINRES(): INCORRECT NUMBER OF ARGUMENTS (NEEDS 3: DEATHCOUNTER OR CONSTANT (INTEGER), DEATHCOUNTER OR CONSTANT (INTEGER), SWITCH)');
 		}
 		if( !(is_numeric($xcoord) || $xcoord instanceof Deathcounter) ) {
@@ -329,8 +583,8 @@ class Grid{
 	public function putMain($xcoord, $ycoord, TempSwitch $success = null) {
 		
 		//ERROR
-		if( func_num_args() != 3 ){
-			Error('COMPILER ERROR FOR PUTMAINRES(): INCORRECT NUMBER OF ARGUMENTS (NEEDS 3: DEATHCOUNTER OR CONSTANT (INTEGER), DEATHCOUNTER OR CONSTANT (INTEGER), SWITCH)');
+		if( func_num_args() != 2 && func_num_args() != 3 ){
+			Error('COMPILER ERROR FOR PUTMAIN(): INCORRECT NUMBER OF ARGUMENTS (NEEDS 3: DEATHCOUNTER OR CONSTANT (INTEGER), DEATHCOUNTER OR CONSTANT (INTEGER), SWITCH)');
 		}
 		if( !(is_numeric($xcoord) || $xcoord instanceof Deathcounter) ) {
 			Error('COMPILER ERROR FOR PUTMAINRES(): ARGUMENT 1 NEEDS TO BE A DEATHCOUNTER OR A CONSTANT (INTEGER)');
