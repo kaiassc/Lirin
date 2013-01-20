@@ -145,21 +145,29 @@ class BattleSystem {
 			SetAlly(AllPlayers),
 		'');
 		
+		/**
 		$P8->always(
 			SetAlly(AllPlayers),
 		'');
+		/**/
 	}
 	
 	function CreateEngine(){
 		
 		$P1 = new Player(P1);
 		
+		/**
 		foreach(self::getBSUnits() as $bsunit){
-			
+			$P1->always(
+				$bsunit->scanUnit(),
+			'');
+		}
+		/**/
+		
+		foreach(self::getBSUnits() as $bsunit){
 			$P1->_if( $bsunit->swings() )->then(
 				$bsunit->dealDamageToTarget(),
 			'');
-			
 		}
 		
 	}

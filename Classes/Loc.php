@@ -18,7 +18,6 @@ class Loc {
 	/* @var LirinLocation */ static $origin;
 	/* @var LirinLocation */ static $shiftLeft;
 	/* @var LirinLocation */ static $shiftUp;
-	/* @var LirinLocation */ static $topLeft;
 	
 	/* @var LirinLocation[] */ static $YLoc = array();
 	
@@ -38,7 +37,6 @@ class Loc {
 		self::$origin       = Grid::$origin; 
 		self::$shiftLeft    = Grid::$shiftLeft; 
 		self::$shiftUp      = Grid::$shiftUp; 
-		self::$topLeft      = Grid::$topLeft;
 		
 		self::$YLoc = Grid::$YLoc;
 	}

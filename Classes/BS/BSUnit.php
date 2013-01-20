@@ -19,6 +19,8 @@ class BSUnit extends IndexedUnit {
 	
 	/* @var LirinLocation */ public $Loc;
 	
+	/* @var PermSwitch */ private $scanSwitch;
+	
 	/* @var Deathcounter */ private $replacedc;
 	
 
@@ -30,7 +32,8 @@ class BSUnit extends IndexedUnit {
 		$this->dcplayer = GetPlayerShorthand($dcplayer);
 		$this->replacedc = new Deathcounter(100);
 		$this->Loc = LocationManager::MintLocation("bsunitloc$BSid", 0, 0, 0, 0);
-			
+		$this->scanSwitch = new PermSwitch();
+		
 	}
 	
 	protected function getTargets(){
@@ -121,6 +124,25 @@ class BSUnit extends IndexedUnit {
 	/////
 	//ACTIONS
 	//
+	
+	public function scanUnit(){
+		//unit is moving
+		$text = _if( $this->orderCoordinate(AtLeast, 1), $this->attackCooldown(AtMost, 0) )->then(
+		    $this->scanSwitch->set(),
+		'');
+		
+		//scan
+		$text .= _if( $this->scanSwitch->is_set() )->then(
+		    Grid::scan($this),
+		'');
+		
+		//keep switch set 1 loop after it "stops"
+		$text .= _if( $this->scanSwitch->is_set(), $this->orderCoordinate(Exactly, 0) )->then(
+		    $this->scanSwitch->clear(),
+		'');
+		
+		return $text;
+	}
 	
 	private function findTarget(TempSwitch $success){
 		$text = $success->clear();
@@ -219,9 +241,107 @@ class BSUnit extends IndexedUnit {
 		return $text;
 	}
 	
-	public function kill(){
+	function showHealth(){
+		$maxpower = getBinaryPower($this->maxhealth->Max);
+	
+		$text = '';
+		$tempdc = new TempDC($this->maxhealth->Max);
+		$nums = array();
+
+		for($i=0; $i<20; $i++){
+			$nums[$i] = new TempDC();
+			$text .= $nums[$i]->setTo(1);
+		}
+		for($i=$maxpower; $i>=0; $i--){
+			$k=pow(2,$i);
+			$numstext = '';
+			for($j=0; $j<20; $j++){
+				$numstext .= $nums[$j]->add($k*($j+1));
+			}
+			$text .= _if( $this->maxhealth->atLeast($k) )->then(
+				$this->maxhealth->subtract($k),
+				$numstext,
+				$tempdc->add($k),
+			'');
+		}
 		
-		return '';
+		$text .= $this->maxhealth->become($tempdc);
+		$tempdc->Max = $this->health->Max;
+		
+		for($j=$maxpower; $j>=0; $j--){
+			$k=pow(2,$j);
+			$numstext = '';
+			foreach($nums as $num){
+				/* @var tempDC $num */
+				$numstext .= $num->subtract($k*20);
+			}
+			$text .= _if( $this->health->atLeast($k) )->then(
+				$this->health->subtract($k),
+				$numstext,
+				$tempdc->add($k),
+			'');
+		}
+		
+		$text .= $this->health->becomeDel($tempdc);
+		
+		$clearnums = '';
+		foreach($nums as $num){
+			/* @var tempDC $num */
+			$clearnums .= $num->setTo(0);
+		}
+		//over max health
+		$P4 = new Player(P4);
+		
+		$text .= _if( $nums[19]->atMost(0) )->then(
+			$this->health->setTo($this->maxhealth),
+			ModifyHealth($this->Player, Men, 1, $this->Loc, 100),
+			$clearnums,
+			$P4->addGas(1),
+		'');
+		//bulk of healths
+		for($i=0; $i<19; $i++){
+			$text .= _if( $nums[$i]->atLeast(1) )->then(
+				ModifyHealth($this->Player, Men, 1, $this->Loc, $i*5+5),
+				$clearnums,
+			'');
+		}
+		//barely scratched
+		$text .= _if( $nums[19]->atLeast(2) )->then(
+			ModifyHealth($this->Player, Men, 1, $this->Loc, 99),
+			$clearnums,
+		'');
+		//perfectly healthy
+		$text .= _if( $nums[19]->exactly(1) )->then(
+			ModifyHealth($this->Player, Men, 1, $this->Loc, 100),
+			$clearnums,
+		'');
+		//kill unit
+		$text .= _if( $this->maxhealth->atLeast(1), $this->health->atMost(0) )->then(
+		    $this->kill(),
+		'');
+		
+		
+		foreach($nums as $num){
+			/* @var tempDC $num */
+			$num->kill();
+		}
+			
+		return $text;
+	}
+	
+	public function kill(){
+			
+		return  KillUnitAtLocation($this->Player, Men, 1, $this->Loc).
+				$this->type->setTo(0).
+				$this->attackTime->setTo(0).
+				$this->attackTarget->setTo(0).
+				$this->health->setTo(0).
+				$this->maxhealth->setTo(0).
+				$this->mana->setTo(0).
+				$this->damage->setTo(0).
+				$this->armor->setTo(0).
+				$this->scanSwitch->clear();
+		
 	}
 	
 	public function remove(){
