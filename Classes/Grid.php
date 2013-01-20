@@ -14,18 +14,13 @@ class Grid{
 	static public $slideLeft64;
 	
 	static public $detectX1;
-	static public $detectX8;
-	static public $detectX64;
 	
-	static public $detectY1;
-	static public $detectY8;
-	static public $detectY32;
+	static public $saveLoc = array();
 	
 	static public $sandbox;
 	static public $origin;
 	static public $shiftLeft;
 	static public $shiftUp;
-	static public $topLeft;
 	
 	static public $YLoc = array();
 	
@@ -62,14 +57,13 @@ class Grid{
 		self::$shiftLeft = new LirinLocation("ShiftLeft");
 		LocationManager::MintLocation("ShiftUp",0,0,0,Map::getHeight()*32*2);
 		self::$shiftUp = new LirinLocation("ShiftUp");
-		LocationManager::MintLocation("TopLeft",0,0,0,0);
-		self::$topLeft = new LirinLocation("TopLeft");
 		
 		for($i=0;$i<=$y_dimension*32/$resolution/2;$i++){
 			LocationManager::MintLocation("YLoc$i", 0,0 , 0, $vert*32*2+$i*$resolution*2);
 			self::$YLoc[] = new LirinLocation("YLoc$i");
 		}
 		
+		/**/
 		LocationManager::MintLocation("SlideLeft1", 62-$resolution*2*1, 0, 0, 0);
 		self::$slideLeft1 = new LirinLocation("SlideLeft1");
 		LocationManager::MintLocation("SlideLeft8", 0, 0, $resolution*2*8-62, 0);
@@ -77,27 +71,28 @@ class Grid{
 		LocationManager::MintLocation("SlideLeft64", 0, 0, $resolution*2*64-62, 0);
 		self::$slideLeft64 = new LirinLocation("SlideLeft64");
 		
-		LocationManager::MintLocation("detectX1", 0, 0, 0, Map::getHeight()*32);
-		self::$detectX1 = new LirinLocation("detectX1");
-		LocationManager::MintLocation("detectX8", 0, 0, $resolution*2*8, Map::getHeight()*32);
-		self::$detectX8 = new LirinLocation("detectX8");
-		LocationManager::MintLocation("detectX64", 0, 0, $resolution*2*64, Map::getHeight()*32);
-		self::$detectX64 = new LirinLocation("detectX64");
-		
-		self::$detectY1 = new LirinLocation("main");
-		LocationManager::MintLocation("detectY8", 0, 0, 0, $resolution*2*8);
-		self::$detectY8 = new LirinLocation("detectY8");
-		LocationManager::MintLocation("detectY32", 0, 0, 0, $resolution*2*32);
-		self::$detectY32 = new LirinLocation("detectY32");
+		$i=$y_dimension*32/$resolution/2;
+		self::$detectX1 = new LirinLocation("YLoc$i");
 		
 		for($i=1;$i<$resolution;$i++){
 			LocationManager::MintLocation("pixX$i", $i*2, 0, 0, Map::getHeight()*32);
 			self::$pixX[] = new LirinLocation("pixX$i");
 		}
 		for($i=1;$i<$resolution;$i++){
-			LocationManager::MintLocation("pixY$i", 0, $i*2, Map::getWidth()*32, 0);
+			LocationManager::MintLocation("pixY$i", 0, $i*2, 0, 0);
 			self::$pixY[] = new LirinLocation("pixY$i");
 		}
+		
+		self::$saveLoc[0] = self::$pixY[0];
+		self::$saveLoc[1] = self::$pixY[1];
+		self::$saveLoc[2] = self::$pixY[2];
+		self::$saveLoc[3] = self::$pixY[3];
+		self::$saveLoc[4] = self::$pixY[4];
+		self::$saveLoc[5] = self::$pixY[5];
+		self::$saveLoc[6] = self::$pixY[6];
+		self::$saveLoc[7] = self::$slideLeft1;
+		self::$saveLoc[8] = self::$slideLeft8;
+		self::$saveLoc[9] = self::$slideLeft64;
 		
 		LocationManager::MintLocationWithIndex("main", 8, 8, 8, 8, 147);
 		self::$main = new ExtendableLocation("main", 4);
@@ -118,70 +113,71 @@ class Grid{
 	//scan for the unit
 	static function scan(BSUnit $unit) {
 		
+		$ignore = new TempSwitch();
 		$text = '';
 		
 		//clear values for scan
-		$text .= $unit->x->setTo((Grid::$xoffset+Grid::$xdimension)*32);
-		$text .= $unit->y->setTo(0);
 		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
 		
 		//X SCAN
 		
-		//scan X 64
-		$text .= Grid::$detectX64->centerOn(Grid::$origin);
-		$text .= Grid::$slideLeft64->centerOn(Grid::$origin);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90);
+		$xbegin = (Grid::$xoffset+Grid::$xdimension)*32;
 		
-		for($i=1; $i<Grid::$xdimension*32/(Grid::$resolution*64)-1; $i++){
-			$text .= _if( $unit->health(Exactly, 10000) )->then(
-				Grid::$detectX64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
-				Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
-				ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90),
-				$unit->x->subtract(Grid::$resolution*64),
+		//find 2-tile
+		$text .= _if( $unit->currentXCoordinate(AtLeast, $xbegin-Grid::$resolution*2-Grid::$resolution*8) )->then(
+			Grid::$slideLeft1->centerOn(Grid::$origin),
+			Grid::$detectX1->centerOn(Grid::$slideLeft1),
+			ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 90),
+			$unit->x->setTo($xbegin),
+		    $ignore->set(),
+		'');
+		for($i=1; $i<Grid::$xdimension/2; $i++){
+			$j=$i;
+			$snap = '';
+			$lastlocation = Grid::$origin;
+			//snap slideLeft64
+			while( $j >= 8 ){
+				$snap .= Grid::$slideLeft64->centerOn(P12, Grid::$unit, $lastlocation);
+				$j -= 8;
+				$lastlocation = Grid::$slideLeft64;
+			}
+			//snap slideLeft8
+			while( $j >= 1 ){
+				$snap .= Grid::$slideLeft8->centerOn(P12, Grid::$unit, $lastlocation);
+				$j -= 1;
+				$lastlocation = Grid::$slideLeft8;
+			}
+			//snap slideLeft1
+			$snap .= Grid::$slideLeft1->centerOn(P12, Grid::$unit, $lastlocation);
+			
+			$text .= _if( $ignore->is_clear(), $unit->currentXCoordinate(AtLeast, $xbegin-Grid::$resolution*2-Grid::$resolution*8*($i+1)) )->then(
+				$snap,
+				Grid::$detectX1->centerOn(Grid::$slideLeft1),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 90),
+				$unit->x->setTo($xbegin-Grid::$resolution*8*$i),
+			    $ignore->set(),
 			'');
 		}
-		$text .= _if( $unit->health(Exactly, 10000) )->then(
-			Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
-			$unit->x->subtract(Grid::$resolution*64),
-		'');
 		
-		//scan X 8
-		$text .= Grid::$detectX8->centerOn(Grid::$slideLeft64);
-		$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80);
 		
-		for($i=0; $i<6; $i++){
-			$text .= _if( $unit->health(AtLeast, 9000) )->then(
-				Grid::$detectX8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
-				Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
-				ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80),
-				$unit->x->subtract(Grid::$resolution*8),
-			'');
-		}
-		$text .= _if( $unit->health(AtLeast, 9000) )->then(
-			Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
-			$unit->x->subtract(Grid::$resolution*8),
-		'');
-		
-		//scan X 1
-		$text .= Grid::$detectX1->centerOn(Grid::$slideLeft8);
-		$text .= Grid::$slideLeft1->centerOn(Grid::$slideLeft8);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70);
-
-		for($i=0; $i<8; $i++){
-			$text .= _if( $unit->health(AtLeast, 8000) )->then(
-				Grid::$detectX1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+		//resolution scan
+		for($i=0; $i<9; $i++){
+			$text .= _if( $unit->health(AtLeast, 10000) )->then(
 				Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
-				ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70),
-				$unit->x->subtract(Grid::$resolution*1),
+				Grid::$detectX1->centerOn(Grid::$slideLeft1),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 90),
+				$unit->x->subtract(Grid::$resolution),
 			'');
 		}
-		$text .= _if( $unit->health(AtLeast, 8000) )->then(
+		$text .= _if( $unit->health(AtLeast, 10000) )->then(
 			Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
-			$unit->x->subtract(Grid::$resolution*1),
+			Grid::$detectX1->centerOn(Grid::$slideLeft1),
+			$unit->x->subtract(Grid::$resolution),
 		'');
+		
 		
 		//scan X pixel
+		$text .= $ignore->clear();
 		$text .= Grid::$main->centerOn(Grid::$slideLeft1);
 		$text .= Grid::$pixX[0]->centerOn(Grid::$slideLeft1);
 		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixX[0], 60);
@@ -199,133 +195,181 @@ class Grid{
 		
 		
 		
-		
 		//Y SCAN
-		$tempY = new TempDC(Grid::$ydimension*32/2);
+		$ybegin = (Map::getHeight()-Grid::$ydimension)*32/2;
 		
-		//switch Y
-		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+		//find 2-tile
+		$text .= _if( $unit->currentYCoordinate(AtMost, $ybegin+Grid::$resolution*8) )->then(
 			Grid::$shiftUp->centerOn(Grid::$main),
-			Grid::$main->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[0]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[1]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[2]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[3]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[4]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[5]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[6]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[7]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[8]->centerOn(Grid::$shiftUp),
+			Grid::$main->centerOn(Grid::$YLoc[0]),
+			Grid::$saveLoc[0]->centerOn(Grid::$YLoc[1]),
+			Grid::$saveLoc[1]->centerOn(Grid::$YLoc[2]),
+			Grid::$saveLoc[2]->centerOn(Grid::$YLoc[3]),
+			Grid::$saveLoc[3]->centerOn(Grid::$YLoc[4]),
+			Grid::$saveLoc[4]->centerOn(Grid::$YLoc[5]),
+			Grid::$saveLoc[5]->centerOn(Grid::$YLoc[6]),
+			Grid::$saveLoc[6]->centerOn(Grid::$YLoc[7]),
+			Grid::$saveLoc[7]->centerOn(Grid::$YLoc[8]),
+			ModifyHealth($unit->Player, Men, All, Grid::$main, 40),
+			$unit->y->setTo($ybegin),
+		    $ignore->set(),
 		'');
-		
-		//scan Y 32
-		$text .= Grid::$YLoc[0]->centerOn(Grid::$main);
-		$text .= Grid::$detectY32->centerOn(Grid::$YLoc[0]);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50);
-		
-		for($i=1; $i<floor(Grid::$ydimension/2/Grid::$resolution)-1; $i++){
-			$text .= _if( $unit->health(AtLeast, 5100) )->then(
-				Grid::$YLoc[32*$i]->centerOn(Grid::$main),
-				Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
-				ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50),
-				$tempY->add(Grid::$resolution*32),
+		for($i=1; $i<Grid::$ydimension/2/2; $i++){
+			$text .= _if( $ignore->is_clear(), $unit->currentYCoordinate(AtMost, $ybegin+Grid::$resolution*8*($i+1)) )->then(
+				Grid::$shiftUp->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-2]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8-1]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+0]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+1]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+2]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+3]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+4]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+5]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+6]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+7]->centerOn(Grid::$shiftUp),
+				Grid::$YLoc[$i*8+8]->centerOn(Grid::$shiftUp),
+				Grid::$main->centerOn(Grid::$YLoc[$i*8-2]),
+				Grid::$saveLoc[0]->centerOn(Grid::$YLoc[$i*8-1]),
+				Grid::$saveLoc[1]->centerOn(Grid::$YLoc[$i*8+0]),
+				Grid::$saveLoc[2]->centerOn(Grid::$YLoc[$i*8+1]),
+				Grid::$saveLoc[3]->centerOn(Grid::$YLoc[$i*8+2]),
+				Grid::$saveLoc[4]->centerOn(Grid::$YLoc[$i*8+3]),
+				Grid::$saveLoc[5]->centerOn(Grid::$YLoc[$i*8+4]),
+				Grid::$saveLoc[6]->centerOn(Grid::$YLoc[$i*8+5]),
+				Grid::$saveLoc[7]->centerOn(Grid::$YLoc[$i*8+6]),
+				Grid::$saveLoc[8]->centerOn(Grid::$YLoc[$i*8+7]),
+				Grid::$saveLoc[9]->centerOn(Grid::$YLoc[$i*8+8]),
+				ModifyHealth($unit->Player, Men, All, Grid::$main, 40),
+				$unit->y->setTo($ybegin+Grid::$resolution*8*$i-Grid::$resolution*2),
+			    $ignore->set(),
+			'');
+		}
+		$text .= _if( $ignore->is_clear(), $unit->currentYCoordinate(AtMost, $ybegin+Grid::$resolution*8*($i+1)) )->then(
+			Grid::$shiftUp->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-2]->centerOn(Grid::$shiftUp),
+			Grid::$YLoc[$i*8-1]->centerOn(Grid::$shiftUp),
+			Grid::$saveLoc[1]->centerOn(Grid::$YLoc[$i*8-2]),
+			Grid::$saveLoc[0]->centerOn(Grid::$YLoc[$i*8-1]),
+			//
+			Grid::$YLoc[$i*8-0]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-1]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-2]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-3]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-4]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-5]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-6]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-7]->centerOn(Grid::$main),
+			Grid::$YLoc[$i*8-8]->centerOn(Grid::$main),
+			Grid::$main->centerOn(Grid::$saveLoc[1]),
+			Grid::$saveLoc[1]->centerOn(Grid::$YLoc[$i*8-0]),
+			Grid::$saveLoc[2]->centerOn(Grid::$YLoc[$i*8-1]),
+			Grid::$saveLoc[3]->centerOn(Grid::$YLoc[$i*8-2]),
+			Grid::$saveLoc[4]->centerOn(Grid::$YLoc[$i*8-3]),
+			Grid::$saveLoc[5]->centerOn(Grid::$YLoc[$i*8-4]),
+			Grid::$saveLoc[6]->centerOn(Grid::$YLoc[$i*8-5]),
+			Grid::$saveLoc[7]->centerOn(Grid::$YLoc[$i*8-6]),
+			Grid::$saveLoc[8]->centerOn(Grid::$YLoc[$i*8-7]),
+			Grid::$saveLoc[9]->centerOn(Grid::$YLoc[$i*8-8]),
+			ModifyHealth($unit->Player, Men, All, Grid::$main, 40),
+			$unit->y->setTo($ybegin+Grid::$resolution*8*$i-Grid::$resolution*2),
+		    $ignore->set(),
+		'');
+		$ybegin = Map::getHeight()*32-$ybegin;
+		for($i=Grid::$ydimension/2/2-1; $i>0; $i--){
+			$text .= _if( $ignore->is_clear(), $unit->currentYCoordinate(AtMost, $ybegin-Grid::$resolution*8*($i-1)) )->then(
+				Grid::$YLoc[$i*8+2]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8+1]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-0]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-1]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-2]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-3]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-4]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-5]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-6]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-7]->centerOn(Grid::$main),
+				Grid::$YLoc[$i*8-8]->centerOn(Grid::$main),
+				Grid::$main->centerOn(Grid::$YLoc[$i*8+2]),
+				Grid::$saveLoc[0]->centerOn(Grid::$YLoc[$i*8+1]),
+				Grid::$saveLoc[1]->centerOn(Grid::$YLoc[$i*8-0]),
+				Grid::$saveLoc[2]->centerOn(Grid::$YLoc[$i*8-1]),
+				Grid::$saveLoc[3]->centerOn(Grid::$YLoc[$i*8-2]),
+				Grid::$saveLoc[4]->centerOn(Grid::$YLoc[$i*8-3]),
+				Grid::$saveLoc[5]->centerOn(Grid::$YLoc[$i*8-4]),
+				Grid::$saveLoc[6]->centerOn(Grid::$YLoc[$i*8-5]),
+				Grid::$saveLoc[7]->centerOn(Grid::$YLoc[$i*8-6]),
+				Grid::$saveLoc[8]->centerOn(Grid::$YLoc[$i*8-7]),
+				Grid::$saveLoc[9]->centerOn(Grid::$YLoc[$i*8-8]),
+				ModifyHealth($unit->Player, Men, All, Grid::$main, 40),
+				$unit->y->setTo($ybegin-Grid::$resolution*8*$i-Grid::$resolution*2),
+			    $ignore->set(),
 			'');
 		}
 		
-		$text .= _if( $unit->health(AtLeast, 5100) )->then(
-			Grid::$YLoc[32*$i]->centerOn(Grid::$main),
-			Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
-			$tempY->add(Grid::$resolution*32),
-		'');
-		
-		
-		//scan Y 8
-		$text .= Grid::$detectY8->centerOn(Grid::$detectY32);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40);
-		
-		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2*8); $i++){
-			if($i%4==0){ }
-			elseif($i%4==3){
-				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
-					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
-					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
-					$tempY->add(Grid::$resolution*8),
-				'');
-			}
-			else{
-				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
-					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
-					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
-				    ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40),
-					$tempY->add(Grid::$resolution*8),
-				'');
-			}
-		}
-		
-		
-		//scan Y 1
-		$text .= Grid::$detectY1->centerOn(Grid::$detectY8);
-		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30);
-		 
-		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2); $i++){
-			$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000) )->then(
-				Grid::$YLoc[$i]->centerOn(Grid::$main),
-				Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
-			    ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30),
-				$tempY->add(Grid::$resolution),
+		//resolution scan
+		$tempDC = new TempDC();
+		for($i=0; $i<9; $i++){
+			$text .= _if( $unit->health(AtLeast, 5000) )->then(
+			    Grid::$main->centerOn(Grid::$saveLoc[$i]),
+				ModifyHealth($unit->Player, Men, All, Grid::$main, 40),
+				$unit->y->add(Grid::$resolution),
+				$tempDC->add(1),
 			'');
 		}
-		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
-			Grid::$YLoc[$i]->centerOn(Grid::$main),
-			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
-			$tempY->add(Grid::$resolution-1),
-		'');
-		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
-			Grid::$YLoc[$i]->centerOn(Grid::$main),
-			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
-			$tempY->add(Grid::$resolution),
+		$text .= _if( $unit->health(AtLeast, 5000) )->then(
+		    Grid::$main->centerOn(Grid::$saveLoc[$i]),
+			$unit->y->add(Grid::$resolution),
+			$tempDC->add(1),
 		'');
 		
+		//correct for bottom of map
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2-Grid::$resolution*8+1), $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2), $tempDC->atLeast(10) )->then(
+			$unit->y->subtract(1),
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2+1), $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2+Grid::$resolution*8), $tempDC->atLeast(2) )->then(
+			$unit->y->subtract(1),
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2+Grid::$resolution*8+1) )->then(
+			$unit->y->subtract(1),
+		'');
 		
 		//scan Y pixel
-		$text .= Grid::$pixY[0]->centerOn(Grid::$detectY1);
+		$text .= Grid::$pixY[0]->centerOn(Grid::$main);
 		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixY[0], 20);
 		
 		for($i=1; $i<7; $i++){
 			$text .= _if( $unit->health(AtMost, (21-$i)*100) )->then(
-				Grid::$pixY[$i]->centerOn(Grid::$detectY1),
+				Grid::$pixY[$i]->centerOn(Grid::$main),
 				ModifyHealth($unit->Player, Men, All, Grid::$pixY[$i], 20-$i),
-				$tempY->subtract(1),
+				$unit->y->subtract(1),
 			'');
 		}
 		$text .= _if( $unit->health(AtMost, 1400) )->then(
-			$tempY->subtract(1),
+			$unit->y->subtract(1),
 		'');
 		
 		
 		//UNIT TYPE
 		global $unitdata;
-		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
-		    _if( $unit->type->exactly(0) )->then(
-		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
-			    $tempY->add($unitdata["Protoss Zealot"]["up"]),
-		    ''),
-			//others
+
+		$text .= _if( $unit->type->exactly(0) )->then(
+	        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
+		    $unit->y->add($unitdata["Protoss Zealot"]["up"]),
 		'');
-		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
-		    _if( $unit->type->exactly(0) )->then(
-		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
-			    $tempY->add($unitdata["Protoss Zealot"]["down"]),
-		    ''),
-			//others
-		'');
-		
-		
-		//correct for bottom of map
-		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
-			$unit->y->become($tempY),
-			$unit->y->add((Map::getHeight()-Grid::$ydimension)/2*32),
-		'');
-		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
-			$unit->y->setTo(Map::getHeight()*32-(Map::getHeight()-Grid::$ydimension)/2*32-1),
-			$unit->y->subtractDel($tempY),
-		'');
-		
+		//other units here
 
 		
 		//restore and end
-		$text .= $tempY->kill();
+		$text .= $ignore->kill();
+		$text .= $tempDC->kill();
 		$text .= $unit->Loc->centerOn($unit->Player, Men, Grid::$main);
 		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
 		
@@ -922,6 +966,230 @@ class Grid{
 		return $text;
 
 	}
+	
+	
+	
+	
+	
+	/**
+	//scan for the unit
+	static function scan(BSUnit $unit) {
+		
+		$text = '';
+		
+		//clear values for scan
+		$text .= $unit->x->setTo((Grid::$xoffset+Grid::$xdimension)*32);
+		$text .= $unit->y->setTo(0);
+		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
+		
+		//X SCAN
+		
+		//scan X 64
+		$text .= Grid::$detectX64->centerOn(Grid::$origin);
+		$text .= Grid::$slideLeft64->centerOn(Grid::$origin);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90);
+		
+		for($i=1; $i<Grid::$xdimension*32/(Grid::$resolution*64)-1; $i++){
+			$text .= _if( $unit->health(Exactly, 10000) )->then(
+				Grid::$detectX64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+				Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX64, 90),
+				$unit->x->subtract(Grid::$resolution*64),
+			'');
+		}
+		$text .= _if( $unit->health(Exactly, 10000) )->then(
+			Grid::$slideLeft64->centerOn(P12, Grid::$unit, Grid::$slideLeft64),
+			$unit->x->subtract(Grid::$resolution*64),
+		'');
+		
+		//scan X 8
+		$text .= Grid::$detectX8->centerOn(Grid::$slideLeft64);
+		$text .= Grid::$slideLeft8->centerOn(Grid::$slideLeft64);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80);
+		
+		for($i=0; $i<6; $i++){
+			$text .= _if( $unit->health(AtLeast, 9000) )->then(
+				Grid::$detectX8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+				Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX8, 80),
+				$unit->x->subtract(Grid::$resolution*8),
+			'');
+		}
+		$text .= _if( $unit->health(AtLeast, 9000) )->then(
+			Grid::$slideLeft8->centerOn(P12, Grid::$unit, Grid::$slideLeft8),
+			$unit->x->subtract(Grid::$resolution*8),
+		'');
+		
+		//scan X 1
+		$text .= Grid::$detectX1->centerOn(Grid::$slideLeft8);
+		$text .= Grid::$slideLeft1->centerOn(Grid::$slideLeft8);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70);
+
+		for($i=0; $i<8; $i++){
+			$text .= _if( $unit->health(AtLeast, 8000) )->then(
+				Grid::$detectX1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+				Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectX1, 70),
+				$unit->x->subtract(Grid::$resolution*1),
+			'');
+		}
+		$text .= _if( $unit->health(AtLeast, 8000) )->then(
+			Grid::$slideLeft1->centerOn(P12, Grid::$unit, Grid::$slideLeft1),
+			$unit->x->subtract(Grid::$resolution*1),
+		'');
+		
+		//scan X pixel
+		$text .= Grid::$main->centerOn(Grid::$slideLeft1);
+		$text .= Grid::$pixX[0]->centerOn(Grid::$slideLeft1);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixX[0], 60);
+		
+		for($i=1; $i<7; $i++){
+			$text .= _if( $unit->health(AtMost, (61-$i)*100) )->then(
+				Grid::$pixX[$i]->centerOn(Grid::$detectX1),
+				ModifyHealth($unit->Player, Men, All, Grid::$pixX[$i], 60-$i),
+				$unit->x->add(1),
+			'');
+		}
+		$text .= _if( $unit->health(AtMost, 5400) )->then(
+			$unit->x->add(1),
+		'');
+		
+		
+		
+		
+		//Y SCAN
+		$tempY = new TempDC(Grid::$ydimension*32/2);
+		
+		//switch Y
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			Grid::$shiftUp->centerOn(Grid::$main),
+			Grid::$main->centerOn(Grid::$shiftUp),
+		'');
+		
+		//scan Y 32
+		$text .= Grid::$YLoc[0]->centerOn(Grid::$main);
+		$text .= Grid::$detectY32->centerOn(Grid::$YLoc[0]);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50);
+		
+		for($i=1; $i<floor(Grid::$ydimension/2/Grid::$resolution)-1; $i++){
+			$text .= _if( $unit->health(AtLeast, 5100) )->then(
+				Grid::$YLoc[32*$i]->centerOn(Grid::$main),
+				Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
+				ModifyHealth($unit->Player, Men, All, Grid::$detectY32, 50),
+				$tempY->add(Grid::$resolution*32),
+			'');
+		}
+		
+		$text .= _if( $unit->health(AtLeast, 5100) )->then(
+			Grid::$YLoc[32*$i]->centerOn(Grid::$main),
+			Grid::$detectY32->centerOn(Grid::$YLoc[32*$i]),
+			$tempY->add(Grid::$resolution*32),
+		'');
+		
+		
+		//scan Y 8
+		$text .= Grid::$detectY8->centerOn(Grid::$detectY32);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40);
+		
+		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2*8); $i++){
+			if($i%4==0){ }
+			elseif($i%4==3){
+				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
+					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
+					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
+					$tempY->add(Grid::$resolution*8),
+				'');
+			}
+			else{
+				$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution*8), $unit->health(AtLeast, 5000) )->then(
+					Grid::$YLoc[$i*8]->centerOn(Grid::$main),
+					Grid::$detectY8->centerOn(Grid::$YLoc[$i*8]),
+				    ModifyHealth($unit->Player, Men, All, Grid::$detectY8, 40),
+					$tempY->add(Grid::$resolution*8),
+				'');
+			}
+		}
+		
+		
+		//scan Y 1
+		$text .= Grid::$detectY1->centerOn(Grid::$detectY8);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30);
+		 
+		for($i=1; $i<Grid::$ydimension*32/(Grid::$resolution*2); $i++){
+			$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000) )->then(
+				Grid::$YLoc[$i]->centerOn(Grid::$main),
+				Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			    ModifyHealth($unit->Player, Men, All, Grid::$detectY1, 30),
+				$tempY->add(Grid::$resolution),
+			'');
+		}
+		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			Grid::$YLoc[$i]->centerOn(Grid::$main),
+			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			$tempY->add(Grid::$resolution-1),
+		'');
+		$text .= _if( $tempY->exactly(($i-1)*Grid::$resolution), $unit->health(AtLeast, 4000), $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+			Grid::$YLoc[$i]->centerOn(Grid::$main),
+			Grid::$detectY1->centerOn(Grid::$YLoc[$i]),
+			$tempY->add(Grid::$resolution),
+		'');
+		
+		
+		//scan Y pixel
+		$text .= Grid::$pixY[0]->centerOn(Grid::$detectY1);
+		$text .= ModifyHealth($unit->Player, Men, All, Grid::$pixY[0], 20);
+		
+		for($i=1; $i<7; $i++){
+			$text .= _if( $unit->health(AtMost, (21-$i)*100) )->then(
+				Grid::$pixY[$i]->centerOn(Grid::$detectY1),
+				ModifyHealth($unit->Player, Men, All, Grid::$pixY[$i], 20-$i),
+				$tempY->subtract(1),
+			'');
+		}
+		$text .= _if( $unit->health(AtMost, 1400) )->then(
+			$tempY->subtract(1),
+		'');
+		
+		
+		//UNIT TYPE
+		global $unitdata;
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+		    _if( $unit->type->exactly(0) )->then(
+		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
+			    $tempY->add($unitdata["Protoss Zealot"]["up"]),
+		    ''),
+			//others
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+		    _if( $unit->type->exactly(0) )->then(
+		        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
+			    $tempY->add($unitdata["Protoss Zealot"]["down"]),
+		    ''),
+			//others
+		'');
+		
+		
+		//correct for bottom of map
+		$text .= _if( $unit->currentYCoordinate(AtMost, Map::getHeight()*32/2-1) )->then(
+			$unit->y->become($tempY),
+			$unit->y->add((Map::getHeight()-Grid::$ydimension)/2*32),
+		'');
+		$text .= _if( $unit->currentYCoordinate(AtLeast, Map::getHeight()*32/2) )->then(
+			$unit->y->setTo(Map::getHeight()*32-(Map::getHeight()-Grid::$ydimension)/2*32-1),
+			$unit->y->subtractDel($tempY),
+		'');
+		
+
+		
+		//restore and end
+		$text .= $tempY->kill();
+		$text .= $unit->Loc->centerOn($unit->Player, Men, Grid::$main);
+		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
+		
+		return $text;
+		
+	}
+	/**/
 	
 
 }
