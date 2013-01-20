@@ -56,13 +56,12 @@ class Lirin extends Map {
 		
 		$humans->justonce(
 			SetAlly(P7),
-			$enemies[0]->health->setTo(1000),
 		'');
 		
 		/**/
 		$P1->always(
-			$heroes[0]->scanUnit(),
-			$enemies[0]->scanUnit(),
+			//$heroes[0]->scanUnit(),
+			//$enemies[0]->scanUnit(),
 			$enemies[0]->showHealth(),
 		'');		
 		/**/
