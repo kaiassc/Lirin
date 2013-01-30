@@ -56,10 +56,9 @@ class Lirin extends Map {
 			$secondcounter->add(1),
 		'');
 		$P1->_if( $secondcounter->atLeast(1) )->then(
-			$secondcounter->
-				setTo(0),
-			$minutecounter->add(2),
-			$timeofday->add(2),
+			$secondcounter->setTo(0),
+			$minutecounter->add(1),
+			$timeofday->add(1),
 		'');
 		$P1->_if( $minutecounter->atLeast(60) )->then(
 			$minutecounter->setTo(0),
@@ -76,11 +75,6 @@ class Lirin extends Map {
 		$heroes = BattleSystem::getHeroes();
 		$enemies = BattleSystem::getEnemies();
 		$roamers = BattleSystem::getRoamers();
-		
-		$P1->justonce(
-			$enemies[0]->spawnAs(Type::$Scurrier, 2500, 1200),
-			$heroes[0]->spawnAs(Type::$Melee, 2500, 2200),
-		'');
 		
 		foreach($enemies as $enemy){
 			$types = Type::getEnemyTypes();
