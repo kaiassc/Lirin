@@ -624,7 +624,7 @@ class Grid{
 	
 	
 	// Function to snap Main to the input pixel
-	public function putMain($xcoord, $ycoord, TempSwitch $success = null) {
+	static public function putMain($xcoord, $ycoord, TempSwitch $success = null) {
 		
 		//ERROR
 		if( func_num_args() != 2 && func_num_args() != 3 ){

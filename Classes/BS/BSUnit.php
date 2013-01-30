@@ -19,7 +19,8 @@ class BSUnit extends IndexedUnit {
 	
 	/* @var LirinLocation */ public $Loc;
 	
-	/* @var PermSwitch */ private $scanSwitch;
+	/* @var PermSwitch */ public $enableScan;
+	/* @var PermSwitch */ public $scanSwitch;
 	
 	/* @var Deathcounter */ private $replacedc;
 	
@@ -33,6 +34,7 @@ class BSUnit extends IndexedUnit {
 		$this->replacedc = new Deathcounter(100);
 		$this->Loc = LocationManager::MintLocation("bsunitloc$BSid", 0, 0, 0, 0);
 		$this->scanSwitch = new PermSwitch();
+		$this->enableScan = new PermSwitch();
 		
 	}
 	
@@ -127,8 +129,13 @@ class BSUnit extends IndexedUnit {
 	
 	public function scanUnit(){
 		//unit is moving
-		$text = _if( $this->orderCoordinate(AtLeast, 1), $this->attackCooldown(AtMost, 0) )->then(
+		$text = _if( $this->enableScan->is_set(), $this->orderCoordinate(AtLeast, 1), $this->attackCooldown(AtMost, 0) )->then(
 		    $this->scanSwitch->set(),
+		'');
+		
+		//clear scan
+		$text .= _if( $this->scanSwitch->is_set(), $this->enableScan->is_clear() )->then(
+		    $this->scanSwitch->clear(),
 		'');
 		
 		//scan
@@ -340,7 +347,8 @@ class BSUnit extends IndexedUnit {
 				$this->mana->setTo(0).
 				$this->damage->setTo(0).
 				$this->armor->setTo(0).
-				$this->scanSwitch->clear();
+				$this->scanSwitch->clear().
+				$this->enableScan->clear();
 		
 	}
 	
