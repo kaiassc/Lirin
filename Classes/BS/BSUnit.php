@@ -253,7 +253,6 @@ class BSUnit extends IndexedUnit {
 			$this->health->setTo($this->maxhealth),
 			ModifyHealth($this->Player, Men, 1, $this->Location, 100),
 			$clearnums,
-			$P4->addGas(1),
 		'');
 		//bulk of healths
 		for($i=0; $i<19; $i++){
