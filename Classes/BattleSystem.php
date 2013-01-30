@@ -1,4 +1,5 @@
 <?php require_once("BS/BSUnit.php"); require_once("BS/Boss.php"); require_once("BS/Enemy.php"); require_once("BS/Hero.php"); require_once("BS/Roamer.php"); 
+	  require_once("BS/Types/Type.php"); require_once("BS/Types/BSType.php"); require_once("BS/Types/EnemyType.php"); require_once("BS/Types/HeroType.php"); require_once("BS/Types/RoamerType.php");
 
 
 class BattleSystem {
@@ -9,13 +10,17 @@ class BattleSystem {
 	/* @var Boss[] */   static private $Bosses  = array();
 	
 	/* @var Deathcounter[] */ static $typeDCs          = array();
+	/* @var Deathcounter[] */ static $baseidDCs        = array();
+	/* @var Deathcounter[] */ static $apparentidDCs    = array();
 	/* @var Deathcounter[] */ static $attackTimeDCs    = array();
 	/* @var Deathcounter[] */ static $attackTargetDCs  = array();
 	/* @var Deathcounter[] */ static $healthDCs        = array();
 	/* @var Deathcounter[] */ static $maxhealthDCs     = array();
 	/* @var Deathcounter[] */ static $manaDCs          = array();
+	/* @var Deathcounter[] */ static $maxmanaDCs       = array();
 	/* @var Deathcounter[] */ static $damageDCs        = array();
 	/* @var Deathcounter[] */ static $armorDCs         = array();
+	/* @var Deathcounter[] */ static $magicresistDCs   = array();
 	
 	/* @var Deathcounter[] */ static $xDCs             = array();
 	/* @var Deathcounter[] */ static $yDCs             = array();
@@ -25,7 +30,7 @@ class BattleSystem {
 	
 	function __construct(){
 		
-		
+		$this->Setup();
 	}
 	
 	function Setup(){
@@ -71,7 +76,7 @@ class BattleSystem {
 				self::$Enemies[] =  new Enemy(P7, 27),
 				self::$Enemies[] =  new Enemy(P8, 28),
 			),
-			
+			/**
 			array(
 				self::$Enemies[] =  new Enemy(P2, 29), 
 				self::$Bosses[] =    new Boss(P3, 30),
@@ -94,62 +99,61 @@ class BattleSystem {
 			}
 			$index++;
 			/* @var BSUnit[] $group */
-			self::$typeDCs[] =         $type =         new Deathcounter($owners, 15);
-			self::$attackTimeDCs[] =   $attackTime =   new Deathcounter($owners, 15);
-			self::$attackTargetDCs[] = $attackTarget = new Deathcounter($owners, 21);
-			self::$healthDCs[] =       $health =       new Deathcounter($owners, 127);
-			self::$maxhealthDCs[] =    $maxhealth =    new Deathcounter($owners, 127);
-			self::$manaDCs[] =         $mana =         new Deathcounter($owners, 127);
-			self::$damageDCs[] =       $damage =       new Deathcounter($owners, 127);
-			self::$armorDCs[] =        $armor =        new Deathcounter($owners, 127);
-			self::$xDCs[] =            $x =            new Deathcounter($owners, Map::getWidth()*32);
-			self::$yDCs[] =            $y =            new Deathcounter($owners, Map::getHeight()*32);
+			self::$typeDCs[] =          $type =         new Deathcounter($owners, 15);
+			self::$baseidDCs[] =        $baseidDCs =    new Deathcounter($owners, 228);
+			self::$apparentidDCs[] =    $apparentid =   new Deathcounter($owners, 228);
+			self::$attackTimeDCs[] =    $attackTime =   new Deathcounter($owners, 15);
+			self::$attackTargetDCs[] =  $attackTarget = new Deathcounter($owners, 21);
+			self::$healthDCs[] =        $health =       new Deathcounter($owners, 127);
+			self::$maxhealthDCs[] =     $maxhealth =    new Deathcounter($owners, 127);
+			self::$manaDCs[] =          $mana =         new Deathcounter($owners, 127);
+			self::$maxmanaDCs[] =       $maxmana =      new Deathcounter($owners, 127);
+			self::$damageDCs[] =        $damage =       new Deathcounter($owners, 127);
+			self::$armorDCs[] =         $armor =        new Deathcounter($owners, 127);
+			self::$magicresistDCs[] =   $magicresist =  new Deathcounter($owners, 127);
+			self::$xDCs[] =             $x =            new Deathcounter($owners, Map::getWidth()*32);
+			self::$yDCs[] =             $y =            new Deathcounter($owners, Map::getHeight()*32);
 			
 			foreach($group as $bsunit){
-				$bsunit->type =         $type->{$bsunit->dcplayer};
-				$bsunit->attackTime =   $attackTime->{$bsunit->dcplayer};
-				$bsunit->attackTarget = $attackTarget->{$bsunit->dcplayer};
-				$bsunit->health =       $health->{$bsunit->dcplayer};
-				$bsunit->maxhealth =    $maxhealth->{$bsunit->dcplayer};
-				$bsunit->mana =         $mana->{$bsunit->dcplayer};
-				$bsunit->damage =       $damage->{$bsunit->dcplayer};
-				$bsunit->armor =        $armor->{$bsunit->dcplayer};
-				$bsunit->x =            $x->{$bsunit->dcplayer};
-				$bsunit->y =            $y->{$bsunit->dcplayer};
+				$bsunit->type =             $type->{$bsunit->dcplayer};
+				$bsunit->baseunitid =       $baseidDCs->{$bsunit->dcplayer};
+				$bsunit->apparentunitid =   $apparentid->{$bsunit->dcplayer};
+				$bsunit->attackTime =       $attackTime->{$bsunit->dcplayer};
+				$bsunit->attackTarget =     $attackTarget->{$bsunit->dcplayer};
+				$bsunit->health =           $health->{$bsunit->dcplayer};
+				$bsunit->maxhealth =        $maxhealth->{$bsunit->dcplayer};
+				$bsunit->mana =             $mana->{$bsunit->dcplayer};
+				$bsunit->maxmana =          $maxmana->{$bsunit->dcplayer};
+				$bsunit->damage =           $damage->{$bsunit->dcplayer};
+				$bsunit->armor =            $armor->{$bsunit->dcplayer};
+				$bsunit->magicresist =      $magicresist->{$bsunit->dcplayer};
+				$bsunit->x =                $x->{$bsunit->dcplayer};
+				$bsunit->y =                $y->{$bsunit->dcplayer};
 				
 			}
 		}
 		
 		// TESTING
 		$P1 = new Player(P1);
-		$P8 = new Player(P8);
 		
 		/* @var BSUnit $hero1 */ $hero1 = self::$Heroes[0];
 		/* @var BSUnit $hero2 */ $hero2 = self::$Heroes[1];
 		/* @var BSUnit $hero3 */ $hero3 = self::$Heroes[2];
 		
+		$setTypes = '';
+		for($i=0; $i<count(self::$dcgroups); $i++){
+			$setTypes .= self::$typeDCs[$i]->All->setTo(1);
+		}
+		
 		$P1->justonce(
-			SetEnemy(AllPlayers),
-			SetAlly(P2), SetAlly(P3), SetAlly(P7), SetAlly(P8),
-			self::$healthDCs[0]->Allies->setTo(100),    self::$healthDCs[1]->Allies->setTo(100),    self::$healthDCs[2]->Allies->setTo(100),
-			self::$maxhealthDCs[0]->Allies->setTo(100), self::$maxhealthDCs[1]->Allies->setTo(100), self::$maxhealthDCs[2]->Allies->setTo(100),
-			self::$damageDCs[0]->Allies->setTo(33),     self::$damageDCs[1]->Allies->setTo(33),     self::$damageDCs[2]->Allies->setTo(33),
-			self::$armorDCs[0]->Allies->setTo(91),      self::$armorDCs[1]->Allies->setTo(66),      self::$armorDCs[2]->Allies->setTo(33),
-			
-			self::$healthDCs[3]->Allies->setTo(100),    self::$healthDCs[4]->Allies->setTo(100),    
-			self::$maxhealthDCs[3]->Allies->setTo(100), self::$maxhealthDCs[4]->Allies->setTo(100), 
-			self::$damageDCs[3]->Allies->setTo(33),     self::$damageDCs[4]->Allies->setTo(33),     
-			self::$armorDCs[3]->Allies->setTo(91),      self::$armorDCs[4]->Allies->setTo(66),      
-			
-			$hero1->damage->setTo(100),         $hero2->damage->setTo(100),         $hero3->damage->setTo(100),
 			SetAlly(AllPlayers),
+			$setTypes,
+			$hero1->damage->setTo(20),
+			$hero2->damage->setTo(20),
+			$hero3->damage->setTo(20),
+			self::$typeDCs[0]->leaderboard(),
 		'');
 		
-		/**
-		$P8->always(
-			SetAlly(AllPlayers),
-		'');
-		/**/
 	}
 	
 	function CreateEngine(){
@@ -158,17 +162,17 @@ class BattleSystem {
 		
 		/**/
 		foreach(self::getBSUnits() as $bsunit){
-			$P1->always(
+			
+			$P1->_if( $bsunit->type->atLeast(2) )->then(
 				$bsunit->scanUnit(),
+				$bsunit->showHealth(),
 			'');
-		}
-		/**/
-		
-		foreach(self::getBSUnits() as $bsunit){
+			
 			$P1->_if( $bsunit->swings() )->then(
 				$bsunit->dealDamageToTarget(),
 			'');
 		}
+		/**/
 		
 	}
 	

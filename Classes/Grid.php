@@ -14,17 +14,20 @@ class Grid{
 	static public $slideLeft64;
 	
 	static public $detectX1;
-	
+
+	/* @var LirinLocation[] */
 	static public $saveLoc = array();
-	
+
 	static public $sandbox;
 	static public $origin;
 	static public $shiftLeft;
 	static public $shiftUp;
-	
+
+	/* @var LirinLocation[] */
 	static public $YLoc = array();
-	
+	/* @var LirinLocation[] */
 	static public $pixX = array();
+	/* @var LirinLocation[] */
 	static public $pixY = array();
 	
 	static public $main;
@@ -284,7 +287,7 @@ class Grid{
 		    $ignore->set(),
 		'');
 		$ybegin = Map::getHeight()*32-$ybegin;
-		for($i=Grid::$ydimension/2/2-1; $i>0; $i--){
+		for($i=(int)round(Grid::$ydimension/2/2-1); $i>0; $i--){
 			$text .= _if( $ignore->is_clear(), $unit->currentYCoordinate(AtMost, $ybegin-Grid::$resolution*8*($i-1)) )->then(
 				Grid::$YLoc[$i*8+2]->centerOn(Grid::$main),
 				Grid::$YLoc[$i*8+1]->centerOn(Grid::$main),
@@ -359,18 +362,18 @@ class Grid{
 		
 		//UNIT TYPE
 		global $unitdata;
-
-		$text .= _if( $unit->type->exactly(0) )->then(
-	        $unit->x->subtract($unitdata["Protoss Zealot"]["right"]),
-		    $unit->y->add($unitdata["Protoss Zealot"]["up"]),
-		'');
-		//other units here
-
+		
+		foreach($unit->getTypes() as $type){
+			$text .= _if( $unit->type->exactly($type->ID) )->then(
+		        $unit->x->subtract($unitdata[$type->BaseUnit]["right"]),
+			    $unit->y->add($unitdata[$type->BaseUnit]["up"]),
+			'');
+		}
 		
 		//restore and end
 		$text .= $ignore->kill();
 		$text .= $tempDC->kill();
-		$text .= $unit->Loc->centerOn($unit->Player, Men, Grid::$main);
+		$text .= $unit->Location->centerOn($unit->Player, Men, Grid::$main);
 		$text .= ModifyHealth($unit->Player, Men, All, "Anywhere", 100);
 		
 		return $text;
@@ -594,7 +597,7 @@ class Grid{
 			$text .= $ignore->set();
 			
 			//snap main to closest y location
-			for($i=Grid::$ydimension*32/Grid::$resolution/2; $i>0; $i--){
+			for($i=(int)round(Grid::$ydimension*32/Grid::$resolution/2); $i>0; $i--){
 				$text .= _if( $ignore->is_set(), $ytemp->atLeast($i*Grid::$resolution-3) )->then(
 					Grid::$YLoc[$i]->centerOn(Grid::$main),
 					Grid::$main->centerOn(Grid::$YLoc[$i]),

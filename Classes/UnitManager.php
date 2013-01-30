@@ -8,11 +8,124 @@ class UnitManager {
 	
 	private static $PreplacedIndex;
 	
+	/* @var IndexedUnit */
+	static $Catcher;
+	/* @var UnitGroup */
+	static $Buffer;
+	/* @var UnitGroup */
+	static $Placeholder;
+	
 	function __construct($lastpreplacedindex){
 		if(!is_int($lastpreplacedindex)){ Error("You have to specify an integer for the Last Preplaced Unit on the minted map"); }
 		self::$PreplacedIndex = $lastpreplacedindex;
 		
+		$index = self::MintUnitWithAnyIndex("Bengalaas (Jungle)", P8, 33.5*32, 1.5*32);
+		
+		self::$Catcher      = new IndexedUnit($index, "Bengalaas (Jungle)", P8, Anywhere);
+		self::$Placeholder  = new UnitGroup("Bengalaas (Jungle)", P7, Anywhere);
+		self::$Buffer       = new UnitGroup("Kakaru (Twilight)", P8, Anywhere);
+		
 	}
+	
+	public function firstTrigs(){
+		
+		$P1 = new Player(P1);
+		$P4 = new Player(P4);
+		$catcher = self::$Catcher;
+		$success = new TempSwitch();
+		
+		$P1->_if( $catcher->notAt(Anywhere) )->then(
+			
+			$this->findCatcher($success),
+			_if( $success )->then(
+				$P4->setGas(777),
+				Grid::putMainRes(33.5*32, Map::getHeight()/2*32),
+				Loc::$main->acquire(Loc::$shiftUp),
+				Loc::$shiftUp->acquire(Loc::$aoe3x3),
+				$catcher->createAt(Loc::$aoe3x3, 1),
+				
+				$this->createBSUnits(),
+				
+			''),
+			_if( $success->is_clear() )->then(
+				$P4->setGas(888),
+			''),
+			
+			$success->release(),
+			
+		'');
+		
+	}
+	
+	private function findCatcher(TempSwitch $success){
+		$buffer = self::$Buffer;
+		$catcher = self::$Catcher;
+		
+		$text = $success->clear();
+		
+		for($i=1; $i<=100; $i++){
+			$text .= _if( $success->is_clear(), $catcher->isNAIID() )->then(
+				$success->set(),
+			'');
+			$text .= _if( $success->is_clear() )->then(
+				$buffer->create(1),
+				$buffer->remove(),
+			'');
+		}
+		return $text;
+	}
+	private function createBSUnits(){
+		$P4 = new Player(P4);
+		
+		$text = '';
+		foreach(array_reverse(BattleSystem::getBSUnits()) as $bsunit){
+			/* @var BSUnit $bsunit */
+			$text .= _if( $bsunit->replacedc->atLeast(1) )->then(
+				$bsunit->create(),
+				$P4->addOre(1),
+			'');
+		}
+		return $text;
+	}
+	
+	public function lastTrigs(){
+		/* BSUNIT REPLACEMENT */
+		$P8 = new Player(P8);
+		
+		$catcher = self::$Catcher;
+		$bufferunit = self::$Buffer;
+		
+		$unitdied = new TempSwitch();
+		foreach(BattleSystem::getBSUnits() as $bsunit){
+			$P8->_if( $bsunit->replacedc->atLeast(1) )->then(
+				$unitdied->set(),
+			'');
+		}
+		
+		$P8->_if( $unitdied )->then(
+			$bufferunit->create(1),
+			$bufferunit->remove(All),
+		'');
+		
+		foreach(BattleSystem::getBSUnits() as $bsunit){
+			$P8->_if( $bsunit->replacedc->atLeast(1) )->then(
+				$bsunit->deathAnimation(),
+				$bsunit->remove(),
+				
+			'');
+		}
+		
+		$P8->_if( $unitdied )->then(
+			$catcher->remove(All),
+			
+			$bufferunit->create(1),
+			$bufferunit->remove(All),
+			
+			$unitdied->release(),
+		'');
+		
+	}
+	
 	
 	static function MintUnit($unit, $player, $x, $y, $properties = null){
 		if( !is_int($x) || !is_int($y) ){
@@ -142,8 +255,8 @@ class UnitManager {
 		}
 	}
 	
+
 	public function CreateEngine(){
-		
 		$buffer = "Terran Machine Shop";
 
 		$first = self::$PreplacedIndex+1;

@@ -12,40 +12,62 @@ class Lirin extends Map {
 	static $xdim = 192;
 	static $ydim = 128;
 	
+	protected $SuppressOutput = TRUE;
+	
 	function Main(){
 		
 		$SFXManager = new SFXManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
-		$BattleSystem = new BattleSystem();
-		$Grid = new Grid(128, 96, 8/*px*/, 32);
 		$UnitManager = new UnitManager(0);
+		$BattleSystem = new BattleSystem();
+		new Grid(128, 96, 8/*px*/, 32);
 		$LocationManager = new LocationManager();
-		$Loc = new Loc();
-		$Loc->populate();
+		Loc::populate();
+		Type::populate();
+		
 		
 		// Players
 		$P1 = new Player(P1);
 		$P4 = new Player(P4);
+		$P5 = new Player(P5);
+		$P8 = new Player(P8);
 		$All = new Player(P1,P2,P3,P4,P5,P6,P7,P8);
 		$humans = new Player(P4, P5, P6);
-		
 		
 		UnitManager::MintUnit("Start Location", $All, 250, 1400);
 		UnitManager::MintMapRevealers(P4);
 		
+		$UnitManager->firstTrigs();
+		
 		/**/
-		$BattleSystem->Setup();
 		$BattleSystem->CreateEngine();
 		/**/
 		
+		$humans->justonce(
+			SetAlly(AllPlayers),
+			Mute(),
+		'');
 		
-		/**/
-		$K1 = new KeyStroke("1"); $K2 = new KeyStroke("2"); $K3 = new KeyStroke("3"); $K4 = new KeyStroke("4"); $K5 = new KeyStroke("5");
-		$P4->_if( $K1->pressed() )->then( BattleSystem::$healthDCs[0]->leaderboard("Health Set 1") );
-		$P4->_if( $K2->pressed() )->then( BattleSystem::$healthDCs[1]->leaderboard("Health Set 2") );
-		$P4->_if( $K3->pressed() )->then( BattleSystem::$healthDCs[2]->leaderboard("Health Set 3") );
-		$P4->_if( $K4->pressed() )->then( BattleSystem::$healthDCs[3]->leaderboard("Health Set 4") );
-		$P4->_if( $K5->pressed() )->then( BattleSystem::$healthDCs[4]->leaderboard("Health Set 5") );
-		/**/
+		$timeofday = new Deathcounter(2400);
+		$minutecounter = new Deathcounter();
+		$secondcounter = new Deathcounter();
+		
+		// Handle time
+		$P1->always(
+			$secondcounter->add(1),
+		'');
+		$P1->_if( $secondcounter->atLeast(1) )->then(
+			$secondcounter->
+				setTo(0),
+			$minutecounter->add(2),
+			$timeofday->add(2),
+		'');
+		$P1->_if( $minutecounter->atLeast(60) )->then(
+			$minutecounter->setTo(0),
+			$timeofday->add(40),
+		'');
+		$P1->_if( $timeofday->atLeast(2400) )->then(
+			$timeofday->setTo(0),
+		'');
 		
 		
 		$dcx = new Deathcounter(Map::getWidth()*32-1);
@@ -53,18 +75,85 @@ class Lirin extends Map {
 		
 		$heroes = BattleSystem::getHeroes();
 		$enemies = BattleSystem::getEnemies();
+		$roamers = BattleSystem::getRoamers();
+		
+		$P1->justonce(
+			$enemies[0]->spawnAs(Type::$Scurrier, 2500, 1200),
+			$heroes[0]->spawnAs(Type::$Melee, 2500, 2200),
+		'');
+		
+		foreach($enemies as $enemy){
+			$types = Type::getEnemyTypes();
+			$randtype = $types[array_rand($types)];
+			$randx = rand(1285, 3618);
+			$randy = rand(1461, 3500);
+			$P1->justonce(
+				$enemy->spawnAs($randtype, $randx, $randy),
+			'');
+		}
+		foreach($heroes as $hero){
+			//$types = Type::getHeroTypes();
+			//$randtype = $types[array_rand($types)];
+			$x = 1417+($hero->BSid-3)*32;
+			$y = 810;
+			$player = new Player($hero->Player);
+			$player->justonce(
+				$hero->spawnAs(Type::$Melee, $x, $y),
+			'');
+		}
+		$typeindex = 0;
+		foreach($roamers as $roamer){
+			$types = Type::getRoamerTypes();
+			$randtype = $types[$typeindex];
+			$typeindex++;
+			$x = 3800+($typeindex-3)*64;
+			$y = 1000;
+			$P1->justonce(
+				$roamer->spawnAs($randtype, $x, $y),
+			'');
+		}
+		
+		$ctrl = new KeyStroke("Ctrl");
+		
+		foreach($BattleSystem::getBSUnits() as $bsunit){
+			$P4->_if( $ctrl->isDown(), $bsunit->isSelectedByP4() )->then(
+				ClearText(),
+				$bsunit->display(),
+			'');
+			$P5->_if( $ctrl->isDown(), $bsunit->isSelectedByP5() )->then(
+				ClearText(),
+				$bsunit->display(),
+			'');
+			
+		}
+		$humans->_if( $ctrl->released() )->then(
+			ClearText(),
+		'');
+		
+		/**
+		$scurrier = new Scurrier();
+		$enemies[0]->isType($scurrier);
+		$enemies[0]->isType(EnemyType::Scurrier);
+		$enemies[0]->isType(EnemyType::Champion);
+		
+		foreach($enemies as $enemy){
+			$scurrier = new Scurrier();
+			$P1->_if( $enemy->isType($scurrier) )->then(
+				Display("You selected a Scurrier"),
+				$scurrier::Armor,
+			'');
+		}
+		/**/
 		
 		$humans->justonce(
 			SetAlly(P7),
 		'');
 		
-		/**/
-		$P1->always(
-			//$heroes[0]->scanUnit(),
-			//$enemies[0]->scanUnit(),
-			$enemies[0]->showHealth(),
-		'');		
-		/**/
+		$humans->_if( IsCurrentPlayer() )->then(
+			$SFXManager->CreateEngine(),
+		'');
+		
+		$UnitManager->lastTrigs();
 		
 		$LocationManager->CreateEngine();
 		$UnitManager->CreateEngine();

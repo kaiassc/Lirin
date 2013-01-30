@@ -17,8 +17,8 @@ class Map {
 	protected $ShowAnalysis = FALSE;
 	protected $RetainXML = FALSE;
 	
-	static $xdim = 256;
-	static $ydim = 256;
+	protected static $xdim = 256;
+	protected static $ydim = 256;
 	
 	protected $P1, $P2, $P3, $P4, $P5, $P6, $P7, $P8; 
 	
@@ -31,9 +31,9 @@ class Map {
 		}
 		
 		// Settings
-		RetainTmpXML($this->RetainXML);
+		if(isset($this->RetainXML)) { RetainTmpXML($this->RetainXML); }
 		if ( $this->SuppressOutput ){ SuppressOutput(); }
-		if ( $this->ShowAnalysis ){ ShowAnalysis(); }
+		if ( $this->ShowAnalysis )  { ShowAnalysis(); }
 		
 		if( $this->Mint ){ 
 			Mint($this->Mint[0], $this->Mint[1]);

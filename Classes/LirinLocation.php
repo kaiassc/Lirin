@@ -30,6 +30,12 @@ class LirinLocation extends Location {
 		KillUnit($player, 'Zerg Scourge');
 	}
 	
+	public function airPuff($player = P8){
+		return
+		CreateUnitWithProperties($player,'Terran Wraith',1, $this, array(Cloaked, Hallucinated)).
+		KillUnit($player, 'Terran Wraith');
+	}
+	
 	public function placeAt($x, $y){
 		
 	}

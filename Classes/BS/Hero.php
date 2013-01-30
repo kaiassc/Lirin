@@ -4,43 +4,17 @@ class Hero extends BSUnit {
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
 		
-		$oplyr = P10;
-		if($dcplayer === P5){
-			$oplyr = P11;
-		}
-		if($dcplayer === P6){
-			$oplyr = P12;
-		}
-		
-		$y = 64*32; $x = ($BSid*2+33)*32;
-		$this->Index = UnitManager::MintUnitWithAnyIndex("Protoss Zealot", $oplyr, $x, $y);
-		
-		$P = new Player($dcplayer);
-		$P8 = new Player(P8);
-		$P->justonce(
-			Give($oplyr, "Protoss Zealot", 1, $dcplayer, Anywhere),
-		'');
-		$P8->justonce(
-			RemoveUnitAtLocation($oplyr, "Protoss Zealot", 1, Anywhere),
-		'');
-		
-		if($player === null){
-			$player = $dcplayer;
-		}
+		if($player === null){ $player = $dcplayer; }
 		
 		parent::__construct($dcplayer, $BSid, $unit, $player, $location);
-		
-		$targets = BattleSystem::getBSUnits();
-		foreach($targets as $bsunit){
-			if($bsunit->BSid !== $this->BSid){
-				$this->TargetIDs[] = $bsunit->Index;
-			}
-		}
-		
 	}
 	
 	protected function getTargets(){
 		return BattleSystem::getBSUnits();
+	}
+	
+	public function getTypes(){
+		return Type::getHeroTypes();
 	}
 	
 	/////
@@ -53,7 +27,36 @@ class Hero extends BSUnit {
 	//ACTIONS
 	//
 	
+	protected function clearType(){
+		return  $this->type->setTo(0).
+				$this->attackTime->setTo(0).
+				$this->attackTarget->setTo(0).
+				#$this->health->setTo(0).
+				#$this->maxhealth->setTo(0).
+				#$this->mana->setTo(0).
+				#$this->maxmana->setTo(0).
+				#$this->damage->setTo(0).
+				#$this->armor->setTo(0).
+				#$this->magicresist->setTo(0).
+				'';
+	}
 	
+	protected function loadType($type){
+		if( !($type instanceof HeroType) ){
+			Error("\$type must be a HeroType...");
+		}
+		$text = '';
+		$text .= $this->type->setTo($type->ID);
+		$text .= $this->baseunitid->setTo((int)GetUnitID($type->BaseUnit));
+		$text .= $this->apparentunitid->setTo((int)GetUnitID($type->ApparentUnit));
+		
+		$text .= $this->health->setTo(100);
+		$text .= $this->maxhealth->setTo(100);
+		$text .= $this->mana->setTo(100);
+		$text .= $this->maxmana->setTo(100);
+		
+		return $text;
+	}
 	
 		
 }

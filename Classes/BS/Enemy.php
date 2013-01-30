@@ -2,16 +2,9 @@
 
 class Enemy extends BSUnit {
 	
-	private $xspawn;
-	private $yspawn;
+	
 	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player = P8, $location=NULL){
-		
-		$y = 64*32; $x = ($BSid*2+33)*32;
-		$this->Index = UnitManager::MintUnitWithAnyIndex("Zerg Hydralisk", P8, $x, $y);
-		
-		$this->xspawn = $x;
-		$this->yspawn = $y;
 		
 		parent::__construct($dcplayer, $BSid, $unit, $player, $location);
 		
@@ -21,15 +14,16 @@ class Enemy extends BSUnit {
 		return array_merge(BattleSystem::getHeroes(), BattleSystem::getRoamers());
 	}
 	
-	function deathTrig(){
-		$P1 = new Player(1);
-		
-		$success = new TempSwitch();
-		$P1->_if( $this->health->exactly(0) )->then_justonce(
-			Grid::putMainRes($this->xspawn, $this->yspawn, $success),
-			KillUnitAtLocation(P8, "Zerg Hydralisk", 1, Grid::$main),
-			$success->release(),
-		'');
+	public function getTypes(){
+		return Type::getEnemyTypes();
+	}
+	
+	protected function enumerateType(){
+		$enumarray = array();
+		foreach($this->getTypes() as $type){
+			$enumarray[$type->ID] = $type->Name;
+		}
+		$this->type->enumerate($enumarray);
 	}
 	
 	/////
@@ -42,8 +36,62 @@ class Enemy extends BSUnit {
 	//ACTIONS
 	//
 	
+	protected function loadType($type){
+		if( !($type instanceof EnemyType) ){
+			Error("\$type must be an EnemyType...");
+		}
+		$text = '';
+		$text .= $this->type            ->setTo($type->ID);
+		$text .= $this->baseunitid      ->setTo((int)GetUnitID($type->BaseUnit));
+		$text .= $this->apparentunitid  ->setTo((int)GetUnitID($type->ApparentUnit));
+		$text .= $this->damage          ->setTo($type->Damage);
+		$text .= $this->health          ->setTo($type->Health);
+		$text .= $this->maxhealth       ->setTo($type->Health);
+		$text .= $this->mana            ->setTo($type->Mana);
+		$text .= $this->maxmana         ->setTo($type->Mana);
+		$text .= $this->armor           ->setTo($type->Armor);
+		$text .= $this->magicresist     ->setTo($type->MagicResist);
+		
+		return $text;
+	}
 	
+	public function deathAnimation(){
+		$text = '';
+		
+		$text .= _if($this->type->atLeast(2))->then(
+			_if( $this->isType(Type::$GloreHulk) )->then(
+				$this->Location->airPuff(),
+			''),
+			_if( $this->isType(Type::$Squirt) )->then(
+				$this->Location->bloodsplat(),
+			''),
+			_if( $this->isType(Type::$Champion) )->then(
+				$this->Location->bloodsplat(),
+			''),
+			_if( $this->isType(Type::$Scurrier) )->then(
+				$this->Location->explode(),
+			''),
+		'');
+		
+		return $text;
+	}
 	
+	function display(){
+		$text = '';
+		
+		foreach($this->getTypes() as $type){
+			$text .= _if($this->type->exactly($type->ID))->then(
+				Display("\t\t\t\t\\x004$type->Name - $type->Codex"),
+				Display("\t\t\t\t\t\\x01EID: $this->BSid"),
+				Display(" "),
+				Display("\t\t\t\t\t\\x01Ehealth: \t$this->health"),
+				Display("\t\t\t\t\t\\x01Edmg:    \t$type->Damage"),
+				Display("\t\t\t\t\t\\x01Earmr:   \t$type->Armor"),
+				Display("\t\t\t\t\t\\x01Emr:     \t$type->MagicResist"),
+			'');
+		}
+		return $text;
+	}
 		
 }
 
