@@ -247,8 +247,6 @@ class BSUnit extends IndexedUnit {
 			$clearnums .= $num->setTo(0);
 		}
 		//over max health
-		$P4 = new Player(P4);
-		
 		$text .= _if( $nums[19]->atMost(0) )->then(
 			$this->health->setTo($this->maxhealth),
 			ModifyHealth($this->Player, Men, 1, $this->Location, 100),
