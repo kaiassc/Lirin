@@ -22,18 +22,18 @@ class FRAGS{
 	function __construct(){
 		
 		// Switches
-		FRAGS::$movedP4 = new PermSwitch();
-		FRAGS::$movedP5 = new PermSwitch();
-		FRAGS::$movedP6 = new PermSwitch();
+		self::$movedP4 = new PermSwitch();
+		self::$movedP5 = new PermSwitch();
+		self::$movedP6 = new PermSwitch();
 		
-		FRAGS::$P4Fragged = new PermSwitch();
-		FRAGS::$P5Fragged = new PermSwitch();
-		FRAGS::$P6Fragged = new PermSwitch();
+		self::$P4Fragged = new PermSwitch();
+		self::$P5Fragged = new PermSwitch();
+		self::$P6Fragged = new PermSwitch();
 		
 		// Deathcounters
 		$humans = new Player(P4, P5, P6);
-		FRAGS::$x = new Deathcounter($humans, Map::getWidth()*32-1);
-		FRAGS::$y = new Deathcounter($humans, Map::getHeight()*32-1);
+		self::$x = new Deathcounter($humans, Map::getWidth()*32-1);
+		self::$y = new Deathcounter($humans, Map::getHeight()*32-1);
 		
 		// Place FRAGS units
 		$k = 32;
@@ -41,11 +41,11 @@ class FRAGS{
 			if($j==2){ $k = 0; }
 			for($i=0; $i<5; $i++){
 				if(($i+$j)%2 == 0){
-					FRAGS::$scourgeP4[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1008+1024*$i-$k, 496+1024*$j, Invincible), "Zerg Scourge", P4, "Anywhere");
+					self::$scourgeP4[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1008+1024*$i-$k, 496+1024*$j, Invincible), "Zerg Scourge", P4, "Anywhere");
 					UnitManager::MintUnit("Infested Terran", P9, 1008+1024*$i-$k, 496+1024*$j, array(Invincible, Burrowed));
-					FRAGS::$scourgeP5[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1072+1024*$i-$k, 496+1024*$j, Invincible), "Zerg Scourge", P5, "Anywhere");
+					self::$scourgeP5[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1072+1024*$i-$k, 496+1024*$j, Invincible), "Zerg Scourge", P5, "Anywhere");
 					UnitManager::MintUnit("Infested Terran", P10, 1072+1024*$i-$k, 496+1024*$j, array(Invincible, Burrowed));
-					FRAGS::$scourgeP6[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1008+1024*$i-$k, 560+1024*$j, Invincible), "Zerg Scourge", P6, "Anywhere");
+					self::$scourgeP6[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, 1008+1024*$i-$k, 560+1024*$j, Invincible), "Zerg Scourge", P6, "Anywhere");
 					UnitManager::MintUnit("Infested Terran", P11, 1008+1024*$i-$k, 560+1024*$j, array(Invincible, Burrowed));
 				}
 			}
