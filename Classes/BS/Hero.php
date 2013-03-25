@@ -2,9 +2,15 @@
 
 class Hero extends BSUnit {
 	
+	/* @var String */ public $visplayer;
+	
 	public function __construct($dcplayer, $BSid, $unit=NULL, $player=NULL, $location=NULL){
 		
 		if($player === null){ $player = $dcplayer; }
+		
+		if($player === P4){ $this->visplayer = P1; }
+		if($player === P5){ $this->visplayer = P2; }
+		if($player === P6){ $this->visplayer = P3; }
 		
 		parent::__construct($dcplayer, $BSid, $unit, $player, $location);
 	}

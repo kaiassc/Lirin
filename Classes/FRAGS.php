@@ -12,9 +12,12 @@ class FRAGS{
 	static private $movedP4;
 	static private $movedP5;
 	static private $movedP6;
-
+	
+	/* @var IndexedUnit[] */
 	static private $scourgeP4 = array();
+	/* @var IndexedUnit[] */
 	static private $scourgeP5 = array();
+	/* @var IndexedUnit[] */
 	static private $scourgeP6 = array();
 	
 	
@@ -81,6 +84,7 @@ class FRAGS{
 	// process to determine which units FRAGged and find its coordinates
 	private function determineCoordinates($scourges, PermSwitch $moved, Deathcounter $x, Deathcounter $y, PermSwitch $Fragged, $player, $addx, $addy){
 		
+		/* @var TempDC[] $angles */
 		$angles = array();
 		for($i=0; $i<10; $i++){ $angles[] = new TempDC(37); }
 		$clearangles = '';
@@ -111,7 +115,7 @@ class FRAGS{
 		//get directions, angles, move
 		$text .= _if( $moved->is_set() )->then(
 			//get angles and y's
-		    FRAGS::getData($scourges, $angles, $dirs, $y1, $y2),
+		    self::getData($scourges, $angles, $dirs, $y1, $y2),
 			
 			//check if coordinate is exact or not
 			$diff->absDifference($y1, $y2),

@@ -286,10 +286,13 @@ class BSUnit extends IndexedUnit {
 	public function dealDamageToTarget(){
 		
 		$dcgroupid = new TempDC(7);
-		$tempdc = new TempDC(127);
+		
 		
 		$P4 = new Player(P4);
 		
+		/**
+		// WC3 ARMOR MECHANICS
+		$tempdc = new TempDC(127);
 		$text = repeat(1,
 			
 			// set ally
@@ -305,7 +308,7 @@ class BSUnit extends IndexedUnit {
 			_if( $tempdc->atMost(50) )->then( $tempdc->setTo(50) ),
 			
 			// deal damage
-			$this->dealDamage($tempdc, $dcgroupid),
+			$this->deal100xDamage($tempdc, $dcgroupid),
 			
 			// restore
 			SetAlly(AllPlayers),
@@ -314,6 +317,31 @@ class BSUnit extends IndexedUnit {
 			$this->attackTarget->setTo(0),
 			
 		'');
+		/**/
+		
+		/**/
+		// SC ARMOR MECHANICS
+		$tempdealdc = new TempDC(127);
+		$text = repeat(1,
+			
+			// set ally
+			BattleSystem::setAllyByTarget($this->attackTarget, $dcgroupid),
+			
+			// calc damage
+			$tempdealdc->setTo($this->damage),
+			$this->subtractArmor($tempdealdc, $dcgroupid),
+			
+			// deal damage
+			$this->dealDamage($tempdealdc, $dcgroupid),
+			
+			// restore
+			SetAlly(AllPlayers),
+			$tempdealdc->release(),
+			$dcgroupid->release(),
+			$this->attackTarget->setTo(0),
+			
+		'');
+		/**/
 		
 		return $text;
 	}
@@ -356,12 +384,24 @@ class BSUnit extends IndexedUnit {
 		return $text;
 	}
 	
-	protected function dealDamage(Deathcounter $damagex100, Deathcounter $groupid){
+	protected function deal100xDamage(Deathcounter $damagex100, Deathcounter $groupid){
 		$text = '';
 		$GroupIDs = $this->getGroupIDsContainingTarget();
 		foreach($GroupIDs as $id){
 			$text .= _if( $groupid->exactly($id) )->then( 
 				BattleSystem::$healthDCs[$id]->Allies->subDivBecome($damagex100, 100),
+			'');
+		}
+		
+		return $text;
+	}
+	
+	protected function dealDamage(Deathcounter $damage, Deathcounter $groupid){
+		$text = '';
+		$GroupIDs = $this->getGroupIDsContainingTarget();
+		foreach($GroupIDs as $id){
+			$text .= _if( $groupid->exactly($id) )->then( 
+				BattleSystem::$healthDCs[$id]->Allies->subtractDel($damage),
 			'');
 		}
 		
@@ -374,6 +414,18 @@ class BSUnit extends IndexedUnit {
 		foreach($GroupIDs as $id){
 			$text .= _if( $groupid->exactly($id) )->then( 
 				$receivingdc->setTo(BattleSystem::$armorDCs[$id]->Allies),
+			'');
+		}
+		
+		return $text;
+	}
+	
+	protected function subtractArmor(Deathcounter $subtracteddc, Deathcounter $groupid){
+		$text = '';
+		$GroupIDs = $this->getGroupIDsContainingTarget();
+		foreach($GroupIDs as $id){
+			$text .= _if( $groupid->exactly($id) )->then( 
+				$subtracteddc->setTo(BattleSystem::$armorDCs[$id]->Allies),
 			'');
 		}
 		

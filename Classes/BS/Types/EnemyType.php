@@ -28,6 +28,10 @@ class EnemyType  extends BSType{
 		
 	}
 	
+	static function populate(){
+		
+	}
+	
 }
 
 

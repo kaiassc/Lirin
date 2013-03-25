@@ -84,7 +84,7 @@ class Enemy extends BSUnit {
 				Display("\t\t\t\t\\x004$type->Name - $type->Codex"),
 				Display("\t\t\t\t\t\\x01EID: $this->BSid"),
 				Display(" "),
-				Display("\t\t\t\t\t\\x01Ehealth: \t$this->health"),
+				Display("\t\t\t\t\t\\x01Ehealth: \t$type->Health"),
 				Display("\t\t\t\t\t\\x01Edmg:    \t$type->Damage"),
 				Display("\t\t\t\t\t\\x01Earmr:   \t$type->Armor"),
 				Display("\t\t\t\t\t\\x01Emr:     \t$type->MagicResist"),
