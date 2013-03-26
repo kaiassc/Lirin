@@ -7,7 +7,7 @@ class Grid{
 	static private $resolution;
 	static private $xoffset;
 	
-	static private $unit;
+	static public $unit;
 	
 	static public $slideLeft1;
 	static public $slideLeft8;
