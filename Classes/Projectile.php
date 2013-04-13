@@ -6,17 +6,25 @@ class Projectile{
 	
 	/* @var Deathcounter */ public $xpos = array();
 	/* @var Deathcounter */ public $ypos = array();
-	/* @var Deathcounter */ public $vel = array();
-	/* @var Deathcounter */ public $acc = array();
+	/* @var Deathcounter */ private $xpospart = array();
+	/* @var Deathcounter */ private $ypospart = array();
+	/* @var Deathcounter */ private $xvel = array();
+	/* @var Deathcounter */ private $yvel = array();
+	/* @var Deathcounter */ private $xacc = array();
+	/* @var Deathcounter */ private $yacc = array();
 	/* @var Deathcounter */ public $duration = array();
 	
 	function __construct(){
 		
-		$this->xpos     = new Deathcounter((Map::getWidth()*32-1)*100);
-		$this->ypos     = new Deathcounter((Map::getHeight()*32-1)*100);
-		$this->vel      = new Deathcounter(6400*6401);
-		$this->acc      = new Deathcounter(6400*6401);
-		$this->duration = new Deathcounter(40/*TODO: change back to 720*/);
+		$this->xpos      = new Deathcounter(Map::getWidth()*32-1);
+		$this->ypos      = new Deathcounter(Map::getHeight()*32-1);
+		$this->xpospart  = new Deathcounter();
+		$this->ypospart  = new Deathcounter();
+		$this->xvel      = new Deathcounter(6400);
+		$this->yvel      = new Deathcounter(6400);
+		$this->xacc      = new Deathcounter(1600);
+		$this->yacc      = new Deathcounter(1600);
+		$this->duration  = new Deathcounter(40/*TODO: change back to 720*/);
 		
 	}
 	
@@ -32,19 +40,18 @@ class Projectile{
 		if(is_numeric($x)){
 			if($x > Map::getWidth()*32-1 || $x < 0)
 				Error("Error! X needs to be within the bounds of the map");
-			$x = round($x*100);
 		}
 		elseif(!($x instanceof Deathcounter))
 			Error("Error! X needs to be a number or a Deathcounter");
 		if(is_numeric($y)){
 			if($y > Map::getHeight()*32-1 || $y < 0)
 				Error("Error! Y needs to be within the bounds of the map");
-			$y = round($y*100);
 		}
 		elseif(!($y instanceof Deathcounter))
 			Error("Error! Y needs to be a number or a Deathcounter");
 		
-		return $this->xpos->setTo($x) . $this->ypos->setTo($y);
+		return $this->xpos->setTo($x) . $this->ypos->setTo($y).
+				$this->xpospart->setTo(1000) . $this->ypospart->setTo(1000);
 	}
 	function setVelocity($x, $y){
 		if(is_numeric($x)){
@@ -62,37 +69,28 @@ class Projectile{
 		elseif(!($y instanceof Deathcounter))
 			Error("Error! Y needs to be a number or a Deathcounter");
 		
-		if(is_numeric($x) && is_numeric($y)){
-			return $this->vel->setTo($y*6401+$x);
-		}
-		else{
-			return $this->vel->productOf($y, 6401).
-				$this->vel->add($x);
-		}
+		
+		return $this->xvel->setTo($x).
+			$this->yvel->setTo($y);
 	}
 	function setAcceleration($x, $y){
 		if(is_numeric($x)){
-			if($x > 32 || $x < -32)
-				Error("Error! X needs to be between -32 and 32");
-			$x = round(($x+32)*100);
+			if($x > 8 || $x < -8)
+				Error("Error! X needs to be between -8 and 8");
+			$x = round(($x+8)*100);
 		}
 		elseif(!($x instanceof Deathcounter))
 			Error("Error! X needs to be a number or a Deathcounter");
 		if(is_numeric($y)){
-			if($y > 32 || $y < -32)
-				Error("Error! Y needs to be between -32 and 32");
-			$y = round(($y+32)*100);
+			if($y > 8 || $y < -8)
+				Error("Error! Y needs to be between -8 and 8");
+			$y = round(($y+8)*100);
 		}
 		elseif(!($y instanceof Deathcounter))
 			Error("Error! Y needs to be a number or a Deathcounter");
 		
-		if(is_numeric($x) && is_numeric($y)){
-			return $this->acc->setTo($y*6401+$x);
-		}
-		else{
-			return $this->vel->productOf($y, 6401).
-				$this->vel->add($x);
-		}
+		return $this->xvel->setTo($x).
+			$this->yvel->setTo($y);
 	}
 	function setDuration($n){
 		return $this->duration->setTo($n);
@@ -107,102 +105,56 @@ class Projectile{
 	
 	// move projectile
 	function move(){
-		$tempx = new TempDC(6400);
-		$tempy = new TempDC(6400);
-		$tempz = new TempDC(6400*6401);
-		
 		$text = '';
 		
 		//add velocity, acceleration, and make the changes
 		$text .= _if( $this->duration->atLeast(1) )->then(
-			$this->velocitycalc($tempy, $tempx),
-			$this->accelerationcalc($tempy, $tempx, $tempz),
-			$this->velocityrestore($tempy, $tempx),
+			$this->xvel->add($this->xacc),
+			$this->yvel->add($this->xacc),
+			$this->xvel->subtract(800),
+			$this->yvel->subtract(800),
+			_if($this->xvel->atLeast(6401))->then($this->xvel->setTo(6400)),
+			_if($this->yvel->atLeast(6401))->then($this->yvel->setTo(6400)),
+			
+			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
+			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
+			$this->xvel->subtract(3200),
+			$this->yvel->subtract(3200),
+			_if($this->xpos->atLeast(6401))->then($this->xpos->setTo(6400)),
+			_if($this->ypos->atLeast(6401))->then($this->ypos->setTo(6400)),
 		'');
-		
-		$tempx->release();
-		$tempy->release();
-		$tempz->release();
 		
 		return $text;
 	}
 	
-	private function velocitycalc(TempDC $tempy, TempDC $tempx){
+	private function VelToPos(TempDC $vel, TempDC $pos, TempDC $pospart){
 		
-		//prepare velocity to load in
-		$text = '';
-		for($i=12; $i>=0; $i--){
-			$k = pow(2, $i);
-			$text .= _if($this->vel->atLeast($k*6401))->then(
-				$this->vel->subtract($k*6401),
-				$tempy->add($k),
-				$this->ypos->add($k),
-			'');
-		}
-		for($i=12; $i>=0; $i--){
-			$k = pow(2, $i);
-			$text .= _if($this->vel->atLeast($k))->then(
-				$this->vel->subtract($k),
-				$tempx->add($k),
-				$this->xpos->add($k),
-			'');
-		}
-		
-		return $text;
-	}
-	private function velocityrestore(TempDC $tempy, TempDC $tempx){
-		$text = '';
-		
-		$text .= $tempx->subtract(3200);
-		$text .= $tempy->subtract(3200);
-		$text .= _if( $tempx->atLeast(6401) )->then(
-			$tempx->setTo(6400),
-		'');
-		$text .= _if( $tempy->atLeast(6401) )->then(
-			$tempy->setTo(6400),
-		'');
-		
-		for($i=25; $i>=0; $i--){
-			$k = pow(2, $i);
-			$text .= _if($tempy->atLeast($k))->then(
-				$this->vel->add($k*6401),
-				$tempy->subtract($k),
-			'');
-		}
-		for($i=25; $i>=0; $i--){
-			$k = pow(2, $i);
-			$text .= _if($tempx->atLeast($k))->then(
-				$this->vel->add($k),
-				$tempx->subtract($k),
-			'');
-		}
-		
-		$text .= $this->xpos->subtract(3200);
-		$text .= $this->ypos->subtract(3200);
-		
-		return $text;
-	}
-	private function accelerationcalc(TempDC $tempy, TempDC $tempx, TempDC $tempz){
+		$temp = new TempDC(6400);
 		
 		//prepare acceleration to load in
 		$text = '';
-		for($i=12; $i>=0; $i--){
+		for($i=6; $i>=0; $i--){
 			$k = pow(2, $i);
-			$text .= _if($this->acc->atLeast($k*6401))->then(
-				$this->acc->subtract($k*6401),
-				$tempz->add($k*6401),
-				$tempy->add($k),
+			$text .= _if($vel->atLeast($k*100))->then(
+				$vel->subtract($k*100),
+				$temp->add($k*100),
+				$pos->add($k),
 			'');
 		}
-		for($i=12; $i>=0; $i--){
+		for($i=6; $i>=0; $i--){
 			$k = pow(2, $i);
-			$text .= _if($this->acc->atLeast($k))->then(
-				$this->acc->subtract($k),
-				$tempz->add($k),
-				$tempx->add($k),
+			$text .= _if($vel->atLeast($k))->then(
+				$vel->subtract($k),
+				$temp->add($k),
+				$pospart->add($k),
 			'');
 		}
-		$text .= $this->acc->become($tempz);
+		$text .= $vel->become($temp);
+		$temp->kill();
+		
+		$text .= _if($pospart->atLeast(1051))->then($pospart->subtract(100), $pos->add(1));
+		$text .= _if($pospart->atMost(949))->then($pospart->add(100), $pos->subtract(1));
+		
 		
 		return $text;
 	}
@@ -212,20 +164,13 @@ class Projectile{
 	function show(){
 		$text = '';
 		
-		$outx = new TempDC(Map::getWidth()*32-1);
-		$outy = new TempDC(Map::getHeight()*32-1);
 		$success = new TempSwitch();
 		
 		$P4 = new Player(P4);
 		
 		//output
 		$text .= _if( $this->duration->atLeast(1) )->then(
-			$outx->roundedQuotientOf($this->xpos, 100),
-			$outy->roundedQuotientOf($this->ypos, 100),
-			
-			Grid::putMain($outx, $outy, $success),
-			$outx->kill(),
-			$outy->kill(),
+			Grid::putMain($this->xpos, $this->ypos, $success),
 			_if( $success->is_set() )->then(
 				$success->kill(),
 				Grid::$main->explode(),
@@ -243,8 +188,12 @@ class Projectile{
 		$text .= _if( $this->duration->exactly(1) )->then(
 			$this->xpos->setTo(0),
 			$this->ypos->setTo(0),
-			$this->vel->setTo(0),
-			$this->acc->setTo(0),
+			$this->xpospart->setTo(0),
+			$this->ypospart->setTo(0),
+			$this->xvel->setTo(0),
+			$this->yvel->setTo(0),
+			$this->xacc->setTo(0),
+			$this->yacc->setTo(0),
 			$this->duration->setTo(0),
 		'');
 		
