@@ -30,7 +30,6 @@ class UnitManager {
 	public function firstTrigs(){
 		
 		$P1 = new Player(P1);
-		$P4 = new Player(P4);
 		$catcher = self::$Catcher;
 		$success = new TempSwitch();
 		
@@ -38,7 +37,6 @@ class UnitManager {
 			
 			$this->findCatcher($success),
 			_if( $success )->then(
-				$P4->setGas(777),
 				Grid::putMainRes(33.5*32, Map::getHeight()/2*32),
 				Loc::$main->acquire(Loc::$shiftUp),
 				Loc::$shiftUp->acquire(Loc::$aoe3x3),
@@ -46,9 +44,6 @@ class UnitManager {
 				
 				$this->createBSUnits(),
 				
-			''),
-			_if( $success->is_clear() )->then(
-				$P4->setGas(888),
 			''),
 			
 			$success->release(),
@@ -191,7 +186,7 @@ class UnitManager {
 			$props = $properties;
 		}
 		else{
-			$props = array_slice(func_get_args(), 5);
+			$props = array_slice(func_get_args(), 4);
 		}
 		
 		self::$Specified[$index] = array($unit, $player, $x, $y, $props);
@@ -221,8 +216,10 @@ class UnitManager {
 			$props = $properties;
 		}
 		else{
-			$props = array_slice(func_get_args(), 5);
+			$props = array_slice(func_get_args(), 4);
 		}
+		
+		
 		
 		$index = null;
 		$first = self::$PreplacedIndex+1;

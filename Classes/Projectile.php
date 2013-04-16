@@ -14,21 +14,44 @@ class Projectile{
 	/* @var Deathcounter */ private $yacc = array();
 	/* @var Deathcounter */ public $duration = array();
 	
-	function __construct(){
+	function __construct(Array $dcarray = null){
 		
-		$this->xpos      = new Deathcounter(Map::getWidth()*32-1);
-		$this->ypos      = new Deathcounter(Map::getHeight()*32-1);
-		$this->xpospart  = new Deathcounter();
-		$this->ypospart  = new Deathcounter();
-		$this->xvel      = new Deathcounter(6400);
-		$this->yvel      = new Deathcounter(6400);
-		$this->xacc      = new Deathcounter(1600);
-		$this->yacc      = new Deathcounter(1600);
-		$this->duration  = new Deathcounter(40/*TODO: change back to 720*/);
-		
+		if( $dcarray === null ){
+			$this->xpos      = new Deathcounter(Map::getWidth()*32-1);
+			$this->ypos      = new Deathcounter(Map::getHeight()*32-1);
+			$this->xpospart  = new Deathcounter(2000);
+			$this->ypospart  = new Deathcounter(2000);
+			$this->xvel      = new Deathcounter(6400);
+			$this->yvel      = new Deathcounter(6400);
+			$this->xacc      = new Deathcounter(1600);
+			$this->yacc      = new Deathcounter(1600);
+			$this->duration  = new Deathcounter(720);
+		}
+		else if(is_array($dcarray)) {
+			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration) = $dcarray;
+			$this->xpos      = $xpos;
+			$this->ypos      = $ypos;
+			$this->xpospart  = $xpospart;
+			$this->ypospart  = $ypospart;
+			$this->xvel      = $xvel;
+			$this->yvel      = $yvel;
+			$this->xacc      = $xacc;
+			$this->yacc      = $yacc;
+			$this->duration  = $duration;
+		}
+		else {
+			Error("\$dcarray must be an array");
+		}
 	}
 	
+	/////
+	// CONDITIONS
+	///
 	
+	
+	function notInUse(){
+		return $this->duration->exactly(0);
+	}
 	
 	
 	/////
@@ -127,7 +150,7 @@ class Projectile{
 		return $text;
 	}
 	
-	private function VelToPos(TempDC $vel, TempDC $pos, TempDC $pospart){
+	private function VelToPos(Deathcounter $vel, Deathcounter $pos, Deathcounter $pospart){
 		
 		$temp = new TempDC(6400);
 		
@@ -166,8 +189,6 @@ class Projectile{
 		
 		$success = new TempSwitch();
 		
-		$P4 = new Player(P4);
-		
 		//output
 		$text .= _if( $this->duration->atLeast(1) )->then(
 			Grid::putMain($this->xpos, $this->ypos, $success),
@@ -198,6 +219,16 @@ class Projectile{
 		'');
 		
 		return $text;
+	}
+	
+	
+	// combined engine
+	function engine(){
+		return
+			$this->move().
+			$this->show().
+			$this->kill().
+			$this->tickDown();
 	}
 	
 	

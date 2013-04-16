@@ -36,10 +36,29 @@ class LirinLocation extends Location {
 		KillUnit($player, 'Terran Wraith');
 	}
 	
-	public function placeAt($x, $y){
-		
+	public function placeAt($x, $y, TempSwitch $success = null){
+		$text = '';
+		if( $success !== null ){
+			$text .= Grid::putMain($x, $y, $success);
+		}
+		else{
+			$text .= Grid::putMain($x, $y);
+		}
+		$text .= Loc::$main->acquire($this);
+		return $text;
 	}
 	
+	public function placeAtRes($x, $y, TempSwitch $success = null){
+		$text = '';
+		if( $success !== null ){
+			$text .= Grid::putMainRes($x, $y, $success);
+		}
+		else{
+			$text .= Grid::putMainRes($x, $y);
+		}
+		$text .= Loc::$main->acquire($this);
+		return $text;
+	}
 	
 	
 }

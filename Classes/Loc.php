@@ -10,6 +10,7 @@ class Loc {
 	/* @var LirinLocation */ static $aoe4x4;
 	/* @var LirinLocation */ static $aoe5x5;
 	/* @var LirinLocation */ static $spawnbox;
+	/* @var LirinLocation */ static $larvabox;
 	
 	/* @var LirinLocation */ static $slideLeft1;
 	/* @var LirinLocation */ static $slideLeft8;
@@ -35,6 +36,7 @@ class Loc {
 		self::$aoe4x4       = LocationManager::MintLocation("aoe4x4", 0, 0, 4*32, 4*32);
 		self::$aoe5x5       = LocationManager::MintLocation("aoe5x5", 0, 0, 5*32, 5*32);
 		self::$spawnbox     = LocationManager::MintLocation("spawnbox", 33*32, 4*32, 38*32, 9*32);
+		self::$larvabox     = LocationManager::MintLocation("larvabox", 43*32, 4*32, 48*32, 9*32);
 		
 		self::$slideLeft1   = Grid::$slideLeft1;
 		self::$slideLeft8   = Grid::$slideLeft8;
@@ -49,10 +51,10 @@ class Loc {
 			self::$BSLocs[] = $bsunit->Location;
 		}
 		
-		self::$YLoc     = Grid::$YLoc;
-		self::$pixX     = Grid::$pixX;
-		self::$pixY     = Grid::$pixY;
-		self::$saveLoc  = Grid::$saveLoc;
+		self::$YLoc         = Grid::$YLoc;
+		self::$pixX         = Grid::$pixX;
+		self::$pixY         = Grid::$pixY;
+		self::$saveLoc      = Grid::$saveLoc;
 	}
 	
 	
