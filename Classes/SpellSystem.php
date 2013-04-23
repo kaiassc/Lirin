@@ -42,8 +42,6 @@ class SpellSystem {
 			$this->yaccDCs[]        = $yacc      = new Deathcounter($projowners, 1600);
 			$this->durationDCs[]    = $duration  = new Deathcounter($projowners, 720);
 			
-			$this->CPprojectiles[] = new Projectile(array($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration));
-			
 			$this->CPprojectiles[] = new Projectile(array($xpos->CP, $ypos->CP, $xpospart->CP, $ypospart->CP, $xvel->CP, $yvel->CP, $xacc->CP, $yacc->CP, $duration->CP));
 			$this->Projectiles[] = $this->P4projectiles[] = new Projectile(array($xpos->P4, $ypos->P4, $xpospart->P4, $ypospart->P4, $xvel->P4, $yvel->P4, $xacc->P4, $yacc->P4, $duration->P4));
 			$this->Projectiles[] = $this->P5projectiles[] = new Projectile(array($xpos->P5, $ypos->P5, $xpospart->P5, $ypospart->P5, $xvel->P5, $yvel->P5, $xacc->P5, $yacc->P5, $duration->P5));
@@ -63,10 +61,12 @@ class SpellSystem {
 		$humans =       new Player(P4, P5, P6);
 		$projowners =   new Player(P4, P5, P6, P7, P8);
 		
+		$P1->justonce(
+			$this->xvelDCs[0]->leaderboard("xvelDCs[0]"),
+		'');
+		
 		
 		$spelliscast = new TempSwitch();
-		$fireballactivated = '';
-		
 		
 		$xmax = Map::getWidth()*32;
 		$ymax = Map::getHeight()*32;
@@ -84,8 +84,8 @@ class SpellSystem {
 		// Projectile Variables
 		$positionx =        new TempDC(Map::getWidth()*32-1);
 		$positiony =        new TempDC(Map::getHeight()*32-1);
-		$velocityx =        new TempDC(64000);
-		$velocityy =        new TempDC(64000);
+		$velocityx =        new TempDC(640000);
+		$velocityy =        new TempDC(640000);
 		$accelerationx =    new TempDC(1600);
 		$accelerationy =    new TempDC(1600);
 		$duration =         new TempDC(720);
@@ -105,12 +105,14 @@ class SpellSystem {
 		$VelocityLoadIndex =            new TempDC($projowners);
 		$VelocityMultiplyByDCIndex =    new TempDC($projowners);
 		$VelocityMultiplier =           new TempDC($projowners, 100);
+		$VelocityDivisor =              new TempDC($projowners, 100);
+		$VelocityRawY =                  new TempDC($projowners, 6400);
 		$VelocityAdjustForSigned =      new TempDC($projowners);
 		
 		
 		
 		// Pseudo fireball cast
-		$P4->_if( FRAGS::$P4Fragged )->then(
+		$P4->_if( FRAGS::$P4Fragged, Never() )->then(
 			FRAGS::$P4Fragged->clear(),
 			
 			Display("Invoke fireball settings"),
@@ -133,14 +135,54 @@ class SpellSystem {
 			$VelocityLoadIndex->setTo(1), // Load components
 			$VelocityMultiplyByDCIndex->setTo(0), // none
 			$VelocityMultiplier->setTo(16),
+			$VelocityDivisor->setTo(0),
 			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
 			
 			// Set Acceleration
-			$accelerationx->setTo(0),
-			$accelerationy->setTo(0),
+			$accelerationx->setTo(800),
+			$accelerationy->setTo(800),
 			
 			// Set Duration
-			$duration->setTo(36),
+			$duration->setTo(24),
+			
+			$spelliscast->set(),
+			
+		'');
+		
+		// Lob 
+		$P4->_if( FRAGS::$P4Fragged )->then(
+			FRAGS::$P4Fragged->clear(),
+			
+			Display("Invoke lob settings"),
+			
+			$DistanceOriginIndex        ->setTo(self::_Hero),
+			$DistanceDestinationIndex   ->setTo(self::_Point1),
+			
+			$ComponentOriginIndex       ->setTo(self::_Hero),
+			$ComponentDestinationIndex  ->setTo(self::_Point1),
+			
+			// unused
+			$MaxCastRange->setTo(1000/*px*/),
+			
+			// Set Position
+			$PositionIndex->setTo(1), // Load Distance's Origin
+			$StaticOffsetX->setTo(0),
+			$StaticOffsetY->setTo(0),
+			
+			// Set Velocity
+			$VelocityLoadIndex->setTo(1), // Load components
+			$VelocityMultiplyByDCIndex->setTo(1), // vel *= distance
+			$VelocityMultiplier->setTo(0),
+			$VelocityDivisor->setTo(16),
+			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
+			$VelocityRawY->setTo(200),      // 3200 is zero
+			
+			// Set Acceleration
+			$accelerationx->setTo(800),
+			$accelerationy->setTo(1150),
+			
+			// Set Duration
+			$duration->setTo(16),
 			
 			$spelliscast->set(),
 			
@@ -217,12 +259,12 @@ class SpellSystem {
 		'');
 
 		$distance = new TempDC($xmax);
-		$angle = new TempDC($xmax);
-		$xcomponent = new TempDC($xmax, 10000);
-		$ycomponent = new TempDC($ymax, 10000);
+		$angle = new TempDC(1440);
+		$xcomponent = new TempDC(10000);
+		$ycomponent = new TempDC(10000);
 		
-		$tempx = new TempDC($xmax);
-		$tempy = new TempDC($ymax);
+		$tempx = new TempDC(320000);
+		$tempy = new TempDC(320000);
 		$success = new TempSwitch();
 		
 		$projowners->_if( $spelliscast )->then(
@@ -231,6 +273,13 @@ class SpellSystem {
 			$distance->distance($distX1, $distY1, $distX2, $distY2),
 			$angle->getAngle($compX1, $compY1, $compX2, $compY2),
 			$angle->componentsInto($xcomponent, $ycomponent),
+			
+			
+			// TODO:Remove
+			_if( $distance->atLeast(257) )->then(
+				$distance->setTo(256),
+			''),
+			
 			
 			// Set Position
 			_if( $PositionIndex->exactly(1) )->then(
@@ -247,32 +296,35 @@ class SpellSystem {
 			$velocityy->setTo(0),
 			
 			_if( $VelocityLoadIndex->exactly(1) )->then(
+				Display("loading xycomponents"),
 				$velocityx->setTo($xcomponent),
 				$velocityy->setTo($ycomponent),
 			''),
 			
-			_if( $VelocityMultiplier->atLeast(1) )->then(
-				$velocityx->multiplyBy($VelocityMultiplier),
-				$velocityy->multiplyBy($VelocityMultiplier),
-			''),
-			
 			_if( $VelocityMultiplyByDCIndex->exactly(1) )->then(
+				Display("multiplying velocities by the distance"),
 				$velocityx->multiplyBy($distance),
 				$velocityy->multiplyBy($distance),
 			''),
 			
+			_if( $VelocityMultiplier->atLeast(1) )->then(
+				Display("multiplying velocities by static value"),
+				$velocityx->multiplyBy($VelocityMultiplier),
+				$velocityy->multiplyBy($VelocityMultiplier),
+			''),
 			
-			// Set Acceleration
-			$accelerationx->setTo(0),
-			$accelerationy->setTo(0),
+			_if( $VelocityDivisor->atLeast(1) )->then(
+				Display("multiplying velocities by static value"),
+				$velocityx->roundedDivideBy($VelocityDivisor),
+				$velocityy->roundedDivideBy($VelocityDivisor),
+			''),
 			
 			// Add/Subtract for signed
 			_if( $VelocityAdjustForSigned->atLeast(1) )->then(
+				Display("adjusting for signed velocity"),
 				$tempx->setTo($velocityx),
 				$tempy->setTo($velocityy),
 				
-				$tempx->multiplyBy(32),
-				$tempy->multiplyBy(32),
 				$tempx->roundedDivideBy(100),
 				$tempy->roundedDivideBy(100),
 				
@@ -280,19 +332,32 @@ class SpellSystem {
 				$velocityy->setTo(3200),
 				
 				_if( $angle->between(361,1079) )->then(
+					Display(" velocity <--"),
 					$velocityx->subtract($tempx),
 				e)->_else(
+					Display(" velocity -->"),
 					$velocityx->add($tempx),
 				''),
 				_if( $angle->atMost(719) )->then(
+					Display(" velocity ^"),
 					$velocityy->subtract($tempy),
 				''),
 				_if( $angle->atLeast(720) )->then(
+					Display(" velocity V"),
 					$velocityy->add($tempy),
 				''),
 				
 			''),
 			
+			_if( $VelocityRawY->atLeast(1) )->then(
+				$velocityy->add($VelocityRawY),
+				$velocityy->subtract(3200),
+			''),
+			
+			
+			// Set Acceleration
+			#$accelerationx->setTo(800), // aka zero
+			#$accelerationy->setTo(800), // aka zero
 			
 			$this->loadIntoProjectiles($positionx, $positiony, $velocityx, $velocityy, $accelerationx, $accelerationy, $duration, $success),
 			_if( $success->is_clear() )->then(
@@ -318,6 +383,8 @@ class SpellSystem {
 			$VelocityLoadIndex->release(),
 			$VelocityMultiplyByDCIndex->release(),
 			$VelocityMultiplier->release(),
+			$VelocityDivisor->release(),
+			$VelocityRawY->release(),
 			$VelocityAdjustForSigned->release(),
 			
 			$distX1->release(),
@@ -357,7 +424,7 @@ class SpellSystem {
 		
 		$text .= $success->clear();
 		
-		foreach( $this->P4projectiles as $projectile ){
+		foreach( $this->CPprojectiles as $projectile ){
 			$text .= _if( $projectile->notInUse(), $success->is_clear() )->then(
 				$projectile->setPosition($positionx, $positiony),
 				$projectile->setVelocity($velocityx, $velocityy),

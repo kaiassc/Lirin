@@ -151,7 +151,6 @@ class BattleSystem {
 			$hero1->damage->setTo(20),
 			$hero2->damage->setTo(20),
 			$hero3->damage->setTo(20),
-			self::$typeDCs[0]->leaderboard(),
 		'');
 		
 	}

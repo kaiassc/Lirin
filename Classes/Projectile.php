@@ -112,8 +112,8 @@ class Projectile{
 		elseif(!($y instanceof Deathcounter))
 			Error("Error! Y needs to be a number or a Deathcounter");
 		
-		return $this->xvel->setTo($x).
-			$this->yvel->setTo($y);
+		return $this->xacc->setTo($x).
+			$this->yacc->setTo($y);
 	}
 	function setDuration($n){
 		return $this->duration->setTo($n);
@@ -132,19 +132,20 @@ class Projectile{
 		
 		//add velocity, acceleration, and make the changes
 		$text .= _if( $this->duration->atLeast(1) )->then(
+			
 			$this->xvel->add($this->xacc),
-			$this->yvel->add($this->xacc),
+			$this->yvel->add($this->yacc),
 			$this->xvel->subtract(800),
 			$this->yvel->subtract(800),
+			
 			_if($this->xvel->atLeast(6401))->then($this->xvel->setTo(6400)),
 			_if($this->yvel->atLeast(6401))->then($this->yvel->setTo(6400)),
 			
 			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
 			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
-			$this->xvel->subtract(3200),
-			$this->yvel->subtract(3200),
-			_if($this->xpos->atLeast(6401))->then($this->xpos->setTo(6400)),
-			_if($this->ypos->atLeast(6401))->then($this->ypos->setTo(6400)),
+			$this->xpos->subtract(32),
+			$this->ypos->subtract(32),
+			
 		'');
 		
 		return $text;
@@ -188,6 +189,8 @@ class Projectile{
 		$text = '';
 		
 		$success = new TempSwitch();
+		
+		$P4 = new Player(P4);
 		
 		//output
 		$text .= _if( $this->duration->atLeast(1) )->then(
