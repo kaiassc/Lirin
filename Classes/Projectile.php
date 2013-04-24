@@ -21,8 +21,8 @@ class Projectile{
 			$this->ypos      = new Deathcounter(Map::getHeight()*32-1);
 			$this->xpospart  = new Deathcounter(2000);
 			$this->ypospart  = new Deathcounter(2000);
-			$this->xvel      = new Deathcounter(6400);
-			$this->yvel      = new Deathcounter(6400);
+			$this->xvel      = new Deathcounter(12800);
+			$this->yvel      = new Deathcounter(12800);
 			$this->xacc      = new Deathcounter(1600);
 			$this->yacc      = new Deathcounter(1600);
 			$this->duration  = new Deathcounter(720);
@@ -78,16 +78,16 @@ class Projectile{
 	}
 	function setVelocity($x, $y){
 		if(is_numeric($x)){
-			if($x > 32 || $x < -32)
-				Error("Error! X needs to be between -32 and 32");
-			$x = round(($x+32)*100);
+			if($x > 64 || $x < -64)
+				Error("Error! X needs to be between -64 and 64");
+			$x = round(($x+64)*100);
 		}
 		elseif(!($x instanceof Deathcounter))
 			Error("Error! X needs to be a number or a Deathcounter");
 		if(is_numeric($y)){
-			if($y > 32 || $y < -32)
-				Error("Error! Y needs to be between -32 and 32");
-			$y = round(($y+32)*100);
+			if($y > 64 || $y < -64)
+				Error("Error! Y needs to be between -64 and 64");
+			$y = round(($y+64)*100);
 		}
 		elseif(!($y instanceof Deathcounter))
 			Error("Error! Y needs to be a number or a Deathcounter");
@@ -135,16 +135,16 @@ class Projectile{
 			
 			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
 			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
-			$this->xpos->subtract(32),
-			$this->ypos->subtract(32),
+			$this->xpos->subtract(64),
+			$this->ypos->subtract(64),
 			
 			$this->xvel->add($this->xacc),
 			$this->yvel->add($this->yacc),
 			$this->xvel->subtract(800),
 			$this->yvel->subtract(800),
 			
-			_if($this->xvel->atLeast(6401))->then($this->xvel->setTo(6400)),
-			_if($this->yvel->atLeast(6401))->then($this->yvel->setTo(6400)),
+			_if($this->xvel->atLeast(12801))->then($this->xvel->setTo(12800)),
+			_if($this->yvel->atLeast(12801))->then($this->yvel->setTo(12800)),
 			
 		'');
 		
@@ -153,11 +153,11 @@ class Projectile{
 	
 	private function VelToPos(Deathcounter $vel, Deathcounter $pos, Deathcounter $pospart){
 		
-		$temp = new TempDC(6400);
+		$temp = new TempDC(12800);
 		
 		//prepare acceleration to load in
 		$text = '';
-		for($i=6; $i>=0; $i--){
+		for($i=7; $i>=0; $i--){
 			$k = pow(2, $i);
 			$text .= _if($vel->atLeast($k*100))->then(
 				$vel->subtract($k*100),

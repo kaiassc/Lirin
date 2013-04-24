@@ -87,8 +87,8 @@ class SpellSystem {
 		// Projectile Variables
 		$positionx =        new TempDC(Map::getWidth()*32-1);
 		$positiony =        new TempDC(Map::getHeight()*32-1);
-		$velocityx =        new TempDC(6400);
-		$velocityy =        new TempDC(6400);
+		$velocityx =        new TempDC(12800);
+		$velocityy =        new TempDC(12800);
 		$accelerationx =    new TempDC(1600);
 		$accelerationy =    new TempDC(1600);
 		$duration =         new TempDC(720);
@@ -109,7 +109,7 @@ class SpellSystem {
 		$VelocityMultiplyByDCIndex =    new TempDC($projowners);
 		$VelocityMultiplier =           new TempDC($projowners, 100);
 		$VelocityDivisor =              new TempDC($projowners, 100);
-		$VelocityRawY =                  new TempDC($projowners, 6400);
+		$VelocityRawY =                  new TempDC($projowners, 12800);
 		$VelocityAdjustForSigned =      new TempDC($projowners);
 		
 		
@@ -128,7 +128,7 @@ class SpellSystem {
 			$spelliscast->set(),
 		'');
 		
-		$humans->_if( $spelliscast )->then(
+		$humans->_if( $spelliscast, Never() )->then(
 			
 			Display("Invoke fireball settings"),
 			
@@ -163,7 +163,7 @@ class SpellSystem {
 		'');
 		
 		// Lob 
-		$humans->_if( $spelliscast, Never() )->then(
+		$humans->_if( $spelliscast )->then(
 			
 			Display("Invoke lob settings"),
 			
@@ -188,7 +188,7 @@ class SpellSystem {
 			$VelocityDivisor->setTo(16),
 			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
 			//$VelocityRawY->setTo(3200-2975),      // 3200 is zero
-			$VelocityRawY->setTo(3200-2625),      // 3200 is zero
+			$VelocityRawY->setTo(6400-2625),      // 3200 is zero
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
@@ -289,7 +289,7 @@ class SpellSystem {
 			
 		'');
 
-		$distance = new TempDC($xmax);
+		$distance = new TempDC(256);
 		$angle = new TempDC(1440);
 		$xcomponent = new TempDC(10000);
 		$ycomponent = new TempDC(10000);
@@ -351,25 +351,25 @@ class SpellSystem {
 			''),
 			
 			_if( $VelocityDivisor->atLeast(1) )->then(
-				Display("multiplying velocities by static value"),
+				Display("dividing velocities by static value"),
 				$velocityx->roundedDivideBy($VelocityDivisor),
 				$velocityy->roundedDivideBy($VelocityDivisor),
 			''),
 			
+			$velocityx->Max(32000),
+			$velocityy->Max(32000),
+			
 			// Add/Subtract for signed
 			_if( $VelocityAdjustForSigned->atLeast(1) )->then(
 				Display("adjusting for signed velocity"),
-				$tempx->setTo($velocityx),
-				$tempy->setTo($velocityy),
+				$tempx->roundedQuotientOf($velocityx, 10),
+				$tempy->roundedQuotientOf($velocityy, 10),
 				
-				$tempx->roundedDivideBy(10),
-				$tempy->roundedDivideBy(10),
+				$tempx->Max(3200),
+				$tempy->Max(3200),
 				
-				$tempx->Max(1600),
-				$tempy->Max(1600),
-				
-				$velocityx->setTo(3200),
-				$velocityy->setTo(3200),
+				$velocityx->setTo(6400),
+				$velocityy->setTo(6400),
 				
 				_if( $angle->between(361,1079) )->then(
 					Display(" velocity <--"),
@@ -387,14 +387,14 @@ class SpellSystem {
 					$velocityy->add($tempy),
 				''),
 				
-				$velocityx->Max(6400),
-				$velocityy->Max(6400),
+				$velocityx->Max(12800),
+				$velocityy->Max(12800),
 				
 			''),
 			
 			_if( $VelocityRawY->atLeast(1) )->then(
 				$velocityy->add($VelocityRawY),
-				$velocityy->subtract(3200),
+				$velocityy->subtract(6400),
 			''),
 			
 			
