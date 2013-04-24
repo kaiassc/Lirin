@@ -26,6 +26,7 @@ class SpellSystem {
 	const _Hero      = 1;
 	const _Point1    = 2;
 	const _Point2    = 3;
+	const _Cursor    = 4;
 	
 	function __construct($projPerPlayer = 4){
 		
@@ -118,10 +119,10 @@ class SpellSystem {
 			Display("Invoke fireball settings"),
 			
 			$DistanceOriginIndex        ->setTo(self::_Hero),
-			$DistanceDestinationIndex   ->setTo(self::_Point1),
+			$DistanceDestinationIndex   ->setTo(self::_Cursor),
 			
 			$ComponentOriginIndex       ->setTo(self::_Hero),
-			$ComponentDestinationIndex  ->setTo(self::_Point1),
+			$ComponentDestinationIndex  ->setTo(self::_Cursor),
 			
 			// unused
 			$MaxCastRange->setTo(1000/*px*/),
@@ -156,10 +157,10 @@ class SpellSystem {
 			Display("Invoke lob settings"),
 			
 			$DistanceOriginIndex        ->setTo(self::_Hero),
-			$DistanceDestinationIndex   ->setTo(self::_Point1),
+			$DistanceDestinationIndex   ->setTo(self::_Cursor),
 			
 			$ComponentOriginIndex       ->setTo(self::_Hero),
-			$ComponentDestinationIndex  ->setTo(self::_Point1),
+			$ComponentDestinationIndex  ->setTo(self::_Cursor),
 			
 			// unused
 			$MaxCastRange->setTo(1000/*px*/),
@@ -198,9 +199,13 @@ class SpellSystem {
 		$compX2 = new TempDC($xmax);
 		$compY2 = new TempDC($ymax);
 		
+		$cursorx = new Deathcounter(Map::getWidth()*32-1);
+		$cursory = new Deathcounter(Map::getHeight()*32-1);
 		
 		
 		$humans->_if( $spelliscast )->then(
+			
+			GetCursor($cursorx, $cursory, Map::getWidth(), Map::getHeight()),
 			
 			// Load the Distance Calculation's Origin and Destination
 			_if( $DistanceOriginIndex->exactly(self::_Hero) )->then(
@@ -215,6 +220,10 @@ class SpellSystem {
 				$distX1->setTo($point2X),
 				$distY1->setTo($point2Y),
 			''),
+			_if( $DistanceOriginIndex->exactly(self::_Cursor) )->then(
+				$distX1->setTo($cursorx),
+				$distY1->setTo($cursory),
+			''),
 			
 			_if( $DistanceDestinationIndex->exactly(self::_Hero) )->then(
 				$distX2->setTo($bsX->CP),
@@ -227,6 +236,10 @@ class SpellSystem {
 			_if( $DistanceDestinationIndex->exactly(self::_Point2) )->then(
 				$distX2->setTo($point2X),
 				$distY2->setTo($point2Y),
+			''),
+			_if( $DistanceDestinationIndex->exactly(self::_Cursor) )->then(
+				$distX2->setTo($cursorx),
+				$distY2->setTo($cursory),
 			''),
 			
 			// Load the Angle and Component's Origin and Destination
@@ -242,6 +255,10 @@ class SpellSystem {
 				$compX1->setTo($point2X),
 				$compY1->setTo($point2Y),
 			''),
+			_if( $ComponentOriginIndex->exactly(self::_Cursor) )->then(
+				$compX1->setTo($cursorx),
+				$compY1->setTo($cursory),
+			''),
 			
 			_if( $ComponentDestinationIndex->exactly(self::_Hero) )->then(
 				$compX2->setTo($bsX->CP),
@@ -254,6 +271,10 @@ class SpellSystem {
 			_if( $ComponentDestinationIndex->exactly(self::_Point2) )->then(
 				$compX2->setTo($point2X),
 				$compY2->setTo($point2Y),
+			''),
+			_if( $ComponentDestinationIndex->exactly(self::_Cursor) )->then(
+				$compX2->setTo($cursorx),
+				$compY2->setTo($cursory),
 			''),
 			
 		'');
