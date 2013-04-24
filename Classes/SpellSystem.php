@@ -175,11 +175,11 @@ class SpellSystem {
 			$VelocityMultiplier->setTo(0),
 			$VelocityDivisor->setTo(16),
 			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
-			$VelocityRawY->setTo(200),      // 3200 is zero
+			$VelocityRawY->setTo(3200-2800),      // 3200 is zero
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
-			$accelerationy->setTo(1150),
+			$accelerationy->setTo(800+350),
 			
 			// Set Duration
 			$duration->setTo(16),
@@ -266,7 +266,7 @@ class SpellSystem {
 		$tempx = new TempDC(320000);
 		$tempy = new TempDC(320000);
 		$success = new TempSwitch();
-		
+
 		$projowners->_if( $spelliscast )->then(
 			
 			// Calculate distance, angle, and x and y components
