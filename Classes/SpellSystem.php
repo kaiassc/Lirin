@@ -59,6 +59,8 @@ class SpellSystem {
 		
 		$P1 =           new Player(P1);
 		$P4 =           new Player(P4);
+		$P5 =           new Player(P5);
+		$P6 =           new Player(P6);
 		$humans =       new Player(P4, P5, P6);
 		$projowners =   new Player(P4, P5, P6, P7, P8);
 		
@@ -113,16 +115,28 @@ class SpellSystem {
 		
 		
 		// Pseudo fireball cast
-		$P4->_if( FRAGS::$P4Fragged, Never() )->then(
+		$P4->_if( FRAGS::$P4Fragged )->then(
 			FRAGS::$P4Fragged->clear(),
+			$spelliscast->set(),
+		'');
+		$P5->_if( FRAGS::$P5Fragged )->then(
+			FRAGS::$P5Fragged->clear(),
+			$spelliscast->set(),
+		'');
+		$P6->_if( FRAGS::$P6Fragged )->then(
+			FRAGS::$P6Fragged->clear(),
+			$spelliscast->set(),
+		'');
+		
+		$humans->_if( $spelliscast )->then(
 			
 			Display("Invoke fireball settings"),
 			
 			$DistanceOriginIndex        ->setTo(self::_Hero),
-			$DistanceDestinationIndex   ->setTo(self::_Cursor),
+			$DistanceDestinationIndex   ->setTo(self::_Point1),
 			
 			$ComponentOriginIndex       ->setTo(self::_Hero),
-			$ComponentDestinationIndex  ->setTo(self::_Cursor),
+			$ComponentDestinationIndex  ->setTo(self::_Point1),
 			
 			// unused
 			$MaxCastRange->setTo(1000/*px*/),
@@ -146,21 +160,18 @@ class SpellSystem {
 			// Set Duration
 			$duration->setTo(24),
 			
-			$spelliscast->set(),
-			
 		'');
 		
 		// Lob 
-		$P4->_if( FRAGS::$P4Fragged )->then(
-			FRAGS::$P4Fragged->clear(),
+		$humans->_if( $spelliscast, Never() )->then(
 			
 			Display("Invoke lob settings"),
 			
 			$DistanceOriginIndex        ->setTo(self::_Hero),
-			$DistanceDestinationIndex   ->setTo(self::_Cursor),
+			$DistanceDestinationIndex   ->setTo(self::_Point1),
 			
 			$ComponentOriginIndex       ->setTo(self::_Hero),
-			$ComponentDestinationIndex  ->setTo(self::_Cursor),
+			$ComponentDestinationIndex  ->setTo(self::_Point1),
 			
 			// unused
 			$MaxCastRange->setTo(1000/*px*/),
@@ -186,8 +197,6 @@ class SpellSystem {
 			// Set Duration
 			$duration->setTo(16),
 			
-			$spelliscast->set(),
-			
 		'');
 		
 		$distX1 = new TempDC($xmax);
@@ -206,7 +215,7 @@ class SpellSystem {
 		
 		$humans->_if( $spelliscast )->then(
 			
-			GetCursor($cursorx, $cursory, Map::getWidth(), Map::getHeight()),
+			//GetCursor($cursorx, $cursory, Map::getWidth(), Map::getHeight()),
 			
 			// Load the Distance Calculation's Origin and Destination
 			_if( $DistanceOriginIndex->exactly(self::_Hero) )->then(
@@ -222,8 +231,8 @@ class SpellSystem {
 				$distY1->setTo($point2Y),
 			''),
 			_if( $DistanceOriginIndex->exactly(self::_Cursor) )->then(
-				$distX1->setTo($cursorx),
-				$distY1->setTo($cursory),
+				//$distX1->setTo($cursorx),
+				//$distY1->setTo($cursory),
 			''),
 			
 			_if( $DistanceDestinationIndex->exactly(self::_Hero) )->then(
@@ -239,8 +248,8 @@ class SpellSystem {
 				$distY2->setTo($point2Y),
 			''),
 			_if( $DistanceDestinationIndex->exactly(self::_Cursor) )->then(
-				$distX2->setTo($cursorx),
-				$distY2->setTo($cursory),
+				//$distX2->setTo($cursorx),
+				//$distY2->setTo($cursory),
 			''),
 			
 			// Load the Angle and Component's Origin and Destination
@@ -257,8 +266,8 @@ class SpellSystem {
 				$compY1->setTo($point2Y),
 			''),
 			_if( $ComponentOriginIndex->exactly(self::_Cursor) )->then(
-				$compX1->setTo($cursorx),
-				$compY1->setTo($cursory),
+				//$compX1->setTo($cursorx),
+				//$compY1->setTo($cursory),
 			''),
 			
 			_if( $ComponentDestinationIndex->exactly(self::_Hero) )->then(
@@ -274,8 +283,8 @@ class SpellSystem {
 				$compY2->setTo($point2Y),
 			''),
 			_if( $ComponentDestinationIndex->exactly(self::_Cursor) )->then(
-				$compX2->setTo($cursorx),
-				$compY2->setTo($cursory),
+				//$compX2->setTo($cursorx),
+				//$compY2->setTo($cursory),
 			''),
 			
 		'');
