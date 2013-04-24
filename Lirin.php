@@ -16,9 +16,10 @@ class Lirin extends Map {
 	
 	function Main(){
 		
-		$SFXManager = new SFXManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
+		$FXManager = new FXManager("$_SERVER[DOCUMENT_ROOT]/Lirin/Wavs");
 		$UnitManager = new UnitManager(2);
 		$BattleSystem = new BattleSystem();
+		$SpellSystem = new SpellSystem(4);
 		new Grid(128, 96, 8/*px*/, 32);
 		new Time(10/*min*/);
 		$GloreManager = new GloreManager();
@@ -41,12 +42,13 @@ class Lirin extends Map {
 		UnitManager::MintUnit("Start Location", $All, 250, 1400);
 		UnitManager::MintMapRevealers(P4);
 		
+		/**/
 		$UnitManager->firstTrigs();
-		
 		/**/
 		$BattleSystem->CreateEngine();
 		/**/
-		
+		$SpellSystem->CreateEngine();
+		/**/
 		
 		$humans->justonce(
 			SetAlly(AllPlayers),
@@ -73,16 +75,6 @@ class Lirin extends Map {
 			$FRAGS->getCoordinate(),
 		'');
 		
-		$success = new TempSwitch();
-		$P4->_if( FRAGS::$P4Fragged )->then(
-			FRAGS::$P4Fragged->clear(),
-			Grid::putMain(FRAGS::$x->P4, FRAGS::$y->P4, $success),
-			_if( $success )->then(
-				Grid::$main->explode(),
-				$success->release(),
-			''),
-		'');
-		/**/
 		
 		$dcx = new Deathcounter(Map::getWidth()*32-1);
 		$dcy = new Deathcounter(Map::getHeight()*32-1);
@@ -107,10 +99,10 @@ class Lirin extends Map {
 		/**/
 		// Spawn Heroes
 		foreach($heroes as $hero){
-			//$types = Type::getHeroTypes();
-			//$randtype = $types[array_rand($types)];
-			$x = 1417+($hero->BSid-3)*32;
-			$y = 810;
+			#$types = Type::getHeroTypes();
+			#$randtype = $types[array_rand($types)];
+			#$x = 1417+($hero->BSid-3)*32;
+			#$y = 810;
 			$player = new Player($hero->Player);
 			$player->justonce(
 				$hero->spawnAs(Type::$Melee, 2555, 2444),
@@ -133,155 +125,6 @@ class Lirin extends Map {
 		}
 		/**/
 		
-		/** 
-		// Chat style test
-		$A = new KeyStroke("A");
-		$D = new KeyStroke("D");
-		
-		$display = new Deathcounter();
-		
-		$P4->_if( $A->pressed() )->then(
-			$display->subtract(1),
-		'');
-		$P4->_if( $D->pressed() )->then(
-			$display->add(1),
-		'');
-		
-		$P4->always(
-			ClearText(),
-		'');
-		
-		$P4->_if( $display->exactly(1) )->then(
-			Display("\\x013\\x00f.\\x004 Tagan \\x00f."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01119 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(2) )->then(
-			Display("\\x013\\x01c.\\x004 Tagan \\x01c."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01919 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(3) )->then(
-			Display("\\x013\\x010.\\x004 Tagan \\x010."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01719 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(4) )->then(
-			Display("\\x013\\x006.\\x004 Tagan \\x006."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01119 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(5) )->then(
-			Display("\\x013\\x006.\\x00f:\\x004 Tagan \\x00f:\\x006."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01b19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(6) )->then(
-			DisplayAlt("\\x013\\x006.\\x010:\\x004 Tagan \\x010:\\x006."),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01119 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(7) )->then(
-			Display("\\x013\\x018:\\x004 TAGAN \\x018:"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01119 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(8) )->then(
-			DisplayAlt("\\x013\\x004Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room?"),
-			Display("\\x013\\x004I have 2 beds open, for only \\x01119 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(9) )->then(
-			DisplayAlt("\\x013\\x004Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x004Are you looking for a room? I have"),
-			Display("\\x013\\x0042 beds open, for only 19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(10) )->then(
-			DisplayAlt("\\x013\\x004Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x00fAre you looking for a room? I have"),
-			Display("\\x013\\x00f2 beds open, for only 19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(11) )->then(
-			DisplayAlt("\\x013\\x004Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x01cAre you looking for a room? I have"),
-			Display("\\x013\\x01c2 beds open, for only 19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(12) )->then(
-			DisplayAlt("\\x013\\x004Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x01eAre you looking for a room? I have"),
-			Display("\\x013\\x01e2 beds open, for only 19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		$P4->_if( $display->exactly(13) )->then(
-			DisplayAlt("\\x013\\x002Tagan"),
-			Display(" "),
-			Display(" "),
-			Display("\\x013\\x01eAre you looking for a room? I have"),
-			Display("\\x013\\x01e2 beds open, for only 19 gold"),
-			Display(" "),
-			Display(" "),
-			Display(" "),
-		'');
-		/**/
 		
 		/** 
 		// Show BSID
@@ -320,14 +163,78 @@ class Lirin extends Map {
 		$humarths = new VirtualLocation(1400, 1500, 2350, 2450);
 		
 		
+		
+		
 		new GloreWorm(2145, 2311);
 		new GloreWorm(1760, 2260);
 		new GloreWorm(1895, 2395);
 		new GloreWorm(2597, 2403);
 		
 		
+		$fireball = new Spell("Fireball");
 		
-		$ProjectileManager = new ProjectileManager(1);
+		/**
+		$shadow = new UnitGroup("Zerg Devourer", P8, Loc::$aoe1x1);
+		
+		$P1->_if( Time::$elapsedLoops->exactly(1) )->then(
+			Loc::$aoe1x1->placeAtRes(4912, 560),
+			$shadow->create(1, Invincible),
+			$shadow->disableDoodadState(),
+		'');
+		$P1->_if( Time::$elapsedLoops->exactly(2) )->then(
+			Loc::$aoe1x1->placeAtRes(4912, 560),
+			$shadow->enableDoodadState(),
+			$shadow->enableDoodadState(),
+		'');
+		$P1->_if( Time::$elapsedLoops->exactly(3) )->then(
+			Loc::$aoe1x1->placeAtRes(4904, 560),
+			$shadow->moveTo(Loc::$aoe1x1),
+		'');
+		
+		$P1->_if( Time::$elapsedLoops->exactly(4) )->then(
+			Loc::$aoe1x1->placeAtRes(4912, 560),
+			$shadow->giveTo(P4),
+		'');
+		$P1->_if( Time::$elapsedLoops->exactly(80) )->then(
+			Loc::$aoe1x1->placeAtRes(4912, 560),
+			$shadow->P4->giveTo(P8),
+		'');
+		$P1->_if( Time::$elapsedLoops->exactly(81) )->then(
+			Loc::$aoe1x1->placeAtRes(4912, 560),
+			CreateUnit(P4, "Protoss Observer", 1, Anywhere),
+		'');
+		
+		$P1->_if( Time::$elapsedLoops->atLeast(82) )->then(
+			Loc::$main->centerOn(P4, "Protoss Observer", Anywhere),
+			$shadow->teleportTo(Loc::$main, All, Anywhere),
+		'');
+		/**/
+		
+		
+		/**
+		// Projectile Testing
+		
+		$ProjectileManager = new ProjectileManager(3);
+		
+		$hero = $heroes[0];
+		$currentspell = new Deathcounter();
+		
+		$Q = new KeyStroke("Q");
+		$W = new KeyStroke("W");
+		$E = new KeyStroke("E");
+		
+		$P4->_if( $Q->pressed() )->then( $currentspell->setTo(0), Display("Spell 1") );
+		$P4->_if( $W->pressed() )->then( $currentspell->setTo(1), Display("Spell 2") );
+		$P4->_if( $E->pressed() )->then( $currentspell->setTo(2), Display("Spell 3") );
+		
+		$tempx  = new TempDC(630000);
+		$tempy  = new TempDC(630000);
+		$angle  = new TempDC();
+		$xvel   = new TempDC();
+		$yvel   = new TempDC();
+		$dur    = new TempDC();
+		
+		$bam = new Sound("bam");
 		
 		$P4->always(
 			$ProjectileManager->engine(),
@@ -335,18 +242,105 @@ class Lirin extends Map {
 		
 		$proj = ProjectileManager::$projectiles[0];
 		
-		$P4->_if( Elapsed(AtLeast, 10) )->then_justonce(
-			Display("Start Projectile"),
-			$proj->setPosition(3072*100, 2048*100),
-			$proj->setVelocity(3200*6400+3200),
-			$proj->setDuration(5),
-			$proj->setAcceleration(3200*6400+3200),
+		$success = new TempSwitch();
+		$P4->_if( FRAGS::$P4Fragged )->then(
+			FRAGS::$P4Fragged->clear(),
+			
+			_if( $currentspell->exactly(0) )->then(
+				Display("Spell 0 Cast"),
+				
+				$proj->setPosition($hero->x, $hero->y),
+				
+				$angle->getAngle($hero->x, $hero->y, FRAGS::$x->P4, FRAGS::$y->P4),
+				$angle->componentsInto($tempx, $tempy),
+				
+				$tempx->multiplyBy(32),
+				$tempy->multiplyBy(32),
+				$tempx->roundedDivideBy(100),
+				$tempy->roundedDivideBy(100),
+				
+				$xvel->setTo(3200),
+				$yvel->setTo(3200),
+				
+				
+				_if( $angle->between(361,1079) )->then(
+					$xvel->subtract($tempx),
+				e)->_else(
+					$xvel->add($tempx),
+				''),
+				_if( $angle->atMost(719) )->then(
+					$yvel->subtract($tempy),
+				''),
+				_if( $angle->atLeast(720) )->then(
+					$yvel->add($tempy),
+				''),
+				
+				$proj->setVelocity($xvel, $yvel),
+				$proj->setAcceleration(0,-32),
+				
+				$proj->duration->setTo(12),
+				FX::rumbleAt(10, $hero->x, $hero->y),
+				FX::playWavAt($bam, $hero->x, $hero->y),
+			''),
+			
+			$tempx->release(),
+			$tempy->release(),
+			$xvel->release(),
+			$yvel->release(),
+			$angle->release(),
+			$dur->release(),
+			
+			$success->release(),
 		'');
 		
-		$P4->_if( $proj->duration->atLeast(1) )->then(
-			Display("duration: {$proj->duration}"),
+		/**
+		$success = new TempSwitch();
+		$P4->_if( FRAGS::$P4Fragged )->then(
+			FRAGS::$P4Fragged->clear(),
+			Grid::putMain(FRAGS::$x->P4, FRAGS::$y->P4, $success),
+			_if( $success )->then(
+				Grid::$main->explode(),
+				$success->release(),
+			''),
+		'');
+		/**/
+		
+		/**
+		// WASD Movement
+		$A = new KeyStroke("A");
+		$S = new KeyStroke("S");
+		$D = new KeyStroke("D");
+		$W = new KeyStroke("W");
+		
+		$P4->always(
+			$hero->Location->acquire(Loc::$main),
+			ClearText(),
 		'');
 		
+		$movepixels = 16;
+		
+		$P4->_if( $W->isDown() )->then(
+			Loc::$main->slideUp($movepixels),
+			Display("W"),
+		'');
+		$P4->_if( $S->isDown() )->then(
+			Loc::$main->slideDown($movepixels),
+			Display("S"),
+		'');
+		$P4->_if( $A->isDown() )->then(
+			Loc::$main->slideLeft($movepixels),
+			Display("A"),
+		'');
+		$P4->_if( $D->isDown() )->then(
+			Loc::$main->slideRight($movepixels),
+			Display("D"),
+		'');
+		
+		$P4->always(
+			#Loc::$main->explode(),
+			Order($hero->Player, Type::$Melee->BaseUnit, Loc::$sandbox, Move, Loc::$main),
+		'');
+		/**/
 		
 		/**
 		// Time testing
@@ -369,7 +363,7 @@ class Lirin extends Map {
 		
 		
 		$humans->_if( IsCurrentPlayer() )->then(
-			$SFXManager->CreateEngine(),
+			$FXManager->CreateEngine(),
 		'');
 		
 		$GloreManager->gloreEngine();
@@ -378,6 +372,9 @@ class Lirin extends Map {
 		
 		$LocationManager->CreateEngine();
 		$UnitManager->CreateEngine();
+		
+		
+		
 	}
 	
 	
