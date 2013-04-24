@@ -43,7 +43,7 @@ class ExtendableLocation extends LirinLocation{
 	}
 	
 	public function slideRight($n){
-		if( is_int($n) && $n > $this->maxslide ){ Error('You cannot slide that far (increase maxslide)'); }
+		if( is_int($n) && $n > $this->maxslide ){ Error("You cannot slide that far (increase maxslide, current max: {$this->maxslide})"); }
 		$holdpos = Loc::$aoe1x1;
 		
 		return 
@@ -54,7 +54,7 @@ class ExtendableLocation extends LirinLocation{
 	}
 	
 	public function slideDown($n){
-		if( is_int($n) && $n > $this->maxslide ){ Error('You cannot slide that far (increase maxslide)'); }
+		if( is_int($n) && $n > $this->maxslide ){ Error("You cannot slide that far (increase maxslide, current max: {$this->maxslide})"); }
 		$holdpos = Loc::$aoe1x1;
 		
 		return 
@@ -65,7 +65,7 @@ class ExtendableLocation extends LirinLocation{
 	}
 	
 	public function slideLeft($n){
-		if( is_int($n) && $n > $this->maxslide ){ Error('You cannot slide that far (increase maxslide)'); }
+		if( is_int($n) && $n > $this->maxslide ){ Error("You cannot slide that far (increase maxslide, current max: {$this->maxslide})"); }
 		$holdpos = Loc::$aoe1x1;
 		
 		return
@@ -76,7 +76,7 @@ class ExtendableLocation extends LirinLocation{
 	}
 	
 	public function slideUp($n){
-		if( is_int($n) && $n > $this->maxslide ){ Error('You cannot slide that far (increase maxslide)'); }
+		if( is_int($n) && $n > $this->maxslide ){ Error("You cannot slide that far (increase maxslide, current max: {$this->maxslide})"); }
 		$holdpos = Loc::$aoe1x1;
 		
 		return

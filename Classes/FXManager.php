@@ -1,7 +1,8 @@
 <?php
 
-class SFXManager {
+class FXManager {
 	
+	/* @var FXManager */
 	protected static $instance = null;
 	
 	// Wav Minting and Management
@@ -17,11 +18,15 @@ class SFXManager {
 	/* @var Deathcounter[] */ private $RumbleDCs = array();
 	
 	/* @var Deathcounter */   public $RumbleLevel;
+	/* @var Deathcounter */   public $DrunkStage;
+	/* @var Deathcounter */   public $DrunkTimer;
 	
 	/* @var Deathcounter */   private static $ScreenX;
 	/* @var Deathcounter */   private static $ScreenY;
-	/* @var Deathcounter */   private static $LastOffsetX;
-	/* @var Deathcounter */   private static $LastOffsetY;
+	/* @var Deathcounter */   private static $LastOffsetUp;
+	/* @var Deathcounter */   private static $LastOffsetDown;
+	/* @var Deathcounter */   private static $LastOffsetLeft;
+	/* @var Deathcounter */   private static $LastOffsetRight;
 	
 	/* @var Permswitch[] */   private static $RSwitches = array();
 	
@@ -38,13 +43,18 @@ class SFXManager {
 		$this->WavFolder = $wavfolder;
 		
 		$this->RumbleLevel = new Deathcounter(1000);
+		$this->DrunkStage = new Deathcounter(100);
+		$this->DrunkTimer = new Deathcounter(1000);
 		self::$ScreenX = new Deathcounter(Map::getWidth()*32);
 		self::$ScreenY = new Deathcounter(Map::getHeight()*32);
-		self::$LastOffsetX = new Deathcounter(65);
-		self::$LastOffsetY = new Deathcounter(65);
+		
+		self::$LastOffsetUp     = new Deathcounter(127);
+		self::$LastOffsetDown   = new Deathcounter(127);
+		self::$LastOffsetLeft   = new Deathcounter(127);
+		self::$LastOffsetRight  = new Deathcounter(127);
 		
 		$randomizeswitches = '';
-		for($i=0; $i<=5; $i++){
+		for($i=0; $i<=7; $i++){
 			self::$RSwitches[$i] = new PermSwitch();
 			$randomizeswitches .= self::$RSwitches[$i]->randomize();
 		}
@@ -115,67 +125,128 @@ class SFXManager {
 			$AtPrompted->release(),
 		'');
 		
-		$xoffset = new TempDC(7);
-		$yoffset = new TempDC(7);
+		$offsetright    = new TempDC(127);
+		$offsetleft     = new TempDC(127);
+		$offsetup       = new TempDC(127);
+		$offsetdown     = new TempDC(127);
 		
 		$rumble = $this->RumbleLevel;
 		
 		$centerview = new TempSwitch();
 		$loadoffset = new TempSwitch();
 		
-		$text .= _if( self::$LastOffsetX->atLeast(1) )->then(
-			self::$LastOffsetX->subtract(1),
-			self::$ScreenX->subtractDel(self::$LastOffsetX),
-			self::$ScreenY->subtractDel(self::$LastOffsetY),
-			self::$ScreenX->add(32),
-			self::$ScreenY->add(32),
+		$text .= _if( self::$LastOffsetRight->atLeast(1) )->then(
+			self::$ScreenX->subtractDel(self::$LastOffsetRight),
 			$centerview->set(),
-			
+		'');
+		$text .= _if( self::$LastOffsetLeft->atLeast(1) )->then(
+			self::$ScreenX->addDel(self::$LastOffsetLeft),
+			$centerview->set(),
+		'');
+		$text .= _if( self::$LastOffsetUp->atLeast(1) )->then(
+			self::$ScreenY->addDel(self::$LastOffsetUp),
+			$centerview->set(),
+		'');
+		$text .= _if( self::$LastOffsetDown->atLeast(1) )->then(
+			self::$ScreenY->subtractDel(self::$LastOffsetDown),
+			$centerview->set(),
 		'');
 		
 		$text .= _if( $rumble->atLeast(1) )->then(
 			
 			_if(self::$RSwitches[0], $rumble->atMost(25))->then(
-				$xoffset->add(4),
+				$offsetleft->add(32),
+				$offsetright->add(32),
 			''),
 			_if(self::$RSwitches[1])->then(
-				$xoffset->add(2),
+				$offsetleft->add(16),
+				$offsetright->add(16),
 			''),
 			_if(self::$RSwitches[2])->then(
-				$xoffset->add(1),
-			''),
-			_if(self::$RSwitches[3], $rumble->atMost(25))->then(
-				$yoffset->add(4),
-			''),
-			_if(self::$RSwitches[4])->then(
-				$yoffset->add(2),
-			''),
-			_if(self::$RSwitches[5])->then(
-				$yoffset->add(1),
+				$offsetleft->add(8),
+				$offsetright->add(8),
 			''),
 			
-			$xoffset->add(1),
-			$yoffset->add(1),
+			_if(self::$RSwitches[6])->then(
+				$offsetleft->setTo(0),
+			''),
+			_if(self::$RSwitches[6]->is_clear())->then(
+				$offsetright->setTo(0),
+			''),
+			
+			_if(self::$RSwitches[3], $rumble->atMost(25))->then(
+				$offsetup->add(32),
+				$offsetdown->add(32),
+			''),
+			_if(self::$RSwitches[4])->then(
+				$offsetup->add(16),
+				$offsetdown->add(16),
+			''),
+			_if(self::$RSwitches[5])->then(
+				$offsetup->add(8),
+				$offsetdown->add(8),
+			''),
+			
+			_if(self::$RSwitches[7])->then(
+				$offsetdown->setTo(0),
+			''),
+			_if(self::$RSwitches[7]->is_clear())->then(
+				$offsetup->setTo(0),
+			''),
+			
 			
 			$rumble->subtract(15),
 			$centerview->set(),
 			$loadoffset->set(),
 			
-			$xoffset->multiplyBy(8),
-			$yoffset->multiplyBy(8),
-			$xoffset->max(65),
-			$yoffset->max(65),
+		'');
+		
+		$DrunkTimer = $this->DrunkTimer;
+		$DrunkStage = $this->DrunkStage;
+		
+		$text .= _if( $DrunkTimer->atLeast(1) )->then(
 			
-			self::$ScreenX->add($xoffset),
-			self::$ScreenY->add($yoffset),
-			self::$ScreenX->subtract(32),
-			self::$ScreenY->subtract(32),
+			$DrunkTimer->sub(1),
+			$DrunkStage->add(1),
+			
+			_if( $DrunkStage->atLeast(16) )->then(
+				$DrunkStage->setTo(0),
+			''),
+			
+			_if( $DrunkStage->atMost(4) )->then(
+				$offsetright->add($DrunkStage),
+			''),
+			_if( $DrunkStage->between(5, 8) )->then(
+				$offsetright->add(8),
+				$offsetright->subtract($DrunkStage),
+			''),
+			_if( $DrunkStage->between(9, 12) )->then(
+				$offsetleft->add($DrunkStage),
+				$offsetleft->subtract(8),
+			''),
+			_if( $DrunkStage->atLeast(13) )->then(
+				$offsetleft->add(16),
+				$offsetleft->subtract($DrunkStage),
+			''),
+			
+			$offsetleft->multiplyBy(8),
+			$offsetright->multiplyBy(8),
+			$centerview->set(),
+			$loadoffset->set(),
 			
 		'');
 		
 		$success = new TempSwitch();
 		
+		$P4 = new Player(P4);
+		
 		$text .= _if( $centerview )->then(
+			
+			self::$ScreenX->add($offsetright),
+			self::$ScreenX->sub($offsetleft),
+			self::$ScreenY->sub($offsetup),
+			self::$ScreenY->add($offsetdown),
+			
 			self::$ScreenX->add(10*32),
 			self::$ScreenY->add(200),
 			
@@ -187,9 +258,11 @@ class SFXManager {
 			Grid::putMainRes(self::$ScreenX, self::$ScreenY, $success),
 			_if( $success )->then(
 				Grid::$main->centerView(),
+				//Loc::$main->explode(P8),
 			''),
 			_if( $success->is_clear() )->then(
 				$loadoffset->clear(),
+				Display("foop! out of bounds"),
 			''),
 			
 			_if(self::$ScreenY->atLeast(Map::getHeight()*32/2-8))->then(
@@ -201,8 +274,10 @@ class SFXManager {
 			self::$ScreenY->sub(200),
 
 			_if( $loadoffset )->then(
-				self::$LastOffsetX->becomeDel($xoffset),
-				self::$LastOffsetY->becomeDel($yoffset),
+				self::$LastOffsetUp->becomeDel($offsetup),
+				self::$LastOffsetDown->becomeDel($offsetdown),
+				self::$LastOffsetLeft->becomeDel($offsetleft),
+				self::$LastOffsetRight->becomeDel($offsetright),
 			''),
 			
 			$centerview->release(),
@@ -210,8 +285,10 @@ class SFXManager {
 			$success->release(),
 		'');
 		
-		$text .= $xoffset->release();
-		$text .= $yoffset->release();
+		$text .= $offsetup->release();
+		$text .= $offsetdown->release();
+		$text .= $offsetright->release();
+		$text .= $offsetleft->release();
 		
 		return $text;
 	}
