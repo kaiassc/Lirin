@@ -69,8 +69,8 @@ class SpellSystem {
 		
 		$spelliscast = new TempSwitch();
 		
-		$xmax = Map::getWidth()*32;
-		$ymax = Map::getHeight()*32;
+		$xmax = Map::getWidth()*32-1;
+		$ymax = Map::getHeight()*32-1;
 		
 
 		$bsX = BattleSystem::$xDCs[0];
@@ -85,8 +85,8 @@ class SpellSystem {
 		// Projectile Variables
 		$positionx =        new TempDC(Map::getWidth()*32-1);
 		$positiony =        new TempDC(Map::getHeight()*32-1);
-		$velocityx =        new TempDC(640000);
-		$velocityy =        new TempDC(640000);
+		$velocityx =        new TempDC(6400);
+		$velocityy =        new TempDC(6400);
 		$accelerationx =    new TempDC(1600);
 		$accelerationy =    new TempDC(1600);
 		$duration =         new TempDC(720);
@@ -176,7 +176,8 @@ class SpellSystem {
 			$VelocityMultiplier->setTo(0),
 			$VelocityDivisor->setTo(16),
 			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
-			$VelocityRawY->setTo(3200-2800),      // 3200 is zero
+			//$VelocityRawY->setTo(3200-2975),      // 3200 is zero
+			$VelocityRawY->setTo(3200-26.25),      // 3200 is zero
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
@@ -284,8 +285,8 @@ class SpellSystem {
 		$xcomponent = new TempDC(10000);
 		$ycomponent = new TempDC(10000);
 		
-		$tempx = new TempDC(320000);
-		$tempy = new TempDC(320000);
+		$tempx = new TempDC(256000);
+		$tempy = new TempDC(256000);
 		$success = new TempSwitch();
 
 		$projowners->_if( $spelliscast )->then(
@@ -318,15 +319,21 @@ class SpellSystem {
 			
 			_if( $VelocityLoadIndex->exactly(1) )->then(
 				Display("loading xycomponents"),
-				$velocityx->setTo($xcomponent),
-				$velocityy->setTo($ycomponent),
+				$velocityx->roundedQuotientOf($xcomponent, 10),
+				$velocityy->roundedQuotientOf($ycomponent, 10),
 			''),
+			
+			$velocityx->Max(1000),
+			$velocityy->Max(1000),
 			
 			_if( $VelocityMultiplyByDCIndex->exactly(1) )->then(
 				Display("multiplying velocities by the distance"),
 				$velocityx->multiplyBy($distance),
 				$velocityy->multiplyBy($distance),
 			''),
+			
+			$velocityx->Max(256000),
+			$velocityy->Max(256000),
 			
 			_if( $VelocityMultiplier->atLeast(1) )->then(
 				Display("multiplying velocities by static value"),
@@ -346,8 +353,11 @@ class SpellSystem {
 				$tempx->setTo($velocityx),
 				$tempy->setTo($velocityy),
 				
-				$tempx->roundedDivideBy(100),
-				$tempy->roundedDivideBy(100),
+				$tempx->roundedDivideBy(10),
+				$tempy->roundedDivideBy(10),
+				
+				$tempx->Max(1600),
+				$tempy->Max(1600),
 				
 				$velocityx->setTo(3200),
 				$velocityy->setTo(3200),
@@ -367,6 +377,9 @@ class SpellSystem {
 					Display(" velocity V"),
 					$velocityy->add($tempy),
 				''),
+				
+				$velocityx->Max(6400),
+				$velocityy->Max(6400),
 				
 			''),
 			

@@ -133,6 +133,11 @@ class Projectile{
 		//add velocity, acceleration, and make the changes
 		$text .= _if( $this->duration->atLeast(1) )->then(
 			
+			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
+			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
+			$this->xpos->subtract(32),
+			$this->ypos->subtract(32),
+			
 			$this->xvel->add($this->xacc),
 			$this->yvel->add($this->yacc),
 			$this->xvel->subtract(800),
@@ -140,11 +145,6 @@ class Projectile{
 			
 			_if($this->xvel->atLeast(6401))->then($this->xvel->setTo(6400)),
 			_if($this->yvel->atLeast(6401))->then($this->yvel->setTo(6400)),
-			
-			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
-			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
-			$this->xpos->subtract(32),
-			$this->ypos->subtract(32),
 			
 		'');
 		
