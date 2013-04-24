@@ -177,7 +177,7 @@ class SpellSystem {
 			$VelocityDivisor->setTo(16),
 			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
 			//$VelocityRawY->setTo(3200-2975),      // 3200 is zero
-			$VelocityRawY->setTo(3200-26.25),      // 3200 is zero
+			$VelocityRawY->setTo(3200-2625),      // 3200 is zero
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
