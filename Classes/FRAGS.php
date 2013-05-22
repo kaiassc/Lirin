@@ -20,7 +20,9 @@ class FRAGS{
 	/* @var IndexedUnit[] */
 	static private $scourgeP6 = array();
 	
-	
+	static $P4nodes = array();
+	static $P5nodes = array();
+	static $P6nodes = array();
 	
 	function __construct(){
 		
@@ -37,8 +39,9 @@ class FRAGS{
 		$humans = new Player(P4, P5, P6);
 		self::$x = new Deathcounter($humans, Map::getWidth()*32-1);
 		self::$y = new Deathcounter($humans, Map::getHeight()*32-1);
-		
+
 		// Place FRAGS units
+		/*
 		$k = 32;
 		for($j=0; $j<4; $j++){
 			if($j==2){ $k = 0; }
@@ -53,14 +56,153 @@ class FRAGS{
 				}
 			}
 		}
+		*/
+		
+		$index = 0;
+		
+		$k = 32;
+		for($j=0; $j<4; $j++){
+			if($j==2){ $k = 0; }
+			for($i=0; $i<5; $i++){
+				if(($i+$j)%2 == 0){
+					self::$P4nodes[$index]["node"] = array("x" => 1008+1024*$i-$k, "y" => 496+1024*$j);
+					self::$P5nodes[$index]["node"] = array("x" => 1072+1024*$i-$k, "y" => 496+1024*$j);
+					self::$P6nodes[$index]["node"] = array("x" => 1008+1024*$i-$k, "y" => 560+1024*$j);
+					$index++;
+				}
+			}
+		}
+		
+		$index = 0;
+		
+		for($x=0;$x<=1;$x++){
+			for($y=0;$y<=4;$y++){
+				self::$P4nodes[$index]["spawn"] = array("x" => 4528+$x*64,       "y" => 624+$y*64);
+				self::$P5nodes[$index]["spawn"] = array("x" => 4528+$x*64+5*32,  "y" => 624+$y*64);
+				self::$P6nodes[$index]["spawn"] = array("x" => 4528+$x*64+10*32, "y" => 624+$y*64);
+				$index++;
+			}
+		}
+		
+		for($i=0; $i<=9; $i++){
+			self::$scourgeP4[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, self::$P4nodes[$i]["spawn"]["x"], self::$P4nodes[$i]["spawn"]["y"], Invincible), "Zerg Scourge", P4, "Anywhere");
+			UnitManager::MintUnit("Infested Terran", P9,  self::$P4nodes[$i]["node"]["x"], self::$P4nodes[$i]["node"]["y"], array(Invincible, Burrowed));
+			self::$scourgeP5[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, self::$P5nodes[$i]["spawn"]["x"], self::$P5nodes[$i]["spawn"]["y"], Invincible), "Zerg Scourge", P5, "Anywhere");
+			UnitManager::MintUnit("Infested Terran", P10, self::$P5nodes[$i]["node"]["x"], self::$P5nodes[$i]["node"]["y"], array(Invincible, Burrowed));
+			self::$scourgeP6[] = new IndexedUnit(UnitManager::MintUnitWithAnyIndex("Zerg Scourge", P12, self::$P6nodes[$i]["spawn"]["x"], self::$P6nodes[$i]["spawn"]["y"], Invincible), "Zerg Scourge", P6, "Anywhere");
+			UnitManager::MintUnit("Infested Terran", P11, self::$P6nodes[$i]["node"]["x"], self::$P6nodes[$i]["node"]["y"], array(Invincible, Burrowed));
+		}
 		
 		// Give FRAGS units
+		
 		
 	}
 	
 	
 
+	function moveScourges($player){
+		$text = '';
+		
+		$nodes = array();
+		$nodeplayer = '';
+		if($player === P4){ $nodes = self::$P4nodes; $nodeplayer = P9; }
+		if($player === P5){ $nodes = self::$P5nodes; $nodeplayer = P10; }
+		if($player === P6){ $nodes = self::$P6nodes; $nodeplayer = P11; }
+		
+		for($i=0; $i<=9; $i++){
+			$nodex = $nodes[$i]["node"]["x"];
+			$nodey = $nodes[$i]["node"]["y"];
+			if($nodex < 1024){ $nodex = 1024; }
+			if($nodex > 5120){ $nodex = 5120; }
+			if($nodey < 512 ){ $nodey = 512;  }
+			if($nodey > 3584){ $nodey = 3584; }
+			$text .= _if( Always() )->then(
+				Loc::$aoe2x2->placeAt($nodes[$i]["spawn"]["x"], $nodes[$i]["spawn"]["y"]),
+				Loc::$aoe5x5->placeAt($nodex,  $nodey),
+				Loc::$aoe5x5->centerOn($nodeplayer, "Infested Terran", Loc::$aoe5x5),
+				MoveUnit($player, "Zerg Scourge", 1, Loc::$aoe2x2, Loc::$aoe5x5),
+			'');
+		}
+		
+		return $text;
+	}
 	
+	function giveScourges($player){
+		$text = '';
+		
+		$nodes = array();
+		if($player === P4){ $nodes = self::$P4nodes; }
+		if($player === P5){ $nodes = self::$P5nodes; }
+		if($player === P6){ $nodes = self::$P6nodes; }
+		
+		for($i=0; $i<=9; $i++){
+			$text .= _if( Always() )->then(
+				Loc::$main->placeAt($nodes[$i]["spawn"]["x"], $nodes[$i]["spawn"]["y"]),
+				Give(P12, "Zerg Scourge", 1, $player, Loc::$main),
+			'');
+			
+		}
+		
+		return $text;
+	}
+	
+	
+	function CreateEngine(){
+		$P1 = new Player(P1);
+		$P4 = new Player(P4);
+		$P5 = new Player(P5);
+		$P6 = new Player(P6);
+		$humans = new Player(P4, P5, P6);
+		
+		$ready = new Deathcounter($humans, 1);
+		
+		$P4->justonce( $this->giveScourges(P4) );
+		$P5->justonce( $this->giveScourges(P5) );
+		$P6->justonce( $this->giveScourges(P6) );
+		
+		$P1->_if( $ready->P4->exactly(0) )->then( $ready->P4->setTo(1) );
+		$P1->_if( $ready->P5->exactly(0) )->then( $ready->P5->setTo(1) );
+		$P1->_if( $ready->P6->exactly(0) )->then( $ready->P6->setTo(1) );
+		
+		$P1->_if( $ready->P4->exactly(1),
+			self::$scourgeP4[0]->orderCoordinate(AtMost, 0), self::$scourgeP4[1]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP4[2]->orderCoordinate(AtMost, 0), self::$scourgeP4[3]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP4[4]->orderCoordinate(AtMost, 0), self::$scourgeP4[5]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP4[6]->orderCoordinate(AtMost, 0), self::$scourgeP4[7]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP4[8]->orderCoordinate(AtMost, 0), self::$scourgeP4[9]->orderCoordinate(AtMost, 0) 
+		)->then(
+			$ready->P4->setTo(0),
+		'');
+		
+		$P1->_if( $ready->P5->exactly(1),
+			self::$scourgeP5[0]->orderCoordinate(AtMost, 0), self::$scourgeP5[1]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP5[2]->orderCoordinate(AtMost, 0), self::$scourgeP5[3]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP5[4]->orderCoordinate(AtMost, 0), self::$scourgeP5[5]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP5[6]->orderCoordinate(AtMost, 0), self::$scourgeP5[7]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP5[8]->orderCoordinate(AtMost, 0), self::$scourgeP5[9]->orderCoordinate(AtMost, 0) 
+		)->then(
+			$ready->P5->setTo(0),
+		'');
+		
+		$P1->_if( $ready->P6->exactly(1),
+			self::$scourgeP6[0]->orderCoordinate(AtMost, 0), self::$scourgeP6[1]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP6[2]->orderCoordinate(AtMost, 0), self::$scourgeP6[3]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP6[4]->orderCoordinate(AtMost, 0), self::$scourgeP6[5]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP6[6]->orderCoordinate(AtMost, 0), self::$scourgeP6[7]->orderCoordinate(AtMost, 0), 
+			self::$scourgeP6[8]->orderCoordinate(AtMost, 0), self::$scourgeP6[9]->orderCoordinate(AtMost, 0) 
+		)->then(
+			$ready->P6->setTo(0),
+		'');
+		
+		$P1->_if( $ready->P4->exactly(1) )->then_justonce( $this->moveScourges(P4) );
+		$P1->_if( $ready->P5->exactly(1) )->then_justonce( $this->moveScourges(P5) );
+		$P1->_if( $ready->P6->exactly(1) )->then_justonce( $this->moveScourges(P6) );
+		
+		$P1->_if( $ready->P4->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP4, FRAGS::$movedP4, FRAGS::$x->P4, FRAGS::$y->P4, FRAGS::$P4Fragged, P9,  0,  0)  );
+		$P1->_if( $ready->P5->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP5, FRAGS::$movedP5, FRAGS::$x->P5, FRAGS::$y->P5, FRAGS::$P5Fragged, P10, 64, 0)  );
+		$P1->_if( $ready->P6->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP6, FRAGS::$movedP6, FRAGS::$x->P6, FRAGS::$y->P6, FRAGS::$P6Fragged, P11, 0,  64) );
+		
+	}
 	
 	
 	/////

@@ -681,7 +681,7 @@ class Grid{
 			//xmove is a coordinate that starts at the grid's origin and counts over
 			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
 			if( $xmove > Grid::$xdimension*32 || $xmove < 0 )
-				ERROR('X coordinate is out of the playing field');
+				ERROR("X coordinate is out of the playing field: $xcoord");
 			
 			//make it so main is always within 4 pixels (this essentially rounds)
 			$xmove += 3;
@@ -827,7 +827,7 @@ class Grid{
 			
 			//error check
 			if( $ycoord > Grid::$ydimension*32 || $ycoord < 0 )
-				ERROR('Y coordinate is out of the playing field');
+				ERROR("Y coordinate is out of the playing field");
 
 			//top half of map
 			if( $ycoord < Grid::$ydimension*32/2 - 4 ){

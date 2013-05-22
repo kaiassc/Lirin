@@ -160,17 +160,23 @@ class BattleSystem {
 		$P1 = new Player(P1);
 		
 		/**/
+		
 		foreach(self::getBSUnits() as $bsunit){
-			
 			$P1->_if( $bsunit->type->atLeast(2) )->then(
 				$bsunit->scanUnit(),
 				$bsunit->showHealth(),
+				
+				_if( $bsunit->armor->atLeast(101) )->then(
+					Display("your armor is too high"),
+				''),
+				
 			'');
 			
 			$P1->_if( $bsunit->swings() )->then(
 				$bsunit->dealDamageToTarget(),
 			'');
 		}
+		
 		/**/
 		
 	}

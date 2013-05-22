@@ -91,7 +91,6 @@ class FXManager {
 		/** @var $Xdcs Deathcounter[] @var $Ydcs Deathcounter[] */
 		list($Xdcs, $Ydcs) = $this->getAtDCs();
 		
-		
 		$AtPrompted = new TempSwitch();
 		foreach(array_merge($this->AtDCs, $this->RumbleDCs) as $dc){
 			/* @var Deathcounter $dc */
@@ -102,6 +101,9 @@ class FXManager {
 		$XdcsAndScreen[] = self::$ScreenX;
 		$YdcsAndScreen = $Ydcs;
 		$YdcsAndScreen[] = self::$ScreenY;
+		
+		
+		//Error(var_export($this->AtRumbles, true)); // TODO:remove
 		
 		$text .= _if( $AtPrompted )->then(
 			
@@ -238,8 +240,6 @@ class FXManager {
 		
 		$success = new TempSwitch();
 		
-		$P4 = new Player(P4);
-		
 		$text .= _if( $centerview )->then(
 			
 			self::$ScreenX->add($offsetright),
@@ -272,7 +272,7 @@ class FXManager {
 			
 			self::$ScreenX->sub(10*32),
 			self::$ScreenY->sub(200),
-
+			
 			_if( $loadoffset )->then(
 				self::$LastOffsetUp->becomeDel($offsetup),
 				self::$LastOffsetDown->becomeDel($offsetdown),
@@ -309,6 +309,16 @@ class FXManager {
 				$Ydcs[] = $y;
 			}
 			if( $name === '' ){ Error("Each command should have a signifier.."); }
+		}
+		foreach($this->AtRumbles as $rumble){
+			list($intensity, $x, $y) = $rumble;
+			if( $x instanceof Deathcounter && !in_array($x, $Xdcs) ){
+				$Xdcs[] = $x;
+			}
+			if( $y instanceof Deathcounter && !in_array($y, $Ydcs) ){
+				$Ydcs[] = $y;
+			}
+			if( !is_int($intensity) ){ Error("Each rumble should have an integer intensity value"); }
 		}
 		return array($Xdcs, $Ydcs);
 	}

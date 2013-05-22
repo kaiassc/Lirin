@@ -13,6 +13,12 @@ class SpellSystem {
 	/* @var Projectile[] */ private $P8projectiles = array();
 	
 	
+	/* @var CoordinateUnit[] */ private $P4casterunits = array();
+	/* @var CoordinateUnit[] */ private $P5casterunits = array();
+	/* @var CoordinateUnit[] */ private $P6casterunits = array();
+	/* @var Deathcounter[] */   private $SpellSlotDCs = array();
+	
+	
 	/* @var Deathcounter[] */ private $xposDCs = array();
 	/* @var Deathcounter[] */ private $yposDCs = array();
 	/* @var Deathcounter[] */ private $xpospartDCs = array();
@@ -22,6 +28,7 @@ class SpellSystem {
 	/* @var Deathcounter[] */ private $xaccDCs = array();
 	/* @var Deathcounter[] */ private $yaccDCs = array();
 	/* @var Deathcounter[] */ private $durationDCs = array();
+	/* @var Deathcounter[] */ private $spellidDCs = array();
 	
 	const _Hero      = 1;
 	const _Point1    = 2;
@@ -30,6 +37,7 @@ class SpellSystem {
 	
 	function __construct($projPerPlayer = 4){
 		
+		$humans = new Player(P4, P5, P6);
 		$projowners = new Player(P4, P5, P6, P7, P8);
 		
 		for($i=0; $i<$projPerPlayer; $i++){
@@ -42,15 +50,42 @@ class SpellSystem {
 			$this->xaccDCs[]        = $xacc      = new Deathcounter($projowners, 1600);
 			$this->yaccDCs[]        = $yacc      = new Deathcounter($projowners, 1600);
 			$this->durationDCs[]    = $duration  = new Deathcounter($projowners, 720);
+			$this->spellidDCs[]     = $spellid   = new Deathcounter($projowners, 100);
 			
 			$this->CPprojectiles[] = new Projectile(array($xpos->CP, $ypos->CP, $xpospart->CP, $ypospart->CP, $xvel->CP, $yvel->CP, $xacc->CP, $yacc->CP, $duration->CP));
-			$this->Projectiles[] = $this->P4projectiles[] = new Projectile(array($xpos->P4, $ypos->P4, $xpospart->P4, $ypospart->P4, $xvel->P4, $yvel->P4, $xacc->P4, $yacc->P4, $duration->P4));
-			$this->Projectiles[] = $this->P5projectiles[] = new Projectile(array($xpos->P5, $ypos->P5, $xpospart->P5, $ypospart->P5, $xvel->P5, $yvel->P5, $xacc->P5, $yacc->P5, $duration->P5));
-			$this->Projectiles[] = $this->P6projectiles[] = new Projectile(array($xpos->P6, $ypos->P6, $xpospart->P6, $ypospart->P6, $xvel->P6, $yvel->P6, $xacc->P6, $yacc->P6, $duration->P6));
-			$this->Projectiles[] = $this->P7projectiles[] = new Projectile(array($xpos->P7, $ypos->P7, $xpospart->P7, $ypospart->P7, $xvel->P7, $yvel->P7, $xacc->P7, $yacc->P7, $duration->P7));
-			$this->Projectiles[] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8));
+			$this->Projectiles[] = $this->P4projectiles[] = new Projectile(array($xpos->P4, $ypos->P4, $xpospart->P4, $ypospart->P4, $xvel->P4, $yvel->P4, $xacc->P4, $yacc->P4, $duration->P4, $spellid->P4));
+			$this->Projectiles[] = $this->P5projectiles[] = new Projectile(array($xpos->P5, $ypos->P5, $xpospart->P5, $ypospart->P5, $xvel->P5, $yvel->P5, $xacc->P5, $yacc->P5, $duration->P5, $spellid->P5));
+			$this->Projectiles[] = $this->P6projectiles[] = new Projectile(array($xpos->P6, $ypos->P6, $xpospart->P6, $ypospart->P6, $xvel->P6, $yvel->P6, $xacc->P6, $yacc->P6, $duration->P6, $spellid->P6));
+			$this->Projectiles[] = $this->P7projectiles[] = new Projectile(array($xpos->P7, $ypos->P7, $xpospart->P7, $ypospart->P7, $xvel->P7, $yvel->P7, $xacc->P7, $yacc->P7, $duration->P7, $spellid->P7));
+			$this->Projectiles[] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8, $spellid->P8));
 			
 		}
+		
+		
+		// Create Spell Slot Caster Units
+		
+		for($i=1;$i<=4; $i++){
+			$casterunit = "Zerg Mutalisk";
+			$x = 4208+64*($i-1);
+			$y = 624;
+			$this->P4casterunits[$i] = new CoordinateUnit(UnitManager::MintUnitWithAnyIndex($casterunit, P12, $x, $y+64*0, Invincible), $x, $y+64*0, $casterunit, P4);
+			$this->P5casterunits[$i] = new CoordinateUnit(UnitManager::MintUnitWithAnyIndex($casterunit, P12, $x, $y+64*1, Invincible), $x, $y+64*1, $casterunit, P5);
+			$this->P6casterunits[$i] = new CoordinateUnit(UnitManager::MintUnitWithAnyIndex($casterunit, P12, $x, $y+64*2, Invincible), $x, $y+64*2, $casterunit, P6);
+		}
+		
+		
+		for($i=1; $i<=4; $i++){
+			$this->SpellSlotDCs[$i] = new Deathcounter($humans, 50);
+		}
+		
+		
+		// TODO: testing trigger, remove later
+		$humans->justonce(
+			$this->SpellSlotDCs[1]->setTo(1), // fireball
+			$this->SpellSlotDCs[2]->setTo(2), // lob
+			$this->SpellSlotDCs[3]->setTo(3), //
+			$this->SpellSlotDCs[4]->setTo(4), //
+		'');
 		
 	}
 	
@@ -61,12 +96,30 @@ class SpellSystem {
 		$P4 =           new Player(P4);
 		$P5 =           new Player(P5);
 		$P6 =           new Player(P6);
+		$comps =        new Player(P7, P8);
 		$humans =       new Player(P4, P5, P6);
 		$projowners =   new Player(P4, P5, P6, P7, P8);
 		
-		$P1->justonce(
-			$this->xvelDCs[0]->leaderboard("xvelDCs[0]"),
-		'');
+		
+		// Give caster units
+		foreach($this->P4casterunits as $casterunit){
+			$P4->justonce(
+				Loc::$main->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->P12->giveTo(P4, 1, Loc::$main),
+			'');
+		}
+		foreach($this->P5casterunits as $casterunit){
+			$P5->justonce(
+				Loc::$main->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->P12->giveTo(P5, 1, Loc::$main),
+			'');
+		}
+		foreach($this->P6casterunits as $casterunit){
+			$P6->justonce(
+				Loc::$main->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->P12->giveTo(P6, 1, Loc::$main),
+			'');
+		}
 		
 		
 		$spelliscast = new TempSwitch();
@@ -78,10 +131,10 @@ class SpellSystem {
 		$bsX = BattleSystem::$xDCs[0];
 		$bsY = BattleSystem::$yDCs[0];
 		
-		$point1X = FRAGS::$x->CP;
-		$point1Y = FRAGS::$y->CP;
-		$point2X = FRAGS::$x->CP;
-		$point2Y = FRAGS::$y->CP;
+		$point1X = new Deathcounter(FRAGS::$x->Max);
+		$point1Y = new Deathcounter(FRAGS::$y->Max);
+		$point2X = new Deathcounter(FRAGS::$x->Max);
+		$point2Y = new Deathcounter(FRAGS::$y->Max);
 		
 		
 		// Projectile Variables
@@ -94,41 +147,98 @@ class SpellSystem {
 		$duration =         new TempDC(720);
 		
 		// Spell Variables
-		$DistanceOriginIndex =          new TempDC($projowners);
-		$DistanceDestinationIndex =     new TempDC($projowners);
-		$ComponentOriginIndex =         new TempDC($projowners);
-		$ComponentDestinationIndex =    new TempDC($projowners);
+		$DistanceOriginIndex =          new TempDC();
+		$DistanceDestinationIndex =     new TempDC();
+		$ComponentOriginIndex =         new TempDC();
+		$ComponentDestinationIndex =    new TempDC();
 		
-		$MaxCastRange =                 new TempDC($projowners);
+		$MaxCastRange =                 new TempDC();
 		
-		$PositionIndex =                new TempDC($projowners);
-		$StaticOffsetX =                new TempDC($projowners);
-		$StaticOffsetY =                new TempDC($projowners);
+		$PositionIndex =                new TempDC();
+		$StaticOffsetX =                new TempDC();
+		$StaticOffsetY =                new TempDC();
 		
-		$VelocityLoadIndex =            new TempDC($projowners);
-		$VelocityMultiplyByDCIndex =    new TempDC($projowners);
-		$VelocityMultiplier =           new TempDC($projowners, 100);
-		$VelocityDivisor =              new TempDC($projowners, 100);
-		$VelocityRawY =                  new TempDC($projowners, 12800);
-		$VelocityAdjustForSigned =      new TempDC($projowners);
+		$VelocityLoadIndex =            new TempDC();
+		$VelocityMultiplyByDCIndex =    new TempDC();
+		$VelocityMultiplier =           new TempDC(100);
+		$VelocityDivisor =              new TempDC(100);
+		$VelocityRawY =                 new TempDC(12800);
+		$VelocityAdjustForSigned =      new TempDC();
 		
 		
+		$invokedslot = new Deathcounter($projowners, 104);
+		$invokedspell = new TempDC(50);
 		
-		// Pseudo fireball cast
-		$P4->_if( FRAGS::$P4Fragged )->then(
+		// 
+		$humans->_if( $invokedslot->atLeast(1) )->then(
+			$invokedslot->subtract(100),
+		'');
+		
+		// Set invokedslot
+		foreach($this->P4casterunits as $key=>$casterunit){
+			$P4->_if( $casterunit->orderCoordinate(AtLeast, 1) )->then(
+				Display("invokedslot set to $key"),
+				$invokedslot->setTo($key+100),
+				Loc::$aoe1x1->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->teleportTo(Loc::$aoe1x1, 1, Loc::$aoe1x1),
+			'');
+		}
+		foreach($this->P5casterunits as $key=>$casterunit){
+			$P5->_if( $casterunit->orderCoordinate(AtLeast, 1) )->then(
+				Display("invokedslot set to $key"),
+				$invokedslot->setTo($key+100),
+				Loc::$aoe1x1->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->teleportTo(Loc::$aoe1x1, 1, Loc::$aoe1x1),
+			'');
+		}
+		foreach($this->P6casterunits as $key=>$casterunit){
+			$P6->_if( $casterunit->orderCoordinate(AtLeast, 1) )->then(
+				Display("invokedslot set to $key"),
+				$invokedslot->setTo($key+100),
+				Loc::$aoe1x1->placeAt($casterunit->x, $casterunit->y),
+				$casterunit->teleportTo(Loc::$aoe1x1, 1, Loc::$aoe1x1),
+			'');
+		}
+		
+		
+		// Set $spelliscast
+		$P4->_if( FRAGS::$P4Fragged, $invokedslot->between(1, 99) )->then(
 			FRAGS::$P4Fragged->clear(),
 			$spelliscast->set(),
 		'');
-		$P5->_if( FRAGS::$P5Fragged )->then(
+		$P5->_if( FRAGS::$P5Fragged, $invokedslot->between(1, 99) )->then(
 			FRAGS::$P5Fragged->clear(),
 			$spelliscast->set(),
 		'');
-		$P6->_if( FRAGS::$P6Fragged )->then(
+		$P6->_if( FRAGS::$P6Fragged, $invokedslot->between(1, 99) )->then(
 			FRAGS::$P6Fragged->clear(),
 			$spelliscast->set(),
+		'');		
+		
+		
+		// Set invokedspell
+		foreach($this->SpellSlotDCs as $key=>$spellslotdc){
+			$humans->_if( $invokedslot->exactly($key), $spelliscast )->then(
+				Display("invokedslot is $key, setting invokedspell based on proper SpellSlotDC"),
+				$invokedspell->setTo($spellslotdc->CP),
+				$invokedslot->setTo(0),
+			'');
+		}
+		
+		$humans->_if( $spelliscast )->then(
+			$point2X->setTo($point1X),
+			$point2Y->setTo($point1Y),
+			$point1X->setTo(FRAGS::$x->CP),
+			$point1Y->setTo(FRAGS::$y->CP),
+			
+			Display("Spell is cast"),
+			Display("invoked spell: $invokedspell"),
 		'');
 		
-		$humans->_if( $spelliscast, Never() )->then(
+		
+		
+		// Fireball
+		$humans->_if( $invokedspell->exactly(1) )->then(
 			
 			Display("Invoke fireball settings"),
 			
@@ -138,20 +248,20 @@ class SpellSystem {
 			$ComponentOriginIndex       ->setTo(self::_Hero),
 			$ComponentDestinationIndex  ->setTo(self::_Point1),
 			
-			// unused
+			// unused thus far
 			$MaxCastRange->setTo(1000/*px*/),
 			
 			// Set Position
-			$PositionIndex->setTo(1), // Load Distance's Origin
+			$PositionIndex->setTo(1),                       // Load Distance's Origin
 			$StaticOffsetX->setTo(0),
 			$StaticOffsetY->setTo(0),
 			
 			// Set Velocity
-			$VelocityLoadIndex->setTo(1), // Load components
-			$VelocityMultiplyByDCIndex->setTo(0), // none
+			$VelocityLoadIndex->setTo(1),                   // Load components
+			$VelocityMultiplyByDCIndex->setTo(0),           // none
 			$VelocityMultiplier->setTo(16),
 			$VelocityDivisor->setTo(0),
-			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
+			$VelocityAdjustForSigned->setTo(1),             // Add/subtracts for signed
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
@@ -162,8 +272,10 @@ class SpellSystem {
 			
 		'');
 		
+		
+		
 		// Lob 
-		$humans->_if( $spelliscast )->then(
+		$humans->_if( $invokedspell->exactly(2) )->then(
 			
 			Display("Invoke lob settings"),
 			
@@ -177,18 +289,17 @@ class SpellSystem {
 			$MaxCastRange->setTo(1000/*px*/),
 			
 			// Set Position
-			$PositionIndex->setTo(1), // Load Distance's Origin
+			$PositionIndex->setTo(1),               // Load Distance's Origin
 			$StaticOffsetX->setTo(0),
 			$StaticOffsetY->setTo(0),
 			
 			// Set Velocity
-			$VelocityLoadIndex->setTo(1), // Load components
-			$VelocityMultiplyByDCIndex->setTo(1), // vel *= distance
+			$VelocityLoadIndex->setTo(1),           // Load components
+			$VelocityMultiplyByDCIndex->setTo(1),   // vel *= distance
 			$VelocityMultiplier->setTo(0),
 			$VelocityDivisor->setTo(16),
-			$VelocityAdjustForSigned->setTo(1), // Add/subtracts for signed
-			//$VelocityRawY->setTo(3200-2975),      // 3200 is zero
-			$VelocityRawY->setTo(6400-2625),      // 3200 is zero
+			$VelocityAdjustForSigned->setTo(1), 	// Add/subtracts for signed
+			$VelocityRawY->setTo(6400-2625),    	// 6400 is zero
 			
 			// Set Acceleration
 			$accelerationx->setTo(800),
@@ -196,8 +307,45 @@ class SpellSystem {
 			
 			// Set Duration
 			$duration->setTo(16),
+				
+		'');
+		
+		
+		// 2 Pt Fireball
+		$humans->_if( $invokedspell->exactly(3) )->then(
+			
+			Display("Invoke 2pt fireball settings"),
+			
+			$DistanceOriginIndex        ->setTo(self::_Point2),
+			$DistanceDestinationIndex   ->setTo(self::_Point1),
+			
+			$ComponentOriginIndex       ->setTo(self::_Point2),
+			$ComponentDestinationIndex  ->setTo(self::_Point1),
+			
+			// unused thus far
+			$MaxCastRange->setTo(1000/*px*/),
+			
+			// Set Position
+			$PositionIndex->setTo(1),               // Load Distance's Origin
+			$StaticOffsetX->setTo(0),
+			$StaticOffsetY->setTo(0),
+			
+			// Set Velocity
+			$VelocityLoadIndex->setTo(1),           // Load components
+			$VelocityMultiplyByDCIndex->setTo(0),   // none
+			$VelocityMultiplier->setTo(16),
+			$VelocityDivisor->setTo(0),
+			$VelocityAdjustForSigned->setTo(1),     // Add/subtracts for signed
+			
+			// Set Acceleration
+			$accelerationx->setTo(800),
+			$accelerationy->setTo(800),
+			
+			// Set Duration
+			$duration->setTo(24),
 			
 		'');
+		
 		
 		$distX1 = new TempDC($xmax);
 		$distY1 = new TempDC($ymax);
@@ -305,14 +453,10 @@ class SpellSystem {
 			$angle->getAngle($compX1, $compY1, $compX2, $compY2),
 			$angle->componentsInto($xcomponent, $ycomponent),
 			
-			
-			// TODO:Remove
 			_if( $distance->atLeast(257) )->then(
 				$distance->setTo(256),
 			''),
 			
-			
-			// Set Position
 			_if( $PositionIndex->exactly(1) )->then(
 				$positionx->setTo($distX1),
 				$positiony->setTo($distY1),
@@ -407,6 +551,9 @@ class SpellSystem {
 				Display("Failed to load spell (projectiles are all taken?)"),
 			''),
 			
+			
+			$invokedspell->setTo(0),
+			
 			$positionx->release(),
 			$positiony->release(),
 			$velocityx->release(),
@@ -450,11 +597,24 @@ class SpellSystem {
 			$spelliscast->release(),
 		'');
 		
+		$projowners->always(
+			$invokedspell->release(),
+		'');
 		
+		$bam = new Sound("bam");
+		
+		foreach($this->Projectiles as $projectile){
+			$P1->_if( $projectile->duration->exactly(1) )->then(
+				FX::rumbleAt(10, $projectile->xpos, $projectile->ypos),
+				FX::playWavAt($bam, $projectile->xpos, $projectile->ypos),
+			'');
+		}
 		
 		$projowners->always(
 			$this->projectileEngine(),
 		'');
+		
+
 		
 	}
 	

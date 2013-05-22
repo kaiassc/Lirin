@@ -4,15 +4,16 @@
 
 class Projectile{
 	
-	/* @var Deathcounter */ public $xpos = array();
-	/* @var Deathcounter */ public $ypos = array();
-	/* @var Deathcounter */ private $xpospart = array();
-	/* @var Deathcounter */ private $ypospart = array();
-	/* @var Deathcounter */ private $xvel = array();
-	/* @var Deathcounter */ private $yvel = array();
-	/* @var Deathcounter */ private $xacc = array();
-	/* @var Deathcounter */ private $yacc = array();
-	/* @var Deathcounter */ public $duration = array();
+	/* @var Deathcounter */ public $xpos;
+	/* @var Deathcounter */ public $ypos;
+	/* @var Deathcounter */ private $xpospart;
+	/* @var Deathcounter */ private $ypospart;
+	/* @var Deathcounter */ private $xvel;
+	/* @var Deathcounter */ private $yvel;
+	/* @var Deathcounter */ private $xacc;
+	/* @var Deathcounter */ private $yacc;
+	/* @var Deathcounter */ public $duration;
+	/* @var Deathcounter */ public $spellid;
 	
 	function __construct(Array $dcarray = null){
 		
@@ -26,9 +27,10 @@ class Projectile{
 			$this->xacc      = new Deathcounter(1600);
 			$this->yacc      = new Deathcounter(1600);
 			$this->duration  = new Deathcounter(720);
+			$this->spellid   = new Deathcounter(100);
 		}
 		else if(is_array($dcarray)) {
-			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration) = $dcarray;
+			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration, $spellid) = $dcarray;
 			$this->xpos      = $xpos;
 			$this->ypos      = $ypos;
 			$this->xpospart  = $xpospart;
@@ -38,6 +40,7 @@ class Projectile{
 			$this->xacc      = $xacc;
 			$this->yacc      = $yacc;
 			$this->duration  = $duration;
+			$this->spellid   = $spellid;
 		}
 		else {
 			Error("\$dcarray must be an array");
@@ -197,7 +200,12 @@ class Projectile{
 			Grid::putMain($this->xpos, $this->ypos, $success),
 			_if( $success->is_set() )->then(
 				$success->kill(),
-				Grid::$main->explode(),
+				_if( $this->duration->atLeast(2) )->then(
+					Grid::$main->explode(),
+				''),
+				_if( $this->duration->exactly(1) )->then(
+					Grid::$main->largeExplode(),
+				''),
 			''),
 		'');
 		
@@ -210,10 +218,10 @@ class Projectile{
 		$text = '';
 		
 		$text .= _if( $this->duration->exactly(1) )->then(
-			$this->xpos->setTo(0),
-			$this->ypos->setTo(0),
-			$this->xpospart->setTo(0),
-			$this->ypospart->setTo(0),
+			#$this->xpos->setTo(0),
+			#$this->ypos->setTo(0),
+			#$this->xpospart->setTo(0),
+			#$this->ypospart->setTo(0),
 			$this->xvel->setTo(0),
 			$this->yvel->setTo(0),
 			$this->xacc->setTo(0),

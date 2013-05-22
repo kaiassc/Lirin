@@ -1,5 +1,11 @@
 <?php
 	
+	function Dump($variable){
+		echo "</textarea>";
+		var_dump($variable);
+		Error("dumped..");
+	}
+	
 	////
 	// Actions
 	//

@@ -27,7 +27,7 @@ class UnitManager {
 		
 	}
 	
-	public function firstTrigs(){
+	public function FirstTrigs(){
 		
 		$P1 = new Player(P1);
 		$catcher = self::$Catcher;
@@ -83,7 +83,7 @@ class UnitManager {
 		return $text;
 	}
 	
-	public function lastTrigs(){
+	public function LastTrigs(){
 		/* BSUNIT REPLACEMENT */
 		$P8 = new Player(P8);
 		
