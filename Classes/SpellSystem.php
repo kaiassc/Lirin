@@ -428,6 +428,7 @@ class SpellSystem {
 				$ComponentOriginIndex       ->setTo(self::_Hero),
 				$ComponentDestinationIndex  ->setTo(self::_Point1),
 			$SaveAngle->set(),
+			$FindComponents->set(),
 				
 			// Set Position
 			$PositionIndex->setTo(1),               // Load Angle's Origin
