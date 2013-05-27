@@ -39,8 +39,10 @@ class SpellSystem {
 	const _DistResize   = 1;
 	const _DistCancel   = 2;
 	// angle controller
-	const _AngleCalc    = 1;
-	const _AngleLoad    = 2;
+	const _Calc         = 1;
+	const _CalcSave     = 2;
+	const _CalcSaveLoad = 3;
+	const _Load         = 4;
 	const _addConst     = 1;
 	const _shiftTo      = 2;
 	
@@ -132,36 +134,37 @@ class SpellSystem {
 		
 		
 		
-		$frags = new TempSwitch();
-		
+		// Pre-existing DCs
 		$xmax = Map::getWidth()*32-1;
 		$ymax = Map::getHeight()*32-1;
-		
 
 		$bsX = BattleSystem::$xDCs[0];
 		$bsY = BattleSystem::$yDCs[0];
 		
 		// Persistent DCs
-		$point1X = new Deathcounter($humans, FRAGS::$x->Max);
-		$point1Y = new Deathcounter($humans, FRAGS::$y->Max);
-		$point2X = new Deathcounter($humans, FRAGS::$x->Max);
-		$point2Y = new Deathcounter($humans, FRAGS::$y->Max);
+		$point1X =                      new Deathcounter($humans, FRAGS::$x->Max);
+		$point1Y =                      new Deathcounter($humans, FRAGS::$y->Max);
+		$point2X =                      new Deathcounter($humans, FRAGS::$x->Max);
+		$point2Y =                      new Deathcounter($humans, FRAGS::$y->Max);
 		
-		$selectedSpell = new Deathcounter($humans, 4);
-		$spellStage = new Deathcounter($humans, 15);
+		$selectedSpell =                new Deathcounter($humans, 4);
+		$spellCast =                    new Deathcounter($humans);
+		$spellStage =                   new Deathcounter($humans, 15);
 		
 		// Saved DCs
-		$SavedAngle = $Saved1 = new Deathcounter($humans, 1440);
+		$SaveAngle =                    new TempSwitch();
+		$StoredCurrentAngle =           new Deathcounter($humans, 1440);
+		$StoredDestinationAngle =       new Deathcounter($humans, 1440);
 		
 		
 		// Projectile Variables
-		$positionx =        new TempDC(Map::getWidth()*32-1);
-		$positiony =        new TempDC(Map::getHeight()*32-1);
-		$velocityx =        new TempDC(12800);
-		$velocityy =        new TempDC(12800);
-		$accelerationx =    new TempDC(1600);
-		$accelerationy =    new TempDC(1600);
-		$duration =         new TempDC(720);
+		$positionx =                    new TempDC(Map::getWidth()*32-1);
+		$positiony =                    new TempDC(Map::getHeight()*32-1);
+		$velocityx =                    new TempDC(12800);
+		$velocityy =                    new TempDC(12800);
+		$accelerationx =                new TempDC(1600);
+		$accelerationy =                new TempDC(1600);
+		$duration =                     new TempDC(720);
 		
 		
 		// SPELL VARIABLES
@@ -181,7 +184,6 @@ class SpellSystem {
 		$ComponentDestinationIndex =    new TempDC();
 		
 		$AngleIndex =                   new TempDC();
-		$SaveAngle =                    new TempSwitch();
 		
 		$AngleAlterationsIndex =        new TempDC();
 		$AngleAlterationsValue =        new TempDC(1440);
@@ -199,7 +201,6 @@ class SpellSystem {
 		$StaticOffsetY =                new TempDC(12800);
 		
 		// for velocity
-		// TODO: remove some of these
 		$VelocityLoadIndex =            new TempDC();
 		$VelocityMultiplyByDCIndex =    new TempDC();
 		$VelocityMultiplier =           new TempDC(256);
@@ -207,13 +208,14 @@ class SpellSystem {
 		$VelocityRawY =                 new TempDC(12800);
 		$VelocityAdjustForSigned =      new TempDC();
 		
-		$tempx =                        new TempDC(256000);
+		$tempx = $tempDiff =            new TempDC(256000);
 		$tempy =                        new TempDC(256000);
 		
 		// miscellaneous
+		$frags =                        new TempSwitch();
 		$invokedslot =                  new Deathcounter($humans, 104);
 		$invokedspell =                 new TempDC(50);
-		$success =                      new TempSwitch();
+		$success = $sign =              new TempSwitch();
 		$loadIntoProj =                 new TempSwitch();
 		
 		// 
@@ -283,7 +285,7 @@ class SpellSystem {
 			
 			$frags->clear(),
 		'');
-		$frags->release();
+		
 		
 		
 		
@@ -294,14 +296,14 @@ class SpellSystem {
 		
 		// Fireball
 		$humans->_if( $invokedspell->exactly(1) )->then(
-			$invokedspell->setTo(0),
-			Display("Invoke fireball"),
 			
+			// Stage prep (for persistent spells)
+			Display("Invoke fireball"),
 			
 			// Distance
 			
 			// Angle
-			$AngleIndex->setTo(self::_AngleCalc),
+			$AngleIndex->setTo(self::_Calc),
 				$ComponentOriginIndex       ->setTo(self::_Hero),
 				$ComponentDestinationIndex  ->setTo(self::_Point1),
 			$FindComponents->set(),
@@ -334,9 +336,9 @@ class SpellSystem {
 		
 		// Lob 
 		$humans->_if( $invokedspell->exactly(2) )->then(
-			$invokedspell->setTo(0),
+			
+			// Stage prep (for persistent spells)
 			Display("Invoke lob"),
-
 			
 			// Distance
 			$FindDistance->set(),
@@ -346,7 +348,7 @@ class SpellSystem {
 				$MaxCastRange->setTo(256),
 			
 			// Angle
-			$AngleIndex->setTo(self::_AngleCalc),
+			$AngleIndex->setTo(self::_Calc),
 				$ComponentOriginIndex       ->setTo(self::_Hero),
 				$ComponentDestinationIndex  ->setTo(self::_Point1),
 			$FindComponents->set(),
@@ -378,20 +380,26 @@ class SpellSystem {
 		
 		
 		// Firebreath
-		$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
-			$invokedspell->setTo(0),
+		#$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
+		#	
+		#	// Stage prep (for persistent spells)
+		#	Display("Ended firebreath"),
+		#	$spellCast->setTo(0),
+		#	$spellStage->setTo(0),
+		#
+		#'');
+		$humans->_if( $spellCast->exactly(3), $spellStage->exactly(1) )->then(
 			
-			Display("Ended firebreath"),
-			$spellStage->setTo(0),
-
-		'');
-		$humans->_if( $spellStage->exactly(1) )->then(
+			// Stage prep (for persistent spells)
 			
 			// Distance
 			
 			// Angle
-			$AngleIndex->setTo(self::_AngleLoad),
+			$AngleIndex->setTo(self::_Load),
 				$ComponentOriginIndex       ->setTo(self::_Hero),
+			$AngleAlterationsIndex->setTo(self::_shiftTo),
+				$AngleAlterationsValue->setTo(30),
+			$SaveAngle->set(),
 			$FindComponents->set(),
 			
 			// Set Position
@@ -417,14 +425,25 @@ class SpellSystem {
 			$loadIntoProj->set(),
 				
 		'');
-		$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(0) )->then(
-			$invokedspell->setTo(0),
+		$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
 			
+			// Stage prep (for persistent spells)
+			Display("Redirected firebreath"),
+			
+			// Angle
+			$AngleIndex->setTo(self::_CalcSaveLoad),
+				$ComponentDestinationIndex  ->setTo(self::_Point1),
+			
+		'');
+		$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(0) )->then(
+			
+			// Stage prep (for persistent spells)
 			Display("Invoke firebreath"),
+			$spellCast->setTo(3),
 			$spellStage->setTo(1),
 			
 			// Angle
-			$AngleIndex->setTo(self::_AngleCalc),
+			$AngleIndex->setTo(self::_CalcSave),
 				$ComponentOriginIndex       ->setTo(self::_Hero),
 				$ComponentDestinationIndex  ->setTo(self::_Point1),
 			$SaveAngle->set(),
@@ -455,7 +474,8 @@ class SpellSystem {
 		'');
 		
 		
-		$invokedspell->release();
+		
+		
 		
 		
 		
@@ -497,38 +517,31 @@ class SpellSystem {
 		// DISTANCE
 		
 		$humans->_if( $FindDistance )->then(
-			$FindDistance->clear(),
 			
 			// Load the Distance Calculation's Origin and Destination
 			_if( $DistanceOriginIndex->exactly(self::_Hero) )->then(
-				$DistanceOriginIndex->setTo(0),
 				$distX1->setTo($bsX->CP),
 				$distY1->setTo($bsY->CP),
 			''),
 			_if( $DistanceOriginIndex->exactly(self::_Point1) )->then(
-				$DistanceOriginIndex->setTo(0),
 				$distX1->setTo($point1X),
 				$distY1->setTo($point1Y),
 			''),
 			_if( $DistanceOriginIndex->exactly(self::_Point2) )->then(
-				$DistanceOriginIndex->setTo(0),
 				$distX1->setTo($point2X),
 				$distY1->setTo($point2Y),
 			''),
 			
 			
 			_if( $DistanceDestinationIndex->exactly(self::_Hero) )->then(
-				$DistanceDestinationIndex->setTo(0),
 				$distX2->setTo($bsX->CP),
 				$distY2->setTo($bsY->CP),
 			''),
 			_if( $DistanceDestinationIndex->exactly(self::_Point1) )->then(
-				$DistanceDestinationIndex->setTo(0),
 				$distX2->setTo($point1X),
 				$distY2->setTo($point1Y),
 			''),
 			_if( $DistanceDestinationIndex->exactly(self::_Point2) )->then(
-				$DistanceDestinationIndex->setTo(0),
 				$distX2->setTo($point2X),
 				$distY2->setTo($point2Y),
 			''),
@@ -553,101 +566,92 @@ class SpellSystem {
 					$FindComponents->clear(), $FindDistance->clear(), $loadIntoProj->clear(), $SaveAngle->clear(),
 				''),
 			''),
-			$MaxCastRange->setTo(0),
 			
 		'');
-		$DistanceOriginIndex->release();
-		$DistanceDestinationIndex->release();
-		$FindDistance->release();
-		$MaxRangeIndex->release();
-		$MaxCastRange->release();
+		
 		
 		
 		// ANGLE
 		
-		// Set Origin (origin is outside of Calculate Angle because it can be called elsewhere
+		// Set Origin and Destination
 		$humans->_if( $ComponentOriginIndex->exactly(self::_Hero) )->then(
-			$ComponentOriginIndex->setTo(0),
 			$compX1->setTo($bsX->CP),
 			$compY1->setTo($bsY->CP),
 		'');
 		$humans->_if( $ComponentOriginIndex->exactly(self::_Point1) )->then(
-			$ComponentOriginIndex->setTo(0),
 			$compX1->setTo($point1X),
 			$compY1->setTo($point1Y),
 		'');
 		$humans->_if( $ComponentOriginIndex->exactly(self::_Point2) )->then(
-			$ComponentOriginIndex->setTo(0),
 			$compX1->setTo($point2X),
 			$compY1->setTo($point2Y),
 		'');
-		$ComponentOriginIndex->release();
+		
+		$humans->_if( $ComponentDestinationIndex->exactly(self::_Hero) )->then(
+			$compX2->setTo($bsX->CP),
+			$compY2->setTo($bsY->CP),
+		'');
+		$humans->_if( $ComponentDestinationIndex->exactly(self::_Point1) )->then(
+			$compX2->setTo($point1X),
+			$compY2->setTo($point1Y),
+		'');
+		$humans->_if( $ComponentDestinationIndex->exactly(self::_Point2) )->then(
+			$compX2->setTo($point2X),
+			$compY2->setTo($point2Y),
+		'');
 		
 		// Calculate angle
-		$humans->_if( $AngleIndex->exactly(self::_AngleCalc) )->then(
-			
-			$AngleIndex->setTo(0),
-			
-			_if( $ComponentDestinationIndex->exactly(self::_Hero) )->then(
-				$ComponentDestinationIndex->setTo(0),
-				$compX2->setTo($bsX->CP),
-				$compY2->setTo($bsY->CP),
-			''),
-			_if( $ComponentDestinationIndex->exactly(self::_Point1) )->then(
-				$ComponentDestinationIndex->setTo(0),
-				$compX2->setTo($point1X),
-				$compY2->setTo($point1Y),
-			''),
-			_if( $ComponentDestinationIndex->exactly(self::_Point2) )->then(
-				$ComponentDestinationIndex->setTo(0),
-				$compX2->setTo($point2X),
-				$compY2->setTo($point2Y),
-			''),
-			
+		$humans->_if( $AngleIndex->between(self::_Calc, self::_CalcSaveLoad) )->then(
 		    $angle->getAngle($compX1, $compY1, $compX2, $compY2),
-			
 		'');
-		$ComponentDestinationIndex->release();
+		
+		// Save destination angle
+		$humans->_if( $AngleIndex->between(self::_CalcSave, self::_CalcSaveLoad) )->then(
+			$StoredDestinationAngle->setTo($angle),
+		'');
 		
 		// Load angle
-		$humans->_if( $AngleIndex->exactly(self::_AngleLoad) )->then(
-			$AngleIndex->setTo(0),
-		    $angle->setTo($SavedAngle),
+		$humans->_if( $AngleIndex->between(self::_CalcSaveLoad, self::_Load) )->then(
+		    $angle->setTo($StoredCurrentAngle),
 		'');
-		$AngleIndex->release();
 		
 		// Alter angle
 		$humans->_if( $AngleAlterationsIndex->exactly(self::_addConst) )->then(
-			$AngleAlterationsIndex->setTo(0),
 		    $angle->add($AngleAlterationsValue),
 			_if( $angle->atLeast(1440) )->then(
 				$angle->subtract(1440),
 			''),
-			$AngleAlterationsValue->setTo(0),
 		'');
-		// TODO: needs work; needs to save two angles!
 		$humans->_if( $AngleAlterationsIndex->exactly(self::_shiftTo) )->then(
-			$AngleAlterationsIndex->setTo(0),
-		    $angle->add($AngleAlterationsValue),
+			$tempDiff->max(1440),
+			$tempDiff->absDifference($angle, $StoredDestinationAngle, $sign),
+			
+			_if( $tempDiff->greaterThan($AngleAlterationsValue) )->then(
+				$tempDiff->setTo($AngleAlterationsValue),
+			''),
+			
+			_if( $sign->is_clear() )->then(
+		        $angle->add($AngleAlterationsValue),
+			''),
+			_if( $sign->is_set() )->then(
+				$angle->add(1440),
+		        $angle->subtract($AngleAlterationsValue),
+			''),
 			_if( $angle->atLeast(1440) )->then(
 				$angle->subtract(1440),
 			''),
-			$AngleAlterationsValue->setTo(0),
+			$tempDiff->max(256000),
 		'');
-		$AngleAlterationsIndex->release();
-		$AngleAlterationsValue->release();
 		
 		// Save angle
 		$humans->_if( $SaveAngle )->then(
-			$SaveAngle->release(),
-			$SavedAngle->setTo($angle),
+			$StoredCurrentAngle->setTo($angle),
 		'');
 		
 		
 		
 		// COMPONENTS
 		$humans->_if( $FindComponents )->then(
-			$FindComponents->release(),
 		    $angle->componentsInto($xcomponent, $ycomponent),
 		'');
 		
@@ -656,7 +660,6 @@ class SpellSystem {
 		$projowners->_if( $PositionIndex->atLeast(1) )->then(
 			
 			_if( $PositionIndex->exactly(1) )->then(
-				$PositionIndex->setTo(0),
 				$positionx->setTo($compX1),
 				$positiony->setTo($compY1),
 			''),
@@ -673,7 +676,6 @@ class SpellSystem {
 			
 			// TODO: more position stuff
 		'');
-		$PositionIndex->release();
 		
 		
 		// VELOCITY
@@ -752,34 +754,6 @@ class SpellSystem {
 				$velocityy->subtract(6400),
 			''),
 			
-			
-			$VelocityLoadIndex->release(),
-			$StaticOffsetX->release(),
-			$StaticOffsetY->release(),
-			$VelocityMultiplyByDCIndex->release(),
-			$VelocityMultiplier->release(),
-			$VelocityDivisor->release(),
-			$VelocityRawY->release(),
-			$VelocityAdjustForSigned->release(),
-			
-			$tempx->release(),
-			$tempy->release(),
-			
-			// TODO: some of these might be necessary for acceleration...
-			$distX1->release(),
-			$distY1->release(),
-			$distX2->release(),
-			$distY2->release(),
-			$compX1->release(),
-			$compY1->release(),
-			$compX2->release(),
-			$compY2->release(),
-			
-			$distance->release(),
-			$angle->release(),
-			
-			$xcomponent->release(),
-			$ycomponent->release(),
 		'');
 			
 			
@@ -796,8 +770,50 @@ class SpellSystem {
 			_if( $success->is_clear() )->then(
 				//Display("Failed to load spell (projectiles are all taken?)"),
 			''),
+		'');
+		
+		
+		
+		// Cleanup
+		$projowners->always(
+			$frags->release(),
+			$invokedspell->release(),
+			$DistanceOriginIndex->release(),
+			$DistanceDestinationIndex->release(),
+			$FindDistance->release(),
+			$MaxRangeIndex->release(),
+			$MaxCastRange->release(),
+			$ComponentOriginIndex->release(),
+			$ComponentDestinationIndex->release(),
+			$AngleIndex->release(),
+			$AngleAlterationsIndex->release(),
+			$AngleAlterationsValue->release(),
+			$SaveAngle->release(),
+			$FindComponents->release(),
+			$PositionIndex->release(),
+			$VelocityLoadIndex->release(),
+			$StaticOffsetX->release(),
+			$StaticOffsetY->release(),
+			$VelocityMultiplyByDCIndex->release(),
+			$VelocityMultiplier->release(),
+			$VelocityDivisor->release(),
+			$VelocityRawY->release(),
+			$VelocityAdjustForSigned->release(),
+			$tempx->release(),
+			$tempy->release(),
+			$distX1->release(),
+			$distY1->release(),
+			$distX2->release(),
+			$distY2->release(),
+			$compX1->release(),
+			$compY1->release(),
+			$compX2->release(),
+			$compY2->release(),
+			$distance->release(),
+			$angle->release(),
+			$xcomponent->release(),
+			$ycomponent->release(),
 			$success->release(),
-			
 			$loadIntoProj->release(),
 			$positionx->release(),
 			$positiony->release(),
