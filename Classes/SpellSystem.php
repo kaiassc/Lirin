@@ -208,8 +208,8 @@ class SpellSystem {
 		$VelocityRawY =                 new TempDC(12800);
 		$VelocityAdjustForSigned =      new TempDC();
 		
-		$tempx = $tempDiff =            new TempDC(256000);
-		$tempy =                        new TempDC(256000);
+		$tempx = $temp1 =               new TempDC(256000);
+		$tempy = $temp2 =               new TempDC(256000);
 		
 		// miscellaneous
 		$frags =                        new TempSwitch();
@@ -268,7 +268,7 @@ class SpellSystem {
 		// Set invokedspell
 		foreach($this->SpellSlotDCs as $key=>$spellslotdc){
 			$humans->_if( $frags, $invokedslot->exactly($key) )->then(
-				Display("invokedslot is $key, setting invokedspell based on proper SpellSlotDC"),
+				//Display("invokedslot is $key, setting invokedspell based on proper SpellSlotDC"),
 				$invokedspell->setTo($spellslotdc->CP),
 				$invokedslot->setTo(0),
 			'');
@@ -623,24 +623,32 @@ class SpellSystem {
 			''),
 		'');
 		$humans->_if( $AngleAlterationsIndex->exactly(self::_shiftTo) )->then(
-			$tempDiff->max(1440),
-			$tempDiff->absDifference($angle, $StoredDestinationAngle, $sign),
+			$temp1->max(1440),
+			$temp2->max(1440),
+			$temp1->absDifference($angle, $StoredDestinationAngle, $sign),
+			_if( $temp1->atLeast(721) )->then(
+				$temp2->setTo($temp1),
+				$temp1->setTo(1440),
+				$temp1->subtract($temp2),
+				$sign->toggle(),
+			''),
 			
-			_if( $tempDiff->greaterThan($AngleAlterationsValue) )->then(
-				$tempDiff->setTo($AngleAlterationsValue),
+			_if( $temp1->greaterThan($AngleAlterationsValue) )->then(
+				$temp1->setTo($AngleAlterationsValue),
 			''),
 			
 			_if( $sign->is_clear() )->then(
-		        $angle->add($AngleAlterationsValue),
+		        $angle->add($temp1),
 			''),
 			_if( $sign->is_set() )->then(
 				$angle->add(1440),
-		        $angle->subtract($AngleAlterationsValue),
+		        $angle->subtract($temp1),
 			''),
 			_if( $angle->atLeast(1440) )->then(
 				$angle->subtract(1440),
 			''),
-			$tempDiff->max(256000),
+			$temp1->max(256000),
+			$temp2->max(256000),
 		'');
 		
 		// Save angle
