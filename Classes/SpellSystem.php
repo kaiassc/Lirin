@@ -476,40 +476,31 @@ class SpellSystem {
 		'');
 		
 		
-		// Test
-		#$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
-		#	
-		#	// Stage prep (for persistent spells)
-		#	Display("Ended firebreath"),
-		#	$spellCast->setTo(0),
-		#	$spellStage->setTo(0),
-		#
-		#'');
-		$humans->_if( $spellCast->exactly(4), $spellStage->exactly(1) )->then(
+		// Holocaust
+		$humans->_if( $spellCast->exactly(4), $spellStage->exactly(3) )->then(
 			
 			// Stage prep (for persistent spells)
+			$spellCast->setTo(0),
+			$spellStage->setTo(0),
 			
 			// Distance
 			
 			// Angle
 			$AngleIndex->setTo(self::_Load),
 				$ComponentOriginIndex       ->setTo(self::_Hero),
-			$AngleAlterationsIndex->setTo(self::_shiftTo),
-				$AngleAlterationsValue->setTo(30),
-			$SaveAngle->set(),
 			$FindComponents->set(),
 			
 			// Set Position
 			$PositionIndex->setTo(1),               // Load Angle's Origin
-			$PositionLoadIndex->setTo(1),
-				$PositionMultiplier->setTo(64),
+			$PositionLoadIndex->setTo(3),           // Perp. right
+				$PositionMultiplier->setTo(96),
 			$StaticOffsetX->setTo(0),
 			$StaticOffsetY->setTo(0),
 			
 			// Set Velocity
 			$VelocityLoadIndex->setTo(1),           // Load components
 			$VelocityMultiplyByDCIndex->setTo(0),   // none
-			$VelocityMultiplier->setTo(0),
+			$VelocityMultiplier->setTo(4),
 			$VelocityDivisor->setTo(0),
 			$VelocityAdjustForSigned->setTo(1), 	// Add/subtracts for signed
 			
@@ -518,26 +509,90 @@ class SpellSystem {
 			$accelerationy->setTo(800),
 			
 			// Set Duration
-			$duration->setTo(1),
+			$duration->setTo(32),
 			
 			// Cast
 			$loadIntoProj->set(),
 				
 		'');
-		$humans->_if( $invokedspell->exactly(4), $spellStage->exactly(1) )->then(
+		$humans->_if( $spellCast->exactly(4), $spellStage->exactly(2) )->then(
 			
 			// Stage prep (for persistent spells)
-			Display("Redirected test"),
+			$spellStage->setTo(3),
+			
+			// Distance
 			
 			// Angle
-			$AngleIndex->setTo(self::_CalcSaveLoad),
-				$ComponentDestinationIndex  ->setTo(self::_Point1),
+			$AngleIndex->setTo(self::_Load),
+				$ComponentOriginIndex       ->setTo(self::_Hero),
+			$FindComponents->set(),
 			
+			// Set Position
+			$PositionIndex->setTo(1),               // Load Angle's Origin
+			$PositionLoadIndex->setTo(2),           // Perp. left
+				$PositionMultiplier->setTo(96),
+			$StaticOffsetX->setTo(0),
+			$StaticOffsetY->setTo(0),
+			
+			// Set Velocity
+			$VelocityLoadIndex->setTo(1),           // Load components
+			$VelocityMultiplyByDCIndex->setTo(0),   // none
+			$VelocityMultiplier->setTo(4),
+			$VelocityDivisor->setTo(0),
+			$VelocityAdjustForSigned->setTo(1), 	// Add/subtracts for signed
+			
+			// Set Acceleration
+			$accelerationx->setTo(800),
+			$accelerationy->setTo(800),
+			
+			// Set Duration
+			$duration->setTo(32),
+			
+			// Cast
+			$loadIntoProj->set(),
+				
+		'');
+		$humans->_if( $spellCast->exactly(4), $spellStage->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			$spellStage->setTo(2),
+			
+			// Distance
+			
+			// Angle
+			$AngleIndex->setTo(self::_Load),
+				$ComponentOriginIndex       ->setTo(self::_Hero),
+			$FindComponents->set(),
+			
+			// Set Position
+			$PositionIndex->setTo(1),               // Load Angle's Origin
+			$PositionLoadIndex->setTo(3),           // Perp. right
+				$PositionMultiplier->setTo(32),
+			$StaticOffsetX->setTo(0),
+			$StaticOffsetY->setTo(0),
+			
+			// Set Velocity
+			$VelocityLoadIndex->setTo(1),           // Load components
+			$VelocityMultiplyByDCIndex->setTo(0),   // none
+			$VelocityMultiplier->setTo(4),
+			$VelocityDivisor->setTo(0),
+			$VelocityAdjustForSigned->setTo(1), 	// Add/subtracts for signed
+			
+			// Set Acceleration
+			$accelerationx->setTo(800),
+			$accelerationy->setTo(800),
+			
+			// Set Duration
+			$duration->setTo(32),
+			
+			// Cast
+			$loadIntoProj->set(),
+				
 		'');
 		$humans->_if( $invokedspell->exactly(4), $spellStage->exactly(0) )->then(
 			
 			// Stage prep (for persistent spells)
-			Display("Invoke test"),
+			Display("Invoke Holocaust"),
 			$spellCast->setTo(4),
 			$spellStage->setTo(1),
 			
@@ -550,15 +605,15 @@ class SpellSystem {
 				
 			// Set Position
 			$PositionIndex->setTo(1),               // Load Angle's Origin
-			$PositionLoadIndex->setTo(1),
-				$PositionMultiplier->setTo(64),
+			$PositionLoadIndex->setTo(2),           // Perp. left
+				$PositionMultiplier->setTo(32),
 			$StaticOffsetX->setTo(0),
 			$StaticOffsetY->setTo(0),
 			
 			// Set Velocity
 			$VelocityLoadIndex->setTo(1),           // Load components
 			$VelocityMultiplyByDCIndex->setTo(0),   // none
-			$VelocityMultiplier->setTo(0),
+			$VelocityMultiplier->setTo(4),
 			$VelocityDivisor->setTo(0),
 			$VelocityAdjustForSigned->setTo(1), 	// Add/subtracts for signed
 			
@@ -567,7 +622,7 @@ class SpellSystem {
 			$accelerationy->setTo(800),
 			
 			// Set Duration
-			$duration->setTo(1),
+			$duration->setTo(32),
 			
 			// Cast
 			$loadIntoProj->set(),
