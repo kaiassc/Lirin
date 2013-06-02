@@ -15,13 +15,8 @@ class Hero extends BSUnit {
 		parent::__construct($dcplayer, $BSid, $unit, $player, $location);
 	}
 	
-	protected function getTargets(){
-		return BattleSystem::getBSUnits();
-	}
-	
-	public function getTypes(){
-		return Type::getHeroTypes();
-	}
+	protected function getTargets(){ return BattleSystem::getBSUnits(); }
+	public    function getTypes(){ return Type::getHeroTypes(); }
 	
 	/////
 	//CONDITIONS
@@ -34,17 +29,12 @@ class Hero extends BSUnit {
 	//
 	
 	protected function clearType(){
-		return  $this->type->setTo(0).
-				$this->attackTime->setTo(0).
-				$this->attackTarget->setTo(0).
-				#$this->health->setTo(0).
-				#$this->maxhealth->setTo(0).
-				#$this->mana->setTo(0).
-				#$this->maxmana->setTo(0).
-				#$this->damage->setTo(0).
-				#$this->armor->setTo(0).
-				#$this->magicresist->setTo(0).
-				'';
+		$text = '';
+		$text .= $this->type->setTo(0);
+		$text .= $this->attackTime->setTo(0);
+		$text .= $this->attackTarget->setTo(0);
+		
+		return $text;
 	}
 	
 	protected function loadType($type){

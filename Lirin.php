@@ -50,14 +50,11 @@ class Lirin extends RPG {
 		}
 		/**/
 		
-		
-		
-		
-		
 		new GloreWorm(2145, 2311);
 		new GloreWorm(1760, 2260);
 		new GloreWorm(1895, 2395);
 		new GloreWorm(2597, 2403);
+		
 		
 		
 	}

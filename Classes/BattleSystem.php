@@ -3,7 +3,9 @@
 
 
 class BattleSystem {
-
+	
+	/* @var Hero */     static $CPHero;
+	
 	/* @var Hero[] */   static private $Heroes  = array();
 	/* @var Enemy[] */  static private $Enemies = array();
 	/* @var Roamer[] */ static private $Roamers = array();
@@ -132,6 +134,25 @@ class BattleSystem {
 				
 			}
 		}
+		
+		// Populate CPHero
+		/* @var Hero  $hero */
+		$hero = clone self::$Heroes[0];
+		self::$CPHero = $hero;
+		self::$CPHero->type =           $hero->type->CP;
+		self::$CPHero->baseunitid =     $hero->baseunitid->CP;
+		self::$CPHero->apparentunitid = $hero->apparentunitid->CP;
+		self::$CPHero->attackTime =     $hero->attackTime->CP;
+		self::$CPHero->attackTarget =   $hero->attackTarget->CP;
+		self::$CPHero->health =         $hero->health->CP;
+		self::$CPHero->maxhealth =      $hero->maxhealth->CP;
+		self::$CPHero->mana =           $hero->mana->CP;
+		self::$CPHero->maxmana =        $hero->maxmana->CP;
+		self::$CPHero->damage =         $hero->damage->CP;
+		self::$CPHero->armor =          $hero->armor->CP;
+		self::$CPHero->magicresist =    $hero->magicresist->CP;
+		self::$CPHero->x =              $hero->x->CP;
+		self::$CPHero->y =              $hero->y->CP;
 		
 		// TESTING
 		$P1 = new Player(P1);

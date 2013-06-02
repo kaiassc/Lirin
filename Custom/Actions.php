@@ -10,6 +10,10 @@
 	// Actions
 	//
 	
+	function Message($text){
+		return Display("\\x013\\x004$text");
+	}
+	
 	//GET SCREEN !
 	/*
 		� Returns the screen's x and y coordinates to $x and $y, respectively

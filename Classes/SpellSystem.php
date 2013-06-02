@@ -253,19 +253,10 @@ class SpellSystem {
 		
 		
 		// Set $frags
-		$P4->_if( FRAGS::$P4Fragged, $invokedslot->between(1, 99) )->then(
-			FRAGS::$P4Fragged->clear(),
+		$humans->_if( FRAGS::$Fragged, $invokedslot->between(1, 99) )->then(
+			FRAGS::$Fragged->setTo(0),
 			$frags->set(),
 		'');
-		$P5->_if( FRAGS::$P5Fragged, $invokedslot->between(1, 99) )->then(
-			FRAGS::$P5Fragged->clear(),
-			$frags->set(),
-		'');
-		$P6->_if( FRAGS::$P6Fragged, $invokedslot->between(1, 99) )->then(
-			FRAGS::$P6Fragged->clear(),
-			$frags->set(),
-		'');		
-		
 		
 		// Set invokedspell
 		foreach($this->SpellSlotDCs as $key=>$spellslotdc){

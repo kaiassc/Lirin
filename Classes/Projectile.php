@@ -193,20 +193,19 @@ class Projectile{
 		
 		$success = new TempSwitch();
 		
-		$P4 = new Player(P4);
-		
 		//output
 		$text .= _if( $this->duration->atLeast(1) )->then(
 			Grid::putMain($this->xpos, $this->ypos, $success),
 			_if( $success->is_set() )->then(
-				$success->kill(),
 				_if( $this->duration->atLeast(2) )->then(
 					Grid::$main->explode(),
 				''),
 				_if( $this->duration->exactly(1) )->then(
 					Grid::$main->largeExplode(),
+					#Grid::$main->explode(),
 				''),
 			''),
+			$success->release(),
 		'');
 		
 		return $text;

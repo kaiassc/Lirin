@@ -971,7 +971,125 @@ class Grid{
 	}
 	
 	
+	/*
 	
+	// Function to snap Main to the input pixel
+	static public function putMainExtended($xcoord, $ycoord) {
+		
+		//ERROR
+		if( func_num_args() != 2 && func_num_args() != 3 ){
+			Error('COMPILER ERROR FOR PUTMAIN(): INCORRECT NUMBER OF ARGUMENTS (NEEDS 3: DEATHCOUNTER OR CONSTANT (INTEGER), DEATHCOUNTER OR CONSTANT (INTEGER), SWITCH)');
+		}
+		if( !(is_numeric($xcoord) || $xcoord instanceof Deathcounter) ) {
+			Error('COMPILER ERROR FOR PUTMAINRES(): ARGUMENT 1 NEEDS TO BE A DEATHCOUNTER OR A CONSTANT (INTEGER)');
+		}
+		if( !(is_numeric($ycoord) || $ycoord instanceof Deathcounter) ) {
+			Error('COMPILER ERROR FOR PUTMAINRES(): ARGUMENT 2 NEEDS TO BE A DEATHCOUNTER OR A CONSTANT (INTEGER)');
+		}
+		
+		
+		$text = '';
+		$horizSlide = '';
+		$vertSlide = '';
+		
+		
+		
+		//location and unit to make putMainRes(const, const) more efficient
+		$lastlocation = Grid::$origin;
+		$lastunit = Grid::$unit;
+		
+		//X is a constant integer
+		if( is_numeric($xcoord) ) {
+			/* @var int $xcoord *
+			
+			//xmove is a coordinate that starts at the grid's origin and counts over
+			$xmove = (Grid::$xoffset+Grid::$xdimension)*32 - $xcoord;			
+			if( $xmove > Grid::$xdimension*32 || $xmove < 0 )
+				ERROR("X coordinate is out of the playing field: $xcoord");
+			
+			//make it so main is always within 4 pixels (this essentially rounds)
+			$xmove += 3;
+			
+			//move 64*resolution left
+			while( $xmove >= Grid::$resolution*64 ){
+				$text .= Grid::$slideLeft64->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*64;
+				$lastlocation = Grid::$slideLeft64;
+			}
+			//move 8*resolution left
+			while( $xmove >= Grid::$resolution*8 ){
+				$text .= Grid::$slideLeft8->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*8;
+				$lastlocation = Grid::$slideLeft8;
+			}
+			//move 1*resolution left
+			while( $xmove >= Grid::$resolution*1 ){
+				$text .= Grid::$slideLeft1->centerOn(P12, Grid::$unit, $lastlocation);
+				$xmove -= Grid::$resolution*1;
+				$lastlocation = Grid::$slideLeft1;
+			}
+			
+			//restore xmove to see how many pixels main should shift left or right (used at the bottom)
+			$xmove -= 3;
+			
+		}
+		
+		//Y is a constant
+		if( is_numeric($ycoord) ) {
+			/* @var int $ycoord *
+			
+			//swap == 0 if top, == 1 if bottom
+			$swap = 0;
+			//start Y at playing field (subtract any edge)
+			$ycoord -= (Map::getHeight()-Grid::$ydimension)/2*32;
+			
+			//error check
+			if( $ycoord > Grid::$ydimension*32 || $ycoord < 0 )
+				ERROR("Y coordinate is out of the playing field");
+			
+			//top half of map
+			if( $ycoord < Grid::$ydimension*32/2 - 4 ){
+				$text .= Grid::$shiftUp->centerOn(P12, $lastunit, $lastlocation);
+				$lastlocation = Grid::$shiftUp;
+				$lastunit = "Map Revealer";
+			}
+			//bottom half of map
+			else{
+				$ycoord = Grid::$ydimension*32 - $ycoord;
+				$swap = 1;
+			}
+			
+			//find which Y location is closest
+			$y = (int)round( ($ycoord-1) / Grid::$resolution);
+			$text .= Grid::$YLoc[$y]->centerOn(P12, $lastunit, $lastlocation);
+			$lastlocation = Grid::$YLoc[$y];
+			
+			//manipulate ycoord to see how many pixels main should shift left or right (used at the bottom)
+			$ycoord = ($ycoord+3) % Grid::$resolution;
+			if( $swap == 0 ){ $ycoord -= 3; }
+			else{ $ycoord = 4 - $ycoord; }
+			
+			//center main
+			$text .= Grid::$main->centerOn($lastlocation);
+			
+			//pixel shift
+			if ($ycoord > 0)
+				$vertSlide = Grid::$main->slideDown($ycoord);
+			elseif ($ycoord < 0)
+				$vertSlide = Grid::$main->slideUp($ycoord*-1);
+			else
+				$vertSlide = '';
+			
+			
+		}
+		
+		
+		$text .= $horizSlide;
+		$text .= $vertSlide;
+		
+		return $text;
+		
+	}
 	
 	
 	/**

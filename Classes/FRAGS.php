@@ -2,23 +2,18 @@
 
 class FRAGS{
 
-	static public $x;
-	static public $y;
+	/* @var Deathcounter */ static public $x;
+	/* @var Deathcounter */ static public $y;
 	
-	static public $P4Fragged;
-	static public $P5Fragged;
-	static public $P6Fragged;
+	/* @var Deathcounter */ static public $Fragged;
 
-	static private $movedP4;
-	static private $movedP5;
-	static private $movedP6;
+	/* @var PermSwitch */ static private $movedP4;
+	/* @var PermSwitch */ static private $movedP5;
+	/* @var PermSwitch */ static private $movedP6;
 	
-	/* @var IndexedUnit[] */
-	static private $scourgeP4 = array();
-	/* @var IndexedUnit[] */
-	static private $scourgeP5 = array();
-	/* @var IndexedUnit[] */
-	static private $scourgeP6 = array();
+	/* @var IndexedUnit[] */ static private $scourgeP4 = array();
+	/* @var IndexedUnit[] */ static private $scourgeP5 = array();
+	/* @var IndexedUnit[] */ static private $scourgeP6 = array();
 	
 	static $P4nodes = array();
 	static $P5nodes = array();
@@ -31,15 +26,17 @@ class FRAGS{
 		self::$movedP5 = new PermSwitch();
 		self::$movedP6 = new PermSwitch();
 		
-		self::$P4Fragged = new PermSwitch();
-		self::$P5Fragged = new PermSwitch();
-		self::$P6Fragged = new PermSwitch();
+		
+		$humans = new Player(P4, P5, P6);
+		self::$Fragged = new Deathcounter($humans, 1);
+		
 		
 		// Deathcounters
 		$humans = new Player(P4, P5, P6);
 		self::$x = new Deathcounter($humans, Map::getWidth()*32-1);
 		self::$y = new Deathcounter($humans, Map::getHeight()*32-1);
-
+		
+		
 		// Place FRAGS units
 		/*
 		$k = 32;
@@ -198,9 +195,9 @@ class FRAGS{
 		$P1->_if( $ready->P5->exactly(1) )->then_justonce( $this->moveScourges(P5) );
 		$P1->_if( $ready->P6->exactly(1) )->then_justonce( $this->moveScourges(P6) );
 		
-		$P1->_if( $ready->P4->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP4, FRAGS::$movedP4, FRAGS::$x->P4, FRAGS::$y->P4, FRAGS::$P4Fragged, P9,  0,  0)  );
-		$P1->_if( $ready->P5->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP5, FRAGS::$movedP5, FRAGS::$x->P5, FRAGS::$y->P5, FRAGS::$P5Fragged, P10, 64, 0)  );
-		$P1->_if( $ready->P6->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP6, FRAGS::$movedP6, FRAGS::$x->P6, FRAGS::$y->P6, FRAGS::$P6Fragged, P11, 0,  64) );
+		$P1->_if( $ready->P4->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP4, FRAGS::$movedP4, FRAGS::$x->P4, FRAGS::$y->P4, FRAGS::$Fragged->P4, P9,  0,  0)  );
+		$P1->_if( $ready->P5->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP5, FRAGS::$movedP5, FRAGS::$x->P5, FRAGS::$y->P5, FRAGS::$Fragged->P5, P10, 64, 0)  );
+		$P1->_if( $ready->P6->atLeast(1) )->then( $this->determineCoordinates(FRAGS::$scourgeP6, FRAGS::$movedP6, FRAGS::$x->P6, FRAGS::$y->P6, FRAGS::$Fragged->P6, P11, 0,  64) );
 		
 	}
 	
@@ -214,9 +211,9 @@ class FRAGS{
 	public function getCoordinate(){
 		$text = '';
 		
-		$text .= $this->determineCoordinates(FRAGS::$scourgeP4, FRAGS::$movedP4, FRAGS::$x->P4, FRAGS::$y->P4, FRAGS::$P4Fragged, P9, 0, 0);
-		$text .= $this->determineCoordinates(FRAGS::$scourgeP5, FRAGS::$movedP5, FRAGS::$x->P5, FRAGS::$y->P5, FRAGS::$P5Fragged, P10, 64, 0);
-		$text .= $this->determineCoordinates(FRAGS::$scourgeP6, FRAGS::$movedP6, FRAGS::$x->P6, FRAGS::$y->P6, FRAGS::$P6Fragged, P11, 0, 64);
+		$text .= $this->determineCoordinates(FRAGS::$scourgeP4, FRAGS::$movedP4, FRAGS::$x->P4, FRAGS::$y->P4, FRAGS::$Fragged->P4, P9, 0, 0);
+		$text .= $this->determineCoordinates(FRAGS::$scourgeP5, FRAGS::$movedP5, FRAGS::$x->P5, FRAGS::$y->P5, FRAGS::$Fragged->P5, P10, 64, 0);
+		$text .= $this->determineCoordinates(FRAGS::$scourgeP6, FRAGS::$movedP6, FRAGS::$x->P6, FRAGS::$y->P6, FRAGS::$Fragged->P6, P11, 0, 64);
 		
 		return $text;
 	}
@@ -224,14 +221,14 @@ class FRAGS{
 	
 	
 	// process to determine which units FRAGged and find its coordinates
-	private function determineCoordinates($scourges, PermSwitch $moved, Deathcounter $x, Deathcounter $y, PermSwitch $Fragged, $player, $addx, $addy){
+	private function determineCoordinates($scourges, PermSwitch $moved, Deathcounter $x, Deathcounter $y, Deathcounter $Fragged, $player, $addx, $addy){
 		
 		/* @var TempDC[] $angles */
 		$angles = array();
 		for($i=0; $i<10; $i++){ $angles[] = new TempDC(37); }
 		$clearangles = '';
 		foreach($angles as $asd){ $clearangles .= $asd->setTo(0); }
-
+		
 		$dirs = array();
 		for($i=0; $i<10; $i++){ $dirs[] = new TempDC(3); }
 		$cleardirs = '';
@@ -252,7 +249,7 @@ class FRAGS{
 		$xoffset = new TempDC(1188);
 		
 		$text = '';
-
+		
 		
 		//get directions, angles, move
 		$text .= _if( $moved->is_set() )->then(
@@ -327,7 +324,7 @@ class FRAGS{
 			$cleardirs,
 			
 			//set output
-			$Fragged->set(),
+			$Fragged->setTo(1),
 			self::resetUnits($player),
 		'');
 
