@@ -336,7 +336,22 @@ class DCArray implements ArrayAccess{
 		
 		Error("Invalid type: \$var must be a Deathcounter or DCArray");
 	}
-	
+
+
+	/**
+	 * Decreases all of the deathcounters in the calling DCArray by the amount in 
+	 * the passed in $dc, and stores the same amount in $store
+	 * 
+	 * Analagous to:
+	 *      [DCArray's Deathcounters] -= $dc;
+	 *      $store = $dc;
+	 *      $dc = 0;
+	 * 
+	 * 
+	 * @param Deathcounter $dc
+	 * @param Deathcounter $store
+	 * @return string
+	 */
 	public function countOff(Deathcounter $dc, Deathcounter $store){
 		$text = '';
 		
@@ -352,7 +367,20 @@ class DCArray implements ArrayAccess{
 		}
 		return $text;
 	}
-	
+
+	/**
+	 * Increases all of the deathcounters in the calling DCArray by the amount in
+	 * the passed in $store and also to the $restoredc,
+	 *
+	 * Analagous to:
+	 *      [DCArray's Deathcounters] += $store;
+	 *      $restoredc += $store
+	 *      $store = 0;
+	 * 
+	 * @param Deathcounter $store
+	 * @param Deathcounter $restoredc
+	 * @return string
+	 */
 	public function countUp(Deathcounter $store, Deathcounter $restoredc = null){
 		$text = '';
 		
