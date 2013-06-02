@@ -341,7 +341,7 @@ class DCArray implements ArrayAccess{
 		$text = '';
 		
 		$maxbit = $dc->binaryPower();
-		for($i=$maxbit;$i>=3;$i--){
+		for($i=$maxbit;$i>=0;$i--){
 			$power = pow(2,$i);
 			$text .= _if( $dc->atLeast($power) )->then(
 				$dc->subtract($power),
@@ -361,7 +361,7 @@ class DCArray implements ArrayAccess{
 			$maxbit = $restoredc->binaryPower();
 		}
 			
-		for($i=$maxbit;$i>=3;$i--){
+		for($i=$maxbit;$i>=0;$i--){
 			$power = pow(2,$i);
 			
 			$restore = '';
