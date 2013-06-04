@@ -13,6 +13,7 @@ class Projectile{
 	/* @var Deathcounter */ private $xacc;
 	/* @var Deathcounter */ private $yacc;
 	/* @var Deathcounter */ public $duration;
+	/* @var Deathcounter */ public $eventTime;
 	/* @var Deathcounter */ public $spellid;
 	
 	function __construct(Array $dcarray = null){
@@ -27,10 +28,11 @@ class Projectile{
 			$this->xacc      = new Deathcounter(1600);
 			$this->yacc      = new Deathcounter(1600);
 			$this->duration  = new Deathcounter(720);
+			$this->eventTime = new Deathcounter(720);
 			$this->spellid   = new Deathcounter(100);
 		}
 		else if(is_array($dcarray)) {
-			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration, $spellid) = $dcarray;
+			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration, $eventTime, $spellid) = $dcarray;
 			$this->xpos      = $xpos;
 			$this->ypos      = $ypos;
 			$this->xpospart  = $xpospart;
@@ -40,12 +42,33 @@ class Projectile{
 			$this->xacc      = $xacc;
 			$this->yacc      = $yacc;
 			$this->duration  = $duration;
+			$this->eventTime = $eventTime;
 			$this->spellid   = $spellid;
 		}
 		else {
 			Error("\$dcarray must be an array");
 		}
 	}
+	
+	// Spell Constants
+	const _Fireball         = 1;
+	const _Lob              = 2;
+	const _Lunge            = 3;
+	const _Teleport         = 4;
+	const _Meteor           = 5;
+	const _Block            = 6;
+	const _Disruption       = 7;
+	const _Firewall         = 8;
+	const _Barrier          = 9;
+	const _Zap              = 10;
+	const _Blaze            = 11;
+	const _DanceOfFlames    = 12;
+	const _Holocaust        = 13;
+	const _Explosion        = 14;
+	const _Claim            = 15;
+	const _RainOfFire       = 16;
+	const _Firebreath       = 17;
+	
 	
 	/////
 	// CONDITIONS
@@ -54,6 +77,10 @@ class Projectile{
 	
 	function notInUse(){
 		return $this->duration->exactly(0);
+	}
+	
+	function inUse(){
+		return $this->duration->atLeast(1);
 	}
 	
 	
@@ -121,11 +148,19 @@ class Projectile{
 	function setDuration($n){
 		return $this->duration->setTo($n);
 	}
+	function setEventTime($n){
+		return $this->eventTime->setTo($n);
+	}
+	
+	function setSpellID($n){
+		return $this->spellid->setTo($n);
+	}
 	
 	
 	//remove lifespan of projectile
 	function tickDown(){
-		return $this->duration->subtract(1);
+		return $this->duration->subtract(1).
+			$this->eventTime->subtract(1);
 	}
 	
 	
@@ -133,9 +168,19 @@ class Projectile{
 	function move(){
 		$text = '';
 		
-		//add velocity, acceleration, and make the changes
+		$switch = new TempSwitch();
+		
+		// enable movement by default
 		$text .= _if( $this->duration->atLeast(1) )->then(
+			$switch->set(),
 			
+			// some spells clear movement at times...
+			_if( $this->spellid->exactly(self::_DanceOfFlames), $this->eventTime->exactly(0) )->then( $switch->clear() ), // dance of flames
+			_if( $this->spellid->exactly(self::_Holocaust), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // holocaust
+		'');
+		
+		// add velocity, acceleration, and make the changes
+		$text .= _if( $switch )->then(	
 			$this->VelToPos($this->xvel, $this->xpos, $this->xpospart),
 			$this->VelToPos($this->yvel, $this->ypos, $this->ypospart),
 			$this->xpos->subtract(64),
@@ -149,6 +194,7 @@ class Projectile{
 			_if($this->xvel->atLeast(12801))->then($this->xvel->setTo(12800)),
 			_if($this->yvel->atLeast(12801))->then($this->yvel->setTo(12800)),
 			
+			$switch->release(),
 		'');
 		
 		return $text;
@@ -191,21 +237,69 @@ class Projectile{
 	function show(){
 		$text = '';
 		
-		$success = new TempSwitch();
+		// Sounds
+		$bam = new Sound("bam");
 		
-		//output
+		// Switches
+		$switch = new TempSwitch();
+		$success = new TempSwitch();
+		$rand = new TempSwitch();
+		
+		// enable output by default
 		$text .= _if( $this->duration->atLeast(1) )->then(
+			$switch->set(),
+			
+			// some spells are invisible at times...
+			_if( $this->spellid->exactly(self::_Holocaust), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // holocaust
+		'');
+		
+		// output
+		$text .= _if( $switch )->then(
 			Grid::putMain($this->xpos, $this->ypos, $success),
 			_if( $success->is_set() )->then(
-				_if( $this->duration->atLeast(2) )->then(
+				
+				// Fireball
+				_if( $this->spellid->exactly(self::_Fireball), $this->duration->atLeast(2) )->then(
 					Grid::$main->explode(),
 				''),
-				_if( $this->duration->exactly(1) )->then(
+				_if( $this->spellid->exactly(self::_Fireball), $this->duration->exactly(1) )->then(
 					Grid::$main->largeExplode(),
-					#Grid::$main->explode(),
 				''),
+				// lob
+				_if( $this->spellid->exactly(self::_Lob), $this->duration->atLeast(2) )->then(
+					Grid::$main->explode(),
+				''),
+				_if( $this->spellid->exactly(self::_Lob), $this->duration->exactly(1) )->then(
+					Grid::$main->largeExplode(),
+				''),
+				// Lunge
+				// Teleport
+				// Meteor
+				// Block
+				// Disruption
+				// Firewall
+				// Barrier
+				// Zap
+				// Blaze
+				// Dance of Flames
+				// Holocaust
+				_if( $this->spellid->exactly(self::_Holocaust), $this->duration->atLeast(1) )->then(
+					$rand->randomize(),
+					_if($rand->is_clear())->then(Grid::$main->largeExplode()),
+					_if($rand->is_set())->then(Grid::$main->largeBlueExplode()),
+				''),
+				// Explosion
+				// Claim
+				// Rain of Fire
+				// Firebreath
+				_if( $this->spellid->exactly(self::_Firebreath), $this->duration->atLeast(1) )->then(
+					Grid::$main->explode(),
+				''),
+				
 			''),
 			$success->release(),
+			$switch->release(),
+			$rand->release(),
 		'');
 		
 		return $text;

@@ -156,7 +156,7 @@ class FXManager {
 		
 		$text .= _if( $rumble->atLeast(1) )->then(
 			
-			_if(self::$RSwitches[0], $rumble->atMost(25))->then(
+			_if(self::$RSwitches[0], $rumble->atLeast(25))->then(
 				$offsetleft->add(32),
 				$offsetright->add(32),
 			''),
@@ -176,7 +176,7 @@ class FXManager {
 				$offsetright->setTo(0),
 			''),
 			
-			_if(self::$RSwitches[3], $rumble->atMost(25))->then(
+			_if(self::$RSwitches[3], $rumble->atLeast(25))->then(
 				$offsetup->add(32),
 				$offsetdown->add(32),
 			''),

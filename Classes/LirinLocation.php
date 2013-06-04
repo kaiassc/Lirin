@@ -24,6 +24,18 @@ class LirinLocation extends Location {
 		KillUnit($player, 'Terran Battlecruiser');
 	}
 	
+	public function blueExplode($player = P8){
+		return
+		CreateUnit($player,'Protoss Scout',1, $this).
+		KillUnit($player, 'Protoss Scout');
+	}
+	
+	public function largeBlueExplode($player = P8){
+		return
+		CreateUnit($player,'Protoss Carrier',1, $this).
+		KillUnit($player, 'Protoss Carrier');
+	}
+	
 	public function bloodsplat($player = P8){
 		return
 		CreateUnitWithProperties($player,'Devouring One (Zergling)',1, $this, Burrowed).

@@ -18,7 +18,7 @@ class RPG extends Map {
 		$LocationManager = new LocationManager();
 		Loc::populate();
 		Type::populate();
-		$ItemSystem = new ItemSystem();
+		#$ItemSystem = new ItemSystem();
 		
 		UnitManager::MintUnit("Start Location", $All, 4720, 752);
 		UnitManager::MintMapRevealers(P4);
@@ -27,7 +27,7 @@ class RPG extends Map {
 		$BattleSystem->CreateEngine();  # 04/23/13 6,557 triggers
 		$SpellSystem->CreateEngine();   # 04/23/13 7,833 triggers
 		$FRAGS->CreateEngine();         # 04/23/13 8,322 triggers
-		$ItemSystem->CreateEngine();
+		#$ItemSystem->CreateEngine();
 		
 		/////////////////////////
 		$this->loop();
