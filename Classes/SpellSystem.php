@@ -162,7 +162,7 @@ class SpellSystem {
 			'');
 		}
 		
-		
+	
 		
 		// Pre-existing DCs
 		$xmax = Map::getWidth()*32-1;
@@ -896,7 +896,7 @@ class SpellSystem {
 	
 	
 	
-	private function loadProjCoordinates($projectile, $X, $Y){
+	private function loadProjCoordinates(Deathcounter $projectile, TempDC $X, TempDC $Y){
 		$text = '';
 		
 		foreach($this->CPprojectiles as $key=>$proj){
@@ -911,7 +911,7 @@ class SpellSystem {
 	
 	
 	
-	private function findSelected($selected, $selectedID){
+	private function findSelected(TempDC $selected, TempDC $selectedID){
 		$text = '';
 				
 		$xdcs = new DCArray($this->xposDCs);
@@ -946,7 +946,7 @@ class SpellSystem {
 		return $text;
 	}
 	
-	private function compareProjCoordinates($selected, $selectedID, $origin){
+	private function compareProjCoordinates(TempDC $selected, TempDC $selectedID, $origin){
 		$range = 24/*px*/;
 		$text = '';
 		
@@ -967,6 +967,21 @@ class SpellSystem {
 
 	
 	function loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $SetVelocity, $velocityx, $velocityy, $SetAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid){
+		
+		/* @var Deathcounter    $savedProj          */
+		/* @var TempSwitch      $SetPosition        */
+		/* @var TempDC          $positionx          */
+		/* @var TempDC          $positiony          */
+		/* @var TempSwitch      $SetVelocity        */
+		/* @var TempDC          $velocityx          */
+		/* @var TempDC          $velocityy          */
+		/* @var TempSwitch      $SetAcceleration    */
+		/* @var TempDC          $accelerationx      */
+		/* @var TempDC          $accelerationy      */
+		/* @var TempDC          $duration           */
+		/* @var TempDC          $eventTime          */
+		/* @var TempDC          $spellid            */
+				
 		$text = '';
 				
 		foreach( $this->CPprojectiles as $key=>$projectile ){
@@ -989,7 +1004,7 @@ class SpellSystem {
 		return $text;
 	}
 	
-	function firstAvailableProj($count, $proj){
+	function firstAvailableProj(TempDC $count, TempDC $proj){
 		$text = $count->setTo(0);
 		
 		foreach ($this->CPprojectiles as $key=>$projectile ){

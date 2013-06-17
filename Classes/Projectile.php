@@ -318,7 +318,7 @@ class Projectile{
 		return $text;
 	}
 	
-	
+		
 	//kill projectile
 	function kill(){
 		$text = '';

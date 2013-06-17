@@ -21,7 +21,7 @@
 	const _Firebreath       = 17;
 	const _Guided           = 18;
 
-
+	
 	// Persistent DCs
 	/* @var Deathcounter    $savedProj                  */
 	/* @var Deathcounter    $spellCast                  */
