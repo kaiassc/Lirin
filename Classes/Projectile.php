@@ -68,6 +68,7 @@ class Projectile{
 	const _Claim            = 15;
 	const _RainOfFire       = 16;
 	const _Firebreath       = 17;
+	const _Guided           = 18;
 	
 	
 	/////
@@ -243,7 +244,6 @@ class Projectile{
 		// Switches
 		$switch = new TempSwitch();
 		$success = new TempSwitch();
-		$rand = new TempSwitch();
 		
 		// enable output by default
 		$text .= _if( $this->duration->atLeast(1) )->then(
@@ -280,13 +280,20 @@ class Projectile{
 				// Firewall
 				// Barrier
 				// Zap
+				_if( $this->spellid->exactly(self::_Zap), $this->duration->atLeast(1) )->then(
+					Grid::$main->blueExplode(),
+				''),
 				// Blaze
 				// Dance of Flames
+				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->atLeast(2) )->then(
+					Grid::$main->explode(),
+				''),
+				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->exactly(1) )->then(
+					Grid::$main->largeExplode(),
+				''),
 				// Holocaust
 				_if( $this->spellid->exactly(self::_Holocaust), $this->duration->atLeast(1) )->then(
-					$rand->randomize(),
-					_if($rand->is_clear())->then(Grid::$main->largeExplode()),
-					_if($rand->is_set())->then(Grid::$main->largeBlueExplode()),
+					Grid::$main->largeExplode(),
 				''),
 				// Explosion
 				// Claim
@@ -295,11 +302,17 @@ class Projectile{
 				_if( $this->spellid->exactly(self::_Firebreath), $this->duration->atLeast(1) )->then(
 					Grid::$main->explode(),
 				''),
+				// Guided
+				_if( $this->spellid->exactly(self::_Guided), $this->duration->atLeast(2) )->then(
+					Grid::$main->explode(),
+				''),
+				_if( $this->spellid->exactly(self::_Guided), $this->duration->exactly(1) )->then(
+					Grid::$main->largeExplode(),
+				''),
 				
 			''),
 			$success->release(),
 			$switch->release(),
-			$rand->release(),
 		'');
 		
 		return $text;
