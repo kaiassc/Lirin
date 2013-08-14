@@ -51,14 +51,16 @@ class SpellSystem {
 	const _RainOfFire       = 16;
 	const _Firebreath       = 17;
 	const _Guided           = 18;
+	const _Smite            = 19;
+	const _Smite2           = 20;
 	
 	
 	
 	// coordinate controller
 	const _Hero         = 1;
-	const _Point1       = 2;
-	const _Proj         = 3;
-	const _Saved        = 4;
+	const _Point        = 2;
+	const _Saved        = 3;
+	const _Proj         = 4;
 	// distance controller
 	const _DistResize   = 1;
 	const _DistCancel   = 2;
@@ -74,6 +76,13 @@ class SpellSystem {
 	const _Behind       = 2;
 	const _Left         = 3;
 	const _Right        = 4;
+	// multiply/divide index
+	const _MultDist     = 1000;
+	// load value
+	const _LoadMult1    = 1;
+	const _LoadMult2    = 2;
+	
+	
 	
 	function __construct($projPerPlayer = 4){
 		
@@ -122,10 +131,10 @@ class SpellSystem {
 		
 		// TODO: testing trigger, remove later
 		$humans->justonce(
-			$this->SpellSlotDCs[1]->setTo(self::_Zap), // fireball
-			$this->SpellSlotDCs[2]->setTo(self::_Lob), // lob
-			$this->SpellSlotDCs[3]->setTo(self::_Holocaust), // holocaust
-			$this->SpellSlotDCs[4]->setTo(self::_DanceOfFlames), // dance of flames
+			$this->SpellSlotDCs[1]->setTo(self::_Block),
+			$this->SpellSlotDCs[2]->setTo(self::_Holocaust),
+			$this->SpellSlotDCs[3]->setTo(self::_Guided),
+			$this->SpellSlotDCs[4]->setTo(self::_Smite),
 		'');
 		
 	}
@@ -172,19 +181,18 @@ class SpellSystem {
 		$bsY = BattleSystem::$yDCs[0];
 		
 		// Persistent DCs
-		$point1X =                      new Deathcounter($humans, FRAGS::$x->Max);
-		$point1Y =                      new Deathcounter($humans, FRAGS::$y->Max);
+		$pointX =                       new Deathcounter($humans, FRAGS::$x->Max);
+		$pointY =                       new Deathcounter($humans, FRAGS::$y->Max);
 		
 		$savedProj =                    new Deathcounter($humans, 4);
 		$spellCast =                    new Deathcounter($humans);
 		$castStage =                    new Deathcounter($humans, 15);
+		$castTimer =                    new Deathcounter($humans, 120);
 		
 		// Saved DCs
 		$SaveAngle =                    new TempSwitch();
-		$StoredCurrentAngle =           new Deathcounter($humans, 1440);
+		$StoredAngle =                  new Deathcounter($humans, 1440);
 		$StoredDestinationAngle =       new Deathcounter($humans, 1440);
-		$StoredX =                      new Deathcounter($humans, FRAGS::$x->Max);
-		$StoredY =                      new Deathcounter($humans, FRAGS::$y->Max);
 		
 		
 		// Projectile Variables
@@ -203,15 +211,12 @@ class SpellSystem {
 		
 		// for selecting proj
 		$SetFirstAvailableProj =        new TempSwitch();
+		$firstAvailableProj =           new TempDC(4);
 		$SetSelectProj =                new TempSwitch();
 		$selectedProj =                 new TempDC(4);
 		$selectedProjID =               new TempDC(100);
-		$firstAvailableProj =           new TempDC(4);
 		
 		// for distance
-		$DistanceOriginIndex =          new TempDC();
-		$DistanceDestinationIndex =     new TempDC();
-		
 		$FindDistance =                 new TempSwitch();
 		$distance =                     new TempDC(256);
 		
@@ -219,10 +224,8 @@ class SpellSystem {
 		$MaxCastRange =                 new TempDC(512);
 		
 		// for coordinates and angle
-		$SaveCoordinates =              new TempSwitch();
-		
-		$ComponentOriginIndex =         new TempDC();
-		$ComponentDestinationIndex =    new TempDC();
+		$OriginIndex =                  new TempDC();
+		$DestinationIndex =             new TempDC();
 		
 		$AngleIndex =                   new TempDC();
 		
@@ -236,30 +239,34 @@ class SpellSystem {
 		$xcomponent =                   new TempDC(10000);
 		$ycomponent =                   new TempDC(10000);
 		
-		// for position
+		// multiplication/division
+		$Mult1Value =                   new TempDC(256);
+		$Mult1ResultX =                 new TempDC(256000);
+		$Mult1ResultY =                 new TempDC(256000);
+		$DivValue =                     new TempDC(256);
+		$Mult2Value =                   new TempDC(64);
+		$Mult2ResultX =                 new TempDC(64000);
+		$Mult2ResultY =                 new TempDC(64000);
+		
+		$tempx = $temp1 =               new TempDC(6400);
+		$tempy = $temp2 =               new TempDC(6400);
+		
+		// position
 		$SetPosition =                  new TempSwitch();
 		$PositionIndex =                new TempDC();
-		$PositionLoadIndex =            new TempDC();
-		$PositionMultiplier =           new TempDC(144);
-		$StaticOffsetX =                new TempDC(12800);
-		$StaticOffsetY =                new TempDC(12800);
+		$PositionDirection =            new TempDC();
 		
-		$tempx = $temp1 =               new TempDC(256000);
-		$tempy = $temp2 =               new TempDC(256000);
+		// velocity
+		$ClearVelocity =                new TempSwitch();
+		$AddVelocity =                  new TempSwitch();
+		$VelocityIndex =                new TempDC();
+		$VelocityDirection =            new TempDC();
 		
-		// for velocity
-		$SetVelocity =                  new TempSwitch();
-		$VelocityLoadIndex =            new TempDC();
-		$VelocityMultiplyByDCIndex =    new TempDC();
-		$VelocityMultiplier =           new TempDC(256);
-		$VelocityDivisor =              new TempDC(100);
-		$VelocityRawY =                 new TempDC(12800);
-		
-		// for acceleration
-		$SetAcceleration =              new TempSwitch();
-		$AccelerationLoadIndex =        new TempDC();
-		$AccelerationMultiplier =       new TempDC(8);
-		$AccelerationRawY =             new TempDC(1600);
+		// acceleration
+		$ClearAcceleration =            new TempSwitch();
+		$AddAcceleration =              new TempSwitch();
+		$AccelerationIndex =            new TempDC();
+		$AccelerationDirection =        new TempDC();
 		
 		// miscellaneous
 		$frags =                        new TempSwitch();
@@ -268,7 +275,6 @@ class SpellSystem {
 		$invokedspell =                 new TempDC(50);
 		$success = $sign =              new TempSwitch();
 		$projCount =                    new TempDC(4);
-		$loadIntoProj =                 new TempSwitch();
 		
 		// 
 		$humans->_if( $invokedslot->atLeast(1) )->then(
@@ -314,10 +320,8 @@ class SpellSystem {
 		}
 		
 		$humans->_if( $frags )->then(
-			//$point2X->setTo($point1X),
-			//$point2Y->setTo($point1Y),
-			$point1X->setTo(FRAGS::$x->CP),
-			$point1Y->setTo(FRAGS::$y->CP),
+			$pointX->setTo(FRAGS::$x->CP),
+			$pointY->setTo(FRAGS::$y->CP),
 		'');
 		
 		
@@ -334,7 +338,7 @@ class SpellSystem {
 			''),
 		'');
 		// first available proj
-		$humans->_if( $frags )->then(
+		$humans->_if( $frags, _OR($castTimer->atLeast(1)) )->then(
 			// get first available projectile slot
 			$this->firstAvailableProj($projCount, $firstAvailableProj),
 		'');
@@ -350,19 +354,12 @@ class SpellSystem {
 		include("SpellDefinitions.php");
 		
 		
-		
-		
-		//Hello?
+
 		
 		
 		//////
 		// SPELL CONSTRUCTOR
 		///
-		
-		$distX1 = new TempDC($xmax);
-		$distY1 = new TempDC($ymax);
-		$distX2 = new TempDC($xmax);
-		$distY2 = new TempDC($ymax);
 		
 		$compX1 = new TempDC($xmax);
 		$compY1 = new TempDC($ymax);
@@ -380,55 +377,43 @@ class SpellSystem {
 			_if( $SetSelectProj->is_set() )->then(
 				$savedProj->setTo($selectedProj),
 			''),
-			
-			
-			
-			// save point
-			_if( $SaveCoordinates->is_set() )->then(
-				$StoredX->setTo($point1X),
-				$StoredY->setTo($point1Y),
-			''),
 
+
+			
+			// COORDINATES
+			
+			// Set Origin and Destination
+			_if( $OriginIndex->exactly(self::_Hero) )->then(
+				$compX1->setTo($bsX->CP),
+				$compY1->setTo($bsY->CP),
+			''),
+			_if( $OriginIndex->between(self::_Point, self::_Saved) )->then(
+				$compX1->setTo($pointX),
+				$compY1->setTo($pointY),
+			''),
+			_if( $OriginIndex->exactly(self::_Proj) )->then(
+				$this->loadProjCoordinates($savedProj, $compX1, $compY1),
+			''),
+			
+			_if( $DestinationIndex->exactly(self::_Hero) )->then(
+				$compX2->setTo($bsX->CP),
+				$compY2->setTo($bsY->CP),
+			''),
+			_if( $DestinationIndex->between(self::_Point, self::_Saved) )->then(
+				$compX2->setTo($pointX),
+				$compY2->setTo($pointY),
+			''),
+			_if( $DestinationIndex->exactly(self::_Proj) )->then(
+				$this->loadProjCoordinates($savedProj, $compX2, $compY2),
+			''),
+			
+			
 			
 			// DISTANCE
 			_if( $FindDistance )->then(
 				
-				// Load the Distance Calculation's Origin and Destination
-				_if( $DistanceOriginIndex->exactly(self::_Hero) )->then(
-					$distX1->setTo($bsX->CP),
-					$distY1->setTo($bsY->CP),
-				''),
-				_if( $DistanceOriginIndex->exactly(self::_Point1) )->then(
-					$distX1->setTo($point1X),
-					$distY1->setTo($point1Y),
-				''),
-				_if( $DistanceOriginIndex->exactly(self::_Proj) )->then(
-					$this->loadProjCoordinates($savedProj, $distX1, $distY1),
-				''),
-				_if( $DistanceOriginIndex->exactly(self::_Saved) )->then(
-					$distX1->setTo($StoredX),
-					$distY1->setTo($StoredY),
-				''),
-				
-				
-				_if( $DistanceDestinationIndex->exactly(self::_Hero) )->then(
-					$distX2->setTo($bsX->CP),
-					$distY2->setTo($bsY->CP),
-				''),
-				_if( $DistanceDestinationIndex->exactly(self::_Point1) )->then(
-					$distX2->setTo($point1X),
-					$distY2->setTo($point1Y),
-				''),
-				_if( $DistanceDestinationIndex->exactly(self::_Proj) )->then(
-					$this->loadProjCoordinates($savedProj, $distX2, $distY2),
-				''),
-				_if( $DistanceOriginIndex->exactly(self::_Saved) )->then(
-					$distX2->setTo($StoredX),
-					$distY2->setTo($StoredY),
-				''),
-				
 				// calc distance
-			    $distance->distance($distX1, $distY1, $distX2, $distY2),
+			    $distance->distance($compX1, $compY1, $compX2, $compY2),
 				
 				// if distance exceeds, do specified
 				_if( $distance->greaterThan($MaxCastRange) )->then(
@@ -437,47 +422,10 @@ class SpellSystem {
 					''),
 					_if( $MaxRangeIndex->exactly(self::_DistCancel) )->then(
 						Display("Out of range!"),
-						$SetPosition->clear(), $SetVelocity->clear(), $SetAcceleration->clear(), $loadIntoProj->clear(),
+						$SetPosition->clear(), $ClearVelocity->clear(), $AddVelocity->clear(), $ClearAcceleration->clear(), $AddAcceleration->clear(), $castStage->setTo(0), $castTimer->setTo(0),
 					''),
 				''),
 				
-			''),
-			
-			
-			
-			// COORDINATES
-			
-			// Set Origin and Destination
-			_if( $ComponentOriginIndex->exactly(self::_Hero) )->then(
-				$compX1->setTo($bsX->CP),
-				$compY1->setTo($bsY->CP),
-			''),
-			_if( $ComponentOriginIndex->exactly(self::_Point1) )->then(
-				$compX1->setTo($point1X),
-				$compY1->setTo($point1Y),
-			''),
-			_if( $ComponentOriginIndex->exactly(self::_Proj) )->then(
-				$this->loadProjCoordinates($savedProj, $compX1, $compY1),
-			''),
-			_if( $ComponentOriginIndex->exactly(self::_Saved) )->then(
-				$compX1->setTo($StoredX),
-				$compY1->setTo($StoredY),
-			''),
-			
-			_if( $ComponentDestinationIndex->exactly(self::_Hero) )->then(
-				$compX2->setTo($bsX->CP),
-				$compY2->setTo($bsY->CP),
-			''),
-			_if( $ComponentDestinationIndex->exactly(self::_Point1) )->then(
-				$compX2->setTo($point1X),
-				$compY2->setTo($point1Y),
-			''),
-			_if( $ComponentDestinationIndex->exactly(self::_Proj) )->then(
-				$this->loadProjCoordinates($savedProj, $compX2, $compY2),
-			''),
-			_if( $ComponentDestinationIndex->exactly(self::_Saved) )->then(
-				$compX2->setTo($StoredX),
-				$compY2->setTo($StoredY),
 			''),
 	
 			
@@ -496,7 +444,7 @@ class SpellSystem {
 			
 			// Load angle
 			_if( $AngleIndex->between(self::_CalcSaveLoad, self::_Load) )->then(
-			    $angle->setTo($StoredCurrentAngle),
+			    $angle->setTo($StoredAngle),
 			''),
 			
 			// Alter angle
@@ -532,13 +480,13 @@ class SpellSystem {
 				_if( $angle->atLeast(1440) )->then(
 					$angle->subtract(1440),
 				''),
-				$temp1->max(256000),
-				$temp2->max(256000),
+				$temp1->max(6400),
+				$temp2->max(6400),
 			''),
 			
 			// Save angle
 			_if( $SaveAngle )->then(
-				$StoredCurrentAngle->setTo($angle),
+				$StoredAngle->setTo($angle),
 			''),
 			
 			
@@ -546,65 +494,82 @@ class SpellSystem {
 			// COMPONENTS
 			_if( $FindComponents )->then(
 			    $angle->componentsInto($xcomponent, $ycomponent),
+				$xcomponent->roundedDivideBy(10),
+				$ycomponent->roundedDivideBy(10),
+				$xcomponent->max(1000),
+				$ycomponent->max(1000),
+			''),
+			
+			
+			
+			// MULTIPLICATION 1
+			_if( $Mult1Value->atLeast(1) )->then(
+				
+				// load variable (if applicable)
+				_if( $Mult1Value->exactly(self::_MultDist))->then(
+					$Mult1Value->setTo($distance),
+				''),
+				
+				// multiply
+				$Mult1ResultX->productOf($xcomponent, $Mult1Value),
+				$Mult1ResultY->productOf($ycomponent, $Mult1Value),
+			''),
+			
+			
+			// DIVISION 1
+			_if( $DivValue->atLeast(1) )->then(
+				$Mult1ResultX->roundedDivideBy($DivValue),
+				$Mult1ResultY->roundedDivideBy($DivValue),
+			''),
+			
+			
+			// MULTIPLICATION 2
+			_if( $Mult2Value->atLeast(1) )->then(
+				
+				// load variable (if applicable)
+				_if( $Mult2Value->exactly(self::_MultDist))->then(
+					$Mult2Value->setTo($distance),
+				''),
+				
+				// multiply
+				$Mult2ResultX->productOf($xcomponent, $Mult2Value),
+				$Mult2ResultY->productOf($ycomponent, $Mult2Value),
 			''),
 			
 			
 			
 			// POSITION
-			
-			// dynamic offset
 			_if( $SetPosition->is_set() )->then(
-				_if( $PositionLoadIndex->atLeast(1) )->then(
-					_if( $PositionLoadIndex->between(self::_Ahead, self::_Behind) )->then(
-						$positionx->roundedQuotientOf($xcomponent, 10),
-						$positiony->roundedQuotientOf($ycomponent, 10),
-					''),
-					_if( $PositionLoadIndex->between(self::_Left, self::_Right) )->then(
-						$positionx->roundedQuotientOf($ycomponent, 10),
-						$positiony->roundedQuotientOf($xcomponent, 10),
-					''),
-					
-					$positionx->Max(1000),
-					$positiony->Max(1000),
-					
-					_if( $PositionMultiplier->atLeast(1) )->then(
-						$positionx->multiplyBy($PositionMultiplier),
-						$positiony->multiplyBy($PositionMultiplier),
-					''),
-					
-					$positionx->Max(128000),
-					$positiony->Max(128000),
-					
-					$tempx->roundedQuotientOf($positionx, 1000),
-					$tempy->roundedQuotientOf($positiony, 1000),
-					
-					$tempx->Max(128),
-					$tempy->Max(128),
-					
-					$positionx->Max(Map::getWidth()*32-1),
-					$positiony->Max(Map::getHeight()*32-1),
-				''),
 				
-				// add origin coordinate
+				// initialize
 				$positionx->setTo($compX1),
 				$positiony->setTo($compY1),
 				
+				$tempx->Max(144),
+				$tempy->Max(144),
+				$Mult1ResultX->Max(144000),
+				$Mult1ResultY->Max(144000),
+				
+				
+				// get appropriate value
+				_if( $PositionIndex->exactly(self::_LoadMult1), $PositionDirection->between(self::_Ahead, self::_Behind) )->then(
+					$tempx->roundedQuotientOf($Mult1ResultX, 1000),
+					$tempy->roundedQuotientOf($Mult1ResultY, 1000),
+				''),
+				_if( $PositionIndex->exactly(self::_LoadMult1), $PositionDirection->between(self::_Left, self::_Right) )->then(
+					$tempx->roundedQuotientOf($Mult1ResultY, 1000),
+					$tempy->roundedQuotientOf($Mult1ResultX, 1000),
+				''),
+				
+				
 				// Add/Subtract for signed
-				_if( $PositionLoadIndex->atLeast(1) )->then(
+				_if( $PositionIndex->atLeast(1) )->then(
 					
 					// alter angles
-					_if( $PositionLoadIndex->exactly(self::_Left) )->then( //perp left
-						$angle->add(360*4-90*4),
-						_if($angle->atLeast(1440))->then(
-							$angle->subtract(1440),
-						''),
-					''),
-					_if( $PositionLoadIndex->exactly(self::_Right) )->then( //perp right
-						$angle->add(90*4),
-						_if($angle->atLeast(1440))->then(
-							$angle->subtract(1440),
-						''),
-					''),
+					_if( $PositionDirection->exactly(self::_Left) )->then( $angle->add(360*4-90*4) ),
+					_if( $PositionDirection->exactly(self::_Right) )->then( $angle->add(90*4) ),
+					_if( $PositionDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440) )->then( $angle->subtract(1440) ),
 					
 					// account for signs
 					_if( $angle->between(361,1079) )->then(
@@ -620,83 +585,59 @@ class SpellSystem {
 					''),
 					
 					// restore angles
-					_if( $PositionLoadIndex->exactly(self::_Left) )->then( //perp right
-						$angle->add(90*4),
-						_if($angle->atLeast(1440))->then(
-							$angle->subtract(1440),
-						''),
-					''),
-					_if( $PositionLoadIndex->exactly(self::_Right) )->then( //perp left
-						$angle->add(360*4-90*4),
-						_if($angle->atLeast(1440))->then(
-							$angle->subtract(1440),
-						''),
-					''),
-					
-					$tempx->Max(256000),
-					$tempy->Max(256000),
+					_if( $PositionDirection->exactly(self::_Left) )->then( $angle->add(90*4) ),
+					_if( $PositionDirection->exactly(self::_Right) )->then( $angle->add(360*4-90*4) ),
+					_if( $PositionDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440) )->then( $angle->subtract(1440) ),
 					
 				''),
-				
-				// Add Offsets
-				_if( $StaticOffsetX->atLeast(1) )->then(
-					$positionx->add($StaticOffsetX),
-					$positionx->subtract(6400),
-				''),
-				_if( $StaticOffsetY->atLeast(1) )->then(
-					$positiony->add($StaticOffsetY),
-					$positiony->subtract(6400),
-				''),
+
 			''),
 			
 			
 			
 			// VELOCITY
-			_if( $SetVelocity->is_set() )->then(
-				_if( $VelocityLoadIndex->atLeast(1) )->then(
-					
-					_if( $VelocityLoadIndex->exactly(self::_Ahead) )->then(
-						$velocityx->roundedQuotientOf($xcomponent, 10),
-						$velocityy->roundedQuotientOf($ycomponent, 10),
-					''),
-					
-					$velocityx->Max(1000),
-					$velocityy->Max(1000),
-					
-					_if( $VelocityMultiplyByDCIndex->exactly(1) )->then(
-						$VelocityMultiplier->setTo($distance),
-					''),
-					
-					_if( $VelocityMultiplier->atLeast(1) )->then(
-						$velocityx->multiplyBy($VelocityMultiplier),
-						$velocityy->multiplyBy($VelocityMultiplier),
-					''),
-					
-					$velocityx->Max(256000),
-					$velocityy->Max(256000),
-					
-					_if( $VelocityDivisor->atLeast(1) )->then(
-						$velocityx->roundedDivideBy($VelocityDivisor),
-						$velocityy->roundedDivideBy($VelocityDivisor),
-					''),
-					
-					$velocityx->Max(64000),
-					$velocityy->Max(64000),
-					
-					// Add/Subtract for signed
-					$tempx->roundedQuotientOf($velocityx, 10),
-					$tempy->roundedQuotientOf($velocityy, 10),
-					
-					$tempx->Max(6400),
-					$tempy->Max(6400),
-					
-				''),
-								
+			_if( $AddVelocity->is_set() )->then(
+				
+				// initialize
 				$velocityx->setTo(6400),
 				$velocityy->setTo(6400),
+				
+				$tempx->Max(6400),
+				$tempy->Max(6400),
+				$Mult1ResultX->max(64000),
+				$Mult1ResultY->max(64000),
+				
+				
+				// get appropriate value
+				_if( $VelocityIndex->exactly(self::_LoadMult1), $VelocityDirection->between(self::_Ahead, self::_Behind) )->then(
+					$tempx->roundedQuotientOf($Mult1ResultX, 10),
+					$tempy->roundedQuotientOf($Mult1ResultY, 10),
+				''),
+				_if( $VelocityIndex->exactly(self::_LoadMult1), $VelocityDirection->between(self::_Left, self::_Right) )->then(
+					$tempx->roundedQuotientOf($Mult1ResultY, 10),
+					$tempy->roundedQuotientOf($Mult1ResultX, 10),
+				''),
+				_if( $VelocityIndex->exactly(self::_LoadMult2), $VelocityDirection->between(self::_Ahead, self::_Behind) )->then(
+					$tempx->roundedQuotientOf($Mult2ResultX, 10),
+					$tempy->roundedQuotientOf($Mult2ResultY, 10),
+				''),
+				_if( $VelocityIndex->exactly(self::_LoadMult2), $VelocityDirection->between(self::_Left, self::_Right) )->then(
+					$tempx->roundedQuotientOf($Mult2ResultY, 10),
+					$tempy->roundedQuotientOf($Mult2ResultX, 10),
+				''),
+				
+				
+				// Add/Subtract for signed
+				_if( $VelocityIndex->atLeast(1) )->then(
 					
-				_if( $VelocityLoadIndex->atLeast(1) )->then(
+					// alter angles
+					_if( $VelocityDirection->exactly(self::_Left) )->then( $angle->add(360*4-90*4) ),
+					_if( $VelocityDirection->exactly(self::_Right) )->then( $angle->add(90*4) ),
+					_if( $VelocityDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440) )->then( $angle->subtract(1440) ),
 					
+					// account for signs
 					_if( $angle->between(361,1079) )->then(
 						$velocityx->subtract($tempx),
 					e)->_else(
@@ -709,53 +650,57 @@ class SpellSystem {
 						$velocityy->add($tempy),
 					''),
 					
-					$velocityx->Max(12800),
-					$velocityy->Max(12800),
+					// restore angles
+					_if( $VelocityDirection->exactly(self::_Left) )->then( $angle->add(90*4) ),
+					_if( $VelocityDirection->exactly(self::_Right) )->then( $angle->add(360*4-90*4) ),
+					_if( $VelocityDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440) )->then( $angle->subtract(1440) ),
 					
 				''),
 				
-				_if( $VelocityRawY->atLeast(1) )->then(
-					$velocityy->add($VelocityRawY),
-					$velocityy->subtract(6400),
+
+				// add const value
+				_if( $spellCast->exactly(self::_Lob) )->then(
+					$velocityy->subtract(2625),
 				''),
 			''),
 				
 				
 			
 			// ACCELERATION
-			_if( $SetAcceleration->is_set() )->then(
-				_if( $AccelerationLoadIndex->atLeast(1) )->then(
-					
-					_if( $AccelerationLoadIndex->exactly(self::_Ahead) )->then(
-						$accelerationx->roundedQuotientOf($xcomponent, 10),
-						$accelerationy->roundedQuotientOf($ycomponent, 10),
-					''),
-					
-					$accelerationx->Max(1000),
-					$accelerationy->Max(1000),
-					
-					_if( $AccelerationMultiplier->atLeast(1) )->then(
-						$accelerationx->multiplyBy($AccelerationMultiplier),
-						$accelerationy->multiplyBy($AccelerationMultiplier),
-					''),
-					
-					$accelerationx->Max(8000),
-					$accelerationy->Max(8000),
-					
-					// Add/Subtract for signed
-					$tempx->roundedQuotientOf($accelerationx, 10),
-					$tempy->roundedQuotientOf($accelerationy, 10),
-					
-					$tempx->Max(800),
-					$tempy->Max(800),
-					
-				''),
-						
+			_if( $AddAcceleration->is_set() )->then(
+				
+				// initialize
 				$accelerationx->setTo(800),
 				$accelerationy->setTo(800),
-						
-				_if( $AccelerationLoadIndex->atLeast(1) )->then(
+				
+				$tempx->Max(800),
+				$tempy->Max(800),
+				$Mult1ResultX->max(8000),
+				$Mult1ResultY->max(8000),
+				
+				
+				// get appropriate value
+				_if( $AccelerationIndex->exactly(self::_LoadMult2), $AccelerationDirection->between(self::_Ahead, self::_Behind) )->then(
+					$tempx->roundedQuotientOf($Mult2ResultX, 10),
+					$tempy->roundedQuotientOf($Mult2ResultY, 10),
+				''),
+				_if( $AccelerationIndex->exactly(self::_LoadMult2), $AccelerationDirection->between(self::_Left, self::_Right) )->then(
+					$tempx->roundedQuotientOf($Mult2ResultY, 10),
+					$tempy->roundedQuotientOf($Mult2ResultX, 10),
+				''),
+				
+				
+				// Add/Subtract for signed
+				_if( $AccelerationIndex->atLeast(1) )->then(
 					
+					// alter angles
+					_if( $AccelerationDirection->exactly(self::_Left) )->then( $angle->add(360*4-90*4) ),
+					_if( $AccelerationDirection->exactly(self::_Right) )->then( $angle->add(90*4) ),
+					_if( $AccelerationDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440) )->then( $angle->subtract(1440) ),
+					
+					// account for signs
 					_if( $angle->between(361,1079) )->then(
 						$accelerationx->subtract($tempx),
 					e)->_else(
@@ -768,22 +713,25 @@ class SpellSystem {
 						$accelerationy->add($tempy),
 					''),
 					
-					$accelerationx->Max(1600),
-					$accelerationy->Max(1600),
+					// restore angles
+					_if( $AccelerationDirection->exactly(self::_Left) )->then( $angle->add(90*4) ),
+					_if( $AccelerationDirection->exactly(self::_Right) )->then( $angle->add(360*4-90*4) ),
+					_if( $AccelerationDirection->exactly(self::_Behind) )->then( $angle->add(180*4) ),
+					_if( $angle->atLeast(1440))->then( $angle->subtract(1440) ),
 					
 				''),
 				
-				_if( $AccelerationRawY->atLeast(1) )->then(
-					$accelerationy->add($AccelerationRawY),
-					$accelerationy->subtract(800),
+
+				// add const value
+				_if( $spellCast->exactly(self::_Lob) )->then(
+					$accelerationy->add(350),
 				''),
 			''),
 			
 			
+			
 			// LOAD PROJECTILE
-			_if( $loadIntoProj->is_set() )->then(
-			    $this->loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $SetVelocity, $velocityx, $velocityy, $SetAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid),
-			''),
+			$this->loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid),
 			
 		'');
 		
@@ -793,41 +741,37 @@ class SpellSystem {
 			$frags->release(),
 			$invokedspell->release(),
 			$SetPosition->release(),
-			$SetVelocity->release(),
-			$SetAcceleration->release(),
-			$DistanceOriginIndex->release(),
-			$DistanceDestinationIndex->release(),
+			$ClearVelocity->release(),
+			$AddVelocity->release(),
+			$ClearAcceleration->release(),
+			$AddAcceleration->release(),
 			$FindDistance->release(),
 			$MaxRangeIndex->release(),
 			$MaxCastRange->release(),
-			$ComponentOriginIndex->release(),
-			$ComponentDestinationIndex->release(),
+			$OriginIndex->release(),
+			$DestinationIndex->release(),
 			$AngleIndex->release(),
 			$AngleAlterationsIndex->release(),
 			$AngleAlterationsValue->release(),
 			$SaveAngle->release(),
 			$FindComponents->release(),
+			$Mult1Value->release(),
+			$Mult1ResultX->release(),
+			$Mult1ResultY->release(),
+			$DivValue->release(),
+			$Mult2Value->release(),
+			$Mult2ResultX->release(),
+			$Mult2ResultY->release(),
 			$PositionIndex->release(),
-			$PositionLoadIndex->release(),
-			$PositionMultiplier->release(),
-			$VelocityLoadIndex->release(),
-			$StaticOffsetX->release(),
-			$StaticOffsetY->release(),
-			$VelocityMultiplyByDCIndex->release(),
-			$VelocityMultiplier->release(),
-			$VelocityDivisor->release(),
-			$VelocityRawY->release(),
-			$AccelerationLoadIndex->release(),
-			$AccelerationMultiplier->release(),
-			$AccelerationRawY->release(),
+			$PositionDirection->release(),
+			$VelocityIndex->release(),
+			$VelocityDirection->release(),
+			$AccelerationIndex->release(),
+			$AccelerationDirection->release(),
 		'');
 		$humans->always(
 			$tempx->release(),
 			$tempy->release(),
-			$distX1->release(),
-			$distY1->release(),
-			$distX2->release(),
-			$distY2->release(),
 			$compX1->release(),
 			$compY1->release(),
 			$compX2->release(),
@@ -837,7 +781,6 @@ class SpellSystem {
 			$xcomponent->release(),
 			$ycomponent->release(),
 			$success->release(),
-			$loadIntoProj->release(),
 			$positionx->release(),
 			$positiony->release(),
 			$velocityx->release(),
@@ -854,8 +797,7 @@ class SpellSystem {
 			$firstAvailableProj->release(),
 			$selectedProj->release(),
 			$selectedProjID->release(),
-			$SaveCoordinates->release(),
-		
+			$castTimer->subtract(1),
 		'');
 			
 		
@@ -879,6 +821,10 @@ class SpellSystem {
 			'');
 			$P1->_if( $projectile->spellid->exactly(self::_Holocaust), $projectile->duration->atLeast(1), $projectile->eventTime->exactly(0) )->then(
 				FX::rumbleAt(2, $projectile->xpos, $projectile->ypos),
+			'');
+			$P1->_if( $projectile->spellid->exactly(self::_Smite2), $projectile->duration->atLeast(1) )->then(
+				FX::rumbleAt(30, $projectile->xpos, $projectile->ypos),
+				FX::playWavAt($bam, $projectile->xpos, $projectile->ypos),
 			'');
 		}
 		
@@ -966,16 +912,18 @@ class SpellSystem {
 	
 
 	
-	function loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $SetVelocity, $velocityx, $velocityy, $SetAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid){
+	function loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid){
 		
 		/* @var Deathcounter    $savedProj          */
 		/* @var TempSwitch      $SetPosition        */
 		/* @var TempDC          $positionx          */
 		/* @var TempDC          $positiony          */
-		/* @var TempSwitch      $SetVelocity        */
+		/* @var TempSwitch      $ClearVelocity      */
+		/* @var TempSwitch      $AddVelocity        */
 		/* @var TempDC          $velocityx          */
 		/* @var TempDC          $velocityy          */
-		/* @var TempSwitch      $SetAcceleration    */
+		/* @var TempSwitch      $ClearAcceleration  */
+		/* @var TempSwitch      $AddAcceleration    */
 		/* @var TempDC          $accelerationx      */
 		/* @var TempDC          $accelerationy      */
 		/* @var TempDC          $duration           */
@@ -986,18 +934,18 @@ class SpellSystem {
 				
 		foreach( $this->CPprojectiles as $key=>$projectile ){
 			$text .= _if( $savedProj->exactly($key+1) )->then(
-				_if( $SetPosition->is_set() )->then(
-					$projectile->setPosition($positionx, $positiony),
+				_if( $SetPosition->is_set() )->then( $projectile->setPosition($positionx, $positiony) ),
+				_if( $ClearVelocity->is_set() )->then( $projectile->setVelocity(0, 0) ),
+				_if( $AddVelocity->is_set() )->then( $projectile->addVelocity($velocityx, $velocityy) ),
+				_if( $ClearAcceleration->is_set() )->then( $projectile->setAcceleration(0, 0) ),
+				_if( $AddAcceleration->is_set() )->then( $projectile->addAcceleration($accelerationx, $accelerationy) ),
+				_if( $eventTime->atLeast(1) )->then( $projectile->setEventTime($eventTime) ),
+				_if( $duration->atLeast(1) )->then(
+					_if( $duration->atMost(999) )->then($projectile->setDuration(0) ),
+					_if( $duration->atLeast(1000) )->then( $duration->subtract(1000) ),
+					$projectile->addDuration($duration),
 				''),
-				_if( $SetVelocity->is_set() )->then(
-					$projectile->setVelocity($velocityx, $velocityy),
-				''),
-				_if( $SetAcceleration->is_set() )->then(
-					$projectile->setAcceleration($accelerationx, $accelerationy),
-				''),
-				$projectile->setEventTime($eventTime),
-				$projectile->setDuration($duration),
-				$projectile->setSpellID($spellid),
+				_if( $spellid->atLeast(1) )->then( $projectile->setSpellID($spellid) ),
 			'');
 		}
 		

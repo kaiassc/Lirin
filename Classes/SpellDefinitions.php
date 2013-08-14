@@ -20,17 +20,24 @@
 	const _RainOfFire       = 16;
 	const _Firebreath       = 17;
 	const _Guided           = 18;
+	const _Smite            = 19;
+	const _Smite2           = 20;
 
 	
 	// Persistent DCs
+	/* @var Deathcounter    $pointX                     */
+	/* @var Deathcounter    $pointY                     */
+	
 	/* @var Deathcounter    $savedProj                  */
 	/* @var Deathcounter    $spellCast                  */
 	/* @var Deathcounter    $castStage                  */
+	/* @var Deathcounter    $castTimer                  */
 	
 	// Saved DCs
 	/* @var TempSwitch      $SaveAngle                  */
-	/* @var Deathcounter    $StoredCurrentAngle         */
+	/* @var Deathcounter    $StoredAngle                */
 	/* @var Deathcounter    $StoredDestinationAngle     */
+	
 	
 	// Projectile Variables
 	/* @var TempDC          $positionx                  */
@@ -43,20 +50,17 @@
 	/* @var TempDC          $eventTime                  */
 	/* @var TempDC          $spellid                    */
 	
-
+	
 	// SPELL VARIABLES
-
-	// for projectile
-	/* @var TempSwitch      $SetFirstAvailableProj =    */
-	/* @var TempSwitch      $SetSelectProj =            */
-	/* @var TempDC          $selectedProj =             */
-	/* @var TempDC          $selectedProjID =           */
-	/* @var TempDC          $firstAvailableProj =       */
+	
+	// for selecting proj
+	/* @var TempSwitch      $SetFirstAvailableProj      */
+	/* @var TempDC          $firstAvailableProj         */
+	/* @var TempSwitch      $SetSelectProj              */
+	/* @var TempDC          $selectedProj               */
+	/* @var TempDC          $selectedProjID             */
 	
 	// for distance
-	/* @var TempDC          $DistanceOriginIndex        */
-	/* @var TempDC          $DistanceDestinationIndex   */
-	
 	/* @var TempSwitch      $FindDistance               */
 	/* @var TempDC          $distance                   */
 	
@@ -64,10 +68,8 @@
 	/* @var TempDC          $MaxCastRange               */
 	
 	// for coordinates and angle
-	/* @var TempSwitch      $SaveCoordinates            */
-
-	/* @var TempDC          $ComponentOriginIndex       */
-	/* @var TempDC          $ComponentDestinationIndex  */
+	/* @var TempDC          $OriginIndex                */
+	/* @var TempDC          $DestinationIndex           */
 	
 	/* @var TempDC          $AngleIndex                 */
 	
@@ -81,40 +83,44 @@
 	/* @var TempDC          $xcomponent                 */
 	/* @var TempDC          $ycomponent                 */
 	
-	// for position
+	// multiplication/division
+	/* @var TempDC          $Mult1Value                 */
+	/* @var TempDC          $Mult1ResultX               */
+	/* @var TempDC          $Mult1ResultY               */
+	/* @var TempDC          $DivValue                   */
+	/* @var TempDC          $Mult2Value                 */
+	/* @var TempDC          $Mult2ResultX               */
+	/* @var TempDC          $Mult2ResultY               */
+	
+	/* @var TempDC          $tempx = $temp1             */
+	/* @var TempDC          $tempy = $temp2             */
+	
+	// position
 	/* @var TempSwitch      $SetPosition                */
 	/* @var TempDC          $PositionIndex              */
-	/* @var TempDC          $PositionLoadIndex          */
-	/* @var TempDC          $PositionMultiplier         */
-	/* @var TempDC          $StaticOffsetX              */
-	/* @var TempDC          $StaticOffsetY              */
+	/* @var TempDC          $PositionDirection          */
 	
-	/* @var TempDC          $temp1                      */
-	/* @var TempDC          $temp2                      */
+	// velocity
+	/* @var TempSwitch      $ClearVelocity              */
+	/* @var TempSwitch      $AddVelocity                */
+	/* @var TempDC          $VelocityIndex              */
+	/* @var TempDC          $VelocityDirection          */
 	
-	// for velocity
-	/* @var TempSwitch      $SetVelocity                */
-	/* @var TempDC          $VelocityLoadIndex          */
-	/* @var TempDC          $VelocityMultiplyByDCIndex  */
-	/* @var TempDC          $VelocityMultiplier         */
-	/* @var TempDC          $VelocityDivisor            */
-	/* @var TempDC          $VelocityRawY               */
-	
-	// for acceleration
-	/* @var TempSwitch      $SetAcceleration            */
-	/* @var TempDC          $AccelerationLoadIndex      */
-	/* @var TempDC          $AccelerationMultiplier     */
-	/* @var TempDC          $AccelerationRawY           */
+	// acceleration
+	/* @var TempSwitch      $ClearAcceleration          */
+	/* @var TempSwitch      $AddAcceleration            */
+	/* @var TempDC          $AccelerationIndex          */
+	/* @var TempDC          $AccelerationDirection      */
 	
 	// miscellaneous
 	/* @var TempSwitch      $frags                      */
 	/* @var TempSwitch      $enableSpellSystem          */
 	/* @var Deathcounter    $invokedslot                */
 	/* @var TempDC          $invokedspell               */
-	/* @var TempSwitch      $success                    */
-	/* @var TempSwitch      $sign                       */
+	/* @var TempSwitch      $success = $sign            */
 	/* @var TempDC          $projCount                  */
-	/* @var TempSwitch      $loadIntoProj               */
+	
+	
 
 
 	// player slots
@@ -124,9 +130,9 @@
 
 	// coordinate controller
 	const _Hero         = 1;
-	const _Point1       = 2;
-	const _Proj         = 3;
-	const _Saved        = 4;
+	const _Point        = 2;
+	const _Saved        = 3;
+	const _Proj         = 4;
 	// distance controller
 	const _DistResize   = 1;
 	const _DistCancel   = 2;
@@ -142,6 +148,11 @@
 	const _Behind       = 2;
 	const _Left         = 3;
 	const _Right        = 4;
+	// multiply/divide index
+	const _MultDist     = 1000;
+	// load value
+	const _LoadMult1    = 1;
+	const _LoadMult2    = 2;
 	
 
 
@@ -164,17 +175,17 @@
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -182,27 +193,22 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(16),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(16),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(24),
@@ -210,7 +216,6 @@
 			$spellid->setTo(_Fireball),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -229,17 +234,17 @@
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->set(),
-				$DistanceOriginIndex->setTo(_Hero),
-				$DistanceDestinationIndex->setTo(_Point1),
 			$MaxRangeIndex->setTo(_DistResize),
 				$MaxCastRange->setTo(256),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -247,27 +252,23 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(_MultDist),
+			$DivValue->setTo(16),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(1),   // vel *= dist
-					$VelocityMultiplier->setTo(0),
-					$VelocityDivisor->setTo(16),
-				$VelocityRawY->setTo(6400-2625),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(800+350),
+			$ClearAcceleration->set(),
+			$AddAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(16),
@@ -275,7 +276,6 @@
 			$spellid->setTo(_Lob),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 				
 		'');
@@ -294,7 +294,127 @@
 
 
 	// 06 -- BLOCK
-
+		// continue
+		$humans->_if( $spellCast->exactly(_Block), $castTimer->atLeast(1) )->then(
+		
+			//Projectile
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			
+			// Distance
+			$FindDistance->clear(),
+			$MaxRangeIndex->setTo(0),
+				$MaxCastRange->setTo(0),
+			
+			// Angle
+			$AngleIndex->setTo(_Load),
+			$AngleAlterationsIndex->setTo(_shiftTo),
+				$AngleAlterationsValue->setTo(60),
+			$SaveAngle->set(),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(64),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(1),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Block),
+			
+			// Cast
+			$enableSpellSystem->set(),
+				
+		'');
+		// redirect
+		$humans->_if( $invokedspell->exactly(_Block), $castTimer->atLeast(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Redirected Block"),
+			
+			// Coordinate
+			$DestinationIndex->setTo(_Point),
+			
+			// Angle
+			$AngleIndex->setTo(_CalcSaveLoad),
+			
+		'');
+		// cast
+		$humans->_if( $invokedspell->exactly(_Block), $castTimer->exactly(0), $projCount->atLeast(4) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Invoke Block"),
+			$spellCast->setTo(_Block),
+			$castTimer->setTo(12),
+			
+			//Projectile
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
+			// Distance
+			$FindDistance->clear(),
+			
+			// Angle
+			$AngleIndex->setTo(_CalcSave),
+			$AngleAlterationsIndex->setTo(0),
+				$AngleAlterationsValue->setTo(0),
+			$SaveAngle->set(),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(64),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(1),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Block),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// end
+		$humans->_if( $spellCast->exactly(_Block), $castTimer->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Ended Block"),
+			$spellCast->setTo(0),
+		
+		'');
 
 
 	// 07 -- DISRUPTION
@@ -302,185 +422,170 @@
 
 
 	// 08 -- FIREWALL
+		// direct
+		$humans->_if( $invokedspell->exactly(_Firewall), $spellCast->exactly(_Firewall), $castStage->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Direct Firewall"),
+			$invokedspell->setTo(0),
+			$spellCast->setTo(0),
+			$castStage->setTo(0),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Proj),
+			$DestinationIndex->setTo(_Point),
+			
+			// Distance
+			$FindDistance->set(),
+			$MaxRangeIndex->setTo(128),
+				$MaxCastRange->setTo(_DistResize),
+			
+			// Angle
+			$AngleIndex->setTo(_Calc),
+			$AngleAlterationsIndex->setTo(0),
+				$AngleAlterationsValue->setTo(0),
+			$SaveAngle->clear(),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(4),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
+			
+			// Durations and ID
+			$duration->setTo(1000+32),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// cast
+		$humans->_if( $invokedspell->exactly(_Firewall), $projCount->atLeast(1), $castStage->exactly(0) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Invoke Firewall"),
+			$spellCast->setTo(_Firewall),
+			$castStage->setTo(1),
+			$castTimer->setTo(24),
+			
+			//Projectile
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Point),
+			$DestinationIndex->setTo(_Hero),
+			
+			// Distance
+			$FindDistance->set(),
+			$MaxRangeIndex->setTo(_DistCancel),
+				$MaxCastRange->setTo(256),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(0),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Position
+			$SetPosition->set(),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(24),
+			$eventTime->setTo(24),
+			$spellid->setTo(_Firewall),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// cancelled
+		$humans->_if( $spellCast->exactly(_Firewall), $castStage->exactly(1), $castTimer->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Firewall Cancelled"),
+			$spellCast->setTo(0),
+			$castStage->setTo(0),
+			
+		'');
+		
 
 
 
 	// 09 -- BARRIER
-
+		
 
 
 	// 10 -- ZAP
 		// stage4
-		$humans->_if( $spellCast->exactly(_Zap), $castStage->exactly(3) )->then(
-			
-			// Stage prep (for persistent spells)
-			#$spellCast->setTo(12),
-			$castStage->setTo(0),
+		$humans->_if( $spellCast->exactly(_Zap), $castTimer->atLeast(1) )->then(
 			
 			//Projectile
-			$savedProj->setTo(4),
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
 			
 			// Angle
-			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
-			$AngleAlterationsIndex->setTo(0),
-				$AngleAlterationsValue->setTo(0),
-			$SaveAngle->set(),
+			$AngleIndex->setTo(_Load),
 			
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(12),
 			$spellid->setTo(_Zap),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
-		// stage3
-		$humans->_if( $spellCast->exactly(_Zap), $castStage->exactly(2) )->then(
-			
-			// Stage prep (for persistent spells)
-			#$spellCast->setTo(12),
-			$castStage->setTo(3),
-			
-			//Projectile
-			$savedProj->setTo(3),
-			
-			// Angle
-			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
-			$AngleAlterationsIndex->setTo(0),
-				$AngleAlterationsValue->setTo(0),
-			$SaveAngle->set(),
-			
-			// Component
-			$FindComponents->set(),
-			
-			// Position
-			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
-			
-			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
-			
-			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
-			
-			// Durations and ID
-			$duration->setTo(12),
-			$spellid->setTo(_Zap),
-			
-			// Cast
-			$loadIntoProj->set(),
-			$enableSpellSystem->set(),
-			
-		'');
-		// stage2
-		$humans->_if( $spellCast->exactly(_Zap), $castStage->exactly(1) )->then(
-			
-			// Stage prep (for persistent spells)
-			#$spellCast->setTo(12),
-			$castStage->setTo(2),
-			
-			//Projectile
-			$savedProj->setTo(2),
-			
-			// Angle
-			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
-			$AngleAlterationsIndex->setTo(0),
-				$AngleAlterationsValue->setTo(0),
-			$SaveAngle->set(),
-			
-			// Component
-			$FindComponents->set(),
-			
-			// Position
-			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
-			
-			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
-			
-			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
-			
-			// Durations and ID
-			$duration->setTo(12),
-			$spellid->setTo(_Zap),
-			
-			// Cast
-			$loadIntoProj->set(),
-			$enableSpellSystem->set(),
-			
-		'');
-		// cast, stage1
-		$humans->_if( $invokedspell->exactly(_Zap), $projCount->atLeast(4) )->then(
+		// cast
+		$humans->_if( $invokedspell->exactly(_Zap), $castTimer->exactly(0), $projCount->atLeast(4) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Invoke Zap"),
 			$spellCast->setTo(_Zap),
-			$castStage->setTo(1),
+			$castTimer->setTo(4),
 			
 			//Projectile
-			$savedProj->setTo(1),
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->set(),
@@ -488,34 +593,28 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(12),
 			$spellid->setTo(_Zap),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -526,28 +625,32 @@
 
 
 	// 12 -- DANCE OF FLAMES
+		// initial cast
+		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $castTimer->atMost(0), not($selectedProjID->exactly(_DanceOfFlames)) )->then(
+			Display("Cast Dance of Flames"),
+			$spellCast->setTo(_DanceOfFlames),
+			$castTimer->setTo(120),
+		'');
 		// cast
-		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $castStage->atMost(0), not($selectedProjID->exactly(_DanceOfFlames)) )->then(
+		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $spellCast->exactly(_DanceOfFlames), $castTimer->atLeast(1), $castStage->atMost(0), not($selectedProjID->exactly(_DanceOfFlames)) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Invoke Dance of Flames"),
-			$spellCast->setTo(_DanceOfFlames),
-			$castStage->setTo(0),
 			
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -555,27 +658,22 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(12),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(12),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(72),
@@ -583,29 +681,28 @@
 			$spellid->setTo(_DanceOfFlames),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
 		// redirect
-		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $castStage->atLeast(1) )->then(
+		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $spellCast->exactly(_DanceOfFlames), $castTimer->atLeast(1), $castStage->atLeast(1) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Redirect Dance of Flames"),
 			$spellCast->setTo(_DanceOfFlames),
 			$castStage->setTo(0),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Proj),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Proj),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -613,13 +710,16 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(12),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(12),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Durations and ID
 			$duration->setTo(72),
@@ -627,17 +727,24 @@
 			$spellid->setTo(_DanceOfFlames),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
 		// select
-		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $castStage->atMost(0), $selectedProjID->exactly(_DanceOfFlames) )->then(
+		$humans->_if( $invokedspell->exactly(_DanceOfFlames), $spellCast->exactly(_DanceOfFlames), $castTimer->atLeast(1), $castStage->atMost(0), $selectedProjID->exactly(_DanceOfFlames) )->then(
 			
 			Display("Select Dance of Flames"),
 			$castStage->setTo(1),
 			$SetSelectProj->set(),
 			$enableSpellSystem->set(),
+			
+		'');
+		// end
+		$humans->_if( $spellCast->exactly(_DanceOfFlames), $castTimer->exactly(1) )->then(
+			
+			Display("Ended Dance of Flames"),
+			$castStage->setTo(0),
+			$spellCast->setTo(0),
 			
 		'');
 
@@ -653,17 +760,16 @@
 			//Projectile
 			$savedProj->setTo(4),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Load),
-				$ComponentOriginIndex->setTo(_Hero),
-				#$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -671,27 +777,24 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(144),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(6),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(_Right),
-					$PositionMultiplier->setTo(144),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Right),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(6),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult2),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(60),
@@ -699,7 +802,6 @@
 			$spellid->setTo(_Holocaust),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -713,17 +815,16 @@
 			//Projectile
 			$savedProj->setTo(3),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Load),
-				$ComponentOriginIndex->setTo(_Hero),
-				#$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -731,27 +832,24 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(144),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(6),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(_Left),
-					$PositionMultiplier->setTo(144),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Left),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(6),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult2),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(60+1),
@@ -759,7 +857,6 @@
 			$spellid->setTo(_Holocaust),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -773,17 +870,16 @@
 			//Projectile
 			$savedProj->setTo(2),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Load),
-				$ComponentOriginIndex->setTo(_Hero),
-				#$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->clear(),
@@ -791,27 +887,24 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(6),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(_Right),
-					$PositionMultiplier->setTo(48),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Right),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(6),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult2),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(60+2),
@@ -819,7 +912,6 @@
 			$spellid->setTo(_Holocaust),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -834,17 +926,17 @@
 			//Projectile
 			$savedProj->setTo(1),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Calc),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->set(),
@@ -852,27 +944,24 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(6),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(_Left),
-					$PositionMultiplier->setTo(48),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Left),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(_Ahead),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(6),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult2),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(60+3),
@@ -880,7 +969,6 @@
 			$spellid->setTo(_Holocaust),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
@@ -900,37 +988,22 @@
 
 
 	// 17 -- FIREBREATH
-		// end
-		#$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
-		#	
-		#	// Stage prep (for persistent spells)
-		#	Display("Ended firebreath"),
-		#	$spellCast->setTo(0),
-		#	$spellStage->setTo(0),
-		#
-		#'');
 		// continue
-		$humans->_if( $spellCast->exactly(_Firebreath), $castStage->exactly(1) )->then(
-			
-			// Stage prep (for persistent spells)
-			#Display("Invoke fireball"),
-			#$spellCast->setTo(16),
-			#$castStage->setTo(0),
+		$humans->_if( $spellCast->exactly(_Firebreath), $castTimer->atLeast(1) )->then(
 		
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_Load),
-				$ComponentOriginIndex->setTo(_Hero),
-				#$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(_shiftTo),
 				$AngleAlterationsValue->setTo(30),
 			$SaveAngle->set(),
@@ -938,27 +1011,22 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(4),
@@ -966,43 +1034,44 @@
 			$spellid->setTo(_Firebreath),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 				
 		'');
 		// redirect
-		$humans->_if( $invokedspell->exactly(_Firebreath), $castStage->exactly(1) )->then(
+		$humans->_if( $invokedspell->exactly(_Firebreath), $castTimer->atLeast(1) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Redirected Firebreath"),
 			
+			// Coordinate
+			$DestinationIndex->setTo(_Point),
+			
 			// Angle
 			$AngleIndex->setTo(_CalcSaveLoad),
-				$ComponentDestinationIndex  ->setTo(_Point1),
 			
 		'');
 		// cast
-		$humans->_if( $invokedspell->exactly(_Firebreath), $castStage->exactly(0), $projCount->atLeast(4) )->then(
+		$humans->_if( $invokedspell->exactly(_Firebreath), $castTimer->exactly(0), $projCount->atLeast(4) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Invoke Firebreath"),
 			$spellCast->setTo(_Firebreath),
-			$castStage->setTo(1),
+			$castTimer->setTo(60),
 			
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
 			// Distance
 			$FindDistance->clear(),
-				$DistanceOriginIndex->setTo(0),
-				$DistanceDestinationIndex->setTo(0),
 			$MaxRangeIndex->setTo(0),
 				$MaxCastRange->setTo(0),
 			
 			// Angle
 			$AngleIndex->setTo(_CalcSave),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Point1),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->set(),
@@ -1010,27 +1079,22 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(48),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(48),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(4),
@@ -1038,33 +1102,26 @@
 			$spellid->setTo(_Firebreath),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
-
-
-		// 18 -- GUIDED
 		// end
-		#$humans->_if( $invokedspell->exactly(3), $spellStage->exactly(1) )->then(
-		#	
-		#	// Stage prep (for persistent spells)
-		#	Display("Ended firebreath"),
-		#	$spellCast->setTo(0),
-		#	$spellStage->setTo(0),
-		#
-		#'');
-		// continue
-		$humans->_if( $spellCast->exactly(_Guided), $castStage->exactly(1) )->then(
+		$humans->_if( $spellCast->exactly(_Firebreath), $castTimer->exactly(1) )->then(
 			
 			// Stage prep (for persistent spells)
-			#Display("Invoke fireball"),
-			#$spellCast->setTo(16),
-			#$castStage->setTo(0),
+			Display("Ended firebreath"),
+			$spellCast->setTo(0),
 		
-			// Coordinates
-			$ComponentOriginIndex->setTo(_Proj),
-			$ComponentDestinationIndex->setTo(_Saved),
+		'');
+
+
+	// 18 -- GUIDED
+		// continue
+		$humans->_if( $spellCast->exactly(_Guided), $castTimer->atLeast(1) )->then(
+		
+			// Coordinate
+			$OriginIndex->setTo(_Proj),
+			$DestinationIndex->setTo(_Saved),
 			
 			// Angle
 			$AngleIndex->setTo(_CalcSaveLoad),
@@ -1075,49 +1132,50 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(16),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(16),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Durations and ID
-			$duration->setTo(120),
+			$duration->setTo(12),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Guided),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 				
 		'');
 		// redirect
-		$humans->_if( $invokedspell->exactly(_Guided), $castStage->exactly(1) )->then(
+		$humans->_if( $invokedspell->exactly(_Guided), $castTimer->atLeast(1) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Redirected Guided Fireball"),
-			$SaveCoordinates->set(),
 			
 		'');
 		// cast
-		$humans->_if( $invokedspell->exactly(_Guided), $castStage->exactly(0), $projCount->atLeast(1) )->then(
+		$humans->_if( $invokedspell->exactly(_Guided), $castTimer->exactly(0), $projCount->atLeast(1) )->then(
 			
 			// Stage prep (for persistent spells)
 			Display("Invoke Guided Fireball"),
 			$spellCast->setTo(_Guided),
-			$castStage->setTo(1),
+			$castTimer->setTo(84),
 			
 			//Projectile
 			$SetFirstAvailableProj->set(),
 			
-			$SaveCoordinates->set(),
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Saved),
 			
 			// Angle
 			$AngleIndex->setTo(_CalcSave),
-				$ComponentOriginIndex->setTo(_Hero),
-				$ComponentDestinationIndex->setTo(_Saved),
 			$AngleAlterationsIndex->setTo(0),
 				$AngleAlterationsValue->setTo(0),
 			$SaveAngle->set(),
@@ -1125,27 +1183,22 @@
 			// Component
 			$FindComponents->set(),
 			
+			// Mult Div Mult
+			$Mult1Value->setTo(16),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
 			// Position
 			$SetPosition->set(),
-				$PositionIndex->setTo(1),
-					$PositionLoadIndex->setTo(0),
-					$PositionMultiplier->setTo(0),
-				$StaticOffsetX->setTo(0),
-				$StaticOffsetY->setTo(0),
 			
 			// Velocity
-			$SetVelocity->set(),
-				$VelocityLoadIndex->setTo(1),
-					$VelocityMultiplyByDCIndex->setTo(0),
-					$VelocityMultiplier->setTo(16),
-					$VelocityDivisor->setTo(0),
-				$VelocityRawY->setTo(0),
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
 			
 			// Acceleration
-			$SetAcceleration->set(),
-				$AccelerationLoadIndex->setTo(0),
-					$AccelerationMultiplier->setTo(0),
-				$AccelerationRawY->setTo(0),
+			$ClearAcceleration->set(),
 			
 			// Durations and ID
 			$duration->setTo(120),
@@ -1153,12 +1206,205 @@
 			$spellid->setTo(_Guided),
 			
 			// Cast
-			$loadIntoProj->set(),
 			$enableSpellSystem->set(),
 			
 		'');
-
-
+		// end
+		$humans->_if( $spellCast->exactly(_Guided), $castTimer->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Ended Guided Fireball"),
+			$spellCast->setTo(0),
+			$castTimer->setTo(0),
 		
+		'');
+
+
+	// 18 -- SMITE
+		// stage4
+		$humans->_if( $spellCast->exactly(_Smite), $castStage->exactly(4) )->then(
+			
+			// Stage prep (for persistent spells)
+			$castStage->setTo(0),
+			
+			//Projectile
+			$savedProj->setTo(4),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Saved),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			
+			// Position
+			$SetPosition->set(),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(5),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Smite2),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// stage3
+		$humans->_if( $spellCast->exactly(_Smite), $castStage->exactly(3) )->then(
+			
+			// Stage prep (for persistent spells)
+			$castStage->setTo(4),
+			
+			//Projectile
+			$savedProj->setTo(3),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Saved),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			$angle->setTo(400),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(64),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(32),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult2),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(6),
+			$eventTime->setTo(1),
+			$spellid->setTo(_Smite),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// stage2
+		$humans->_if( $spellCast->exactly(_Smite), $castStage->exactly(2) )->then(
+			
+			// Stage prep (for persistent spells)
+			$castStage->setTo(3),
+			
+			//Projectile
+			$savedProj->setTo(2),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Saved),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			$angle->setTo(400),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(64),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(32),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult2),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(7),
+			$eventTime->setTo(2),
+			$spellid->setTo(_Smite),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// stage1
+		$humans->_if( $spellCast->exactly(_Smite), $castStage->exactly(1), $castTimer->atMost(0) )->then(
+			
+			// Stage prep (for persistent spells)
+			$castStage->setTo(2),
+			
+			//Projectile
+			$savedProj->setTo(1),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Saved),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			$angle->setTo(400),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(64),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(32),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult2),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(8),
+			$eventTime->setTo(3),
+			$spellid->setTo(_Smite),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// cast
+		$humans->_if( $invokedspell->exactly(_Smite), $castStage->exactly(0), $projCount->atLeast(4) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Invoke Smite"),
+			$spellCast->setTo(_Smite),
+			$castStage->setTo(1),
+			$castTimer->setTo(20),
+			
+			$enableSpellSystem->set(),
+		'');
 	
 	
