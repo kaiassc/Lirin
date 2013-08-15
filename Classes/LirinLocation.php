@@ -54,6 +54,12 @@ class LirinLocation extends Location {
 		KillUnit($player, 'Terran Wraith');
 	}
 	
+	public function kakaru($player = P8){
+		return
+		CreateUnitWithProperties($player,'Kakaru (Twilight)',1, $this, Invincible).
+		KillUnit($player, 'Kakaru (Twilight)');
+	}
+	
 	public function placeAt($x, $y, TempSwitch $success = null){
 		$text = '';
 		if( $success !== null ){
