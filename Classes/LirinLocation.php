@@ -60,6 +60,7 @@ class LirinLocation extends Location {
 		KillUnit($player, 'Kakaru (Twilight)');
 	}
 	
+	
 	public function placeAt($x, $y, TempSwitch $success = null){
 		$text = '';
 		if( $success !== null ){
