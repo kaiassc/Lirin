@@ -52,7 +52,8 @@ class SpellSystem {
 	const _Firebreath       = 17;
 	const _Guided           = 18;
 	const _Smite            = 19;
-	const _Smite2           = 20;
+	const _Smite2           = 119;
+	const _Spiral           = 20;
 	
 	
 	
@@ -131,10 +132,10 @@ class SpellSystem {
 		
 		// TODO: testing trigger, remove later
 		$humans->justonce(
-			$this->SpellSlotDCs[1]->setTo(self::_Block),
-			$this->SpellSlotDCs[2]->setTo(self::_Holocaust),
-			$this->SpellSlotDCs[3]->setTo(self::_Guided),
-			$this->SpellSlotDCs[4]->setTo(self::_Smite),
+			$this->SpellSlotDCs[1]->setTo(self::_Fireball),
+			$this->SpellSlotDCs[2]->setTo(self::_Lob),
+			$this->SpellSlotDCs[3]->setTo(self::_Meteor),
+			$this->SpellSlotDCs[4]->setTo(self::_Spiral),
 		'');
 		
 	}
@@ -496,8 +497,8 @@ class SpellSystem {
 			    $angle->componentsInto($xcomponent, $ycomponent),
 				$xcomponent->roundedDivideBy(10),
 				$ycomponent->roundedDivideBy(10),
-				$xcomponent->max(1000),
-				$ycomponent->max(1000),
+				$xcomponent->Max(1000),
+				$ycomponent->Max(1000),
 			''),
 			
 			
@@ -660,9 +661,8 @@ class SpellSystem {
 				
 
 				// add const value
-				_if( $spellCast->exactly(self::_Lob) )->then(
-					$velocityy->subtract(2625),
-				''),
+				_if( $spellCast->exactly(self::_Lob) )->then( $velocityy->subtract(2625) ),
+				
 			''),
 				
 				
@@ -723,9 +723,9 @@ class SpellSystem {
 				
 
 				// add const value
-				_if( $spellCast->exactly(self::_Lob) )->then(
-					$accelerationy->add(350),
-				''),
+				_if( $spellCast->exactly(self::_Lob) )->then( $accelerationy->add(350) ),
+				_if( $spellCast->exactly(self::_Meteor) )->then( $accelerationx->add(35), $accelerationy->add(197) ),
+				
 			''),
 			
 			
@@ -813,6 +813,10 @@ class SpellSystem {
 			'');
 			$P1->_if( $projectile->spellid->exactly(self::_Lob), $projectile->duration->exactly(1) )->then(
 				FX::rumbleAt(10, $projectile->xpos, $projectile->ypos),
+				FX::playWavAt($bam, $projectile->xpos, $projectile->ypos),
+			'');
+			$P1->_if( $projectile->spellid->exactly(self::_Meteor), $projectile->duration->exactly(1) )->then(
+				FX::rumbleAt(50, $projectile->xpos, $projectile->ypos),
 				FX::playWavAt($bam, $projectile->xpos, $projectile->ypos),
 			'');
 			$P1->_if( $projectile->spellid->exactly(self::_Zap), $projectile->duration->atLeast(1) )->then(

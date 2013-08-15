@@ -69,6 +69,9 @@ class Projectile{
 	const _RainOfFire       = 16;
 	const _Firebreath       = 17;
 	const _Guided           = 18;
+	const _Smite            = 19;
+	const _Smite2           = 119;
+	const _Spiral           = 20;
 	
 	
 	/////
@@ -109,15 +112,15 @@ class Projectile{
 	}
 	function setVelocity($x, $y){
 		if(is_numeric($x)){
-			if($x > 64 || $x < -64)
-				Error("Error! X needs to be between -64 and 64");
+			if($x > 64.0 || $x < -64.0)
+				Error("Error! X needs to be between -64.0 and 64.0");
 			$x = round(($x+64)*100);
 		}
 		elseif(!($x instanceof Deathcounter))
 			Error("Error! X needs to be a number or a Deathcounter");
 		if(is_numeric($y)){
-			if($y > 64 || $y < -64)
-				Error("Error! Y needs to be between -64 and 64");
+			if($y > 64.0 || $y < -64.0)
+				Error("Error! Y needs to be between -64.0 and 64.0");
 			$y = round(($y+64)*100);
 		}
 		elseif(!($y instanceof Deathcounter))
@@ -127,17 +130,21 @@ class Projectile{
 		return $this->xvel->setTo($x).
 			$this->yvel->setTo($y);
 	}
+	function addVelocity($x, $y){
+		return $this->xvel->add($x) . $this->yvel->add($y).
+				$this->xvel->subtract(6400). $this->yvel->subtract(6400);
+	}
 	function setAcceleration($x, $y){
 		if(is_numeric($x)){
-			if($x > 8 || $x < -8)
-				Error("Error! X needs to be between -8 and 8");
+			if($x > 8.0 || $x < -8.0)
+				Error("Error! X needs to be between -8.0 and 8.0");
 			$x = round(($x+8)*100);
 		}
 		elseif(!($x instanceof Deathcounter))
 			Error("Error! X needs to be a number or a Deathcounter");
 		if(is_numeric($y)){
-			if($y > 8 || $y < -8)
-				Error("Error! Y needs to be between -8 and 8");
+			if($y > 8.0 || $y < -8.0)
+				Error("Error! Y needs to be between -8.0 and 8.0");
 			$y = round(($y+8)*100);
 		}
 		elseif(!($y instanceof Deathcounter))
@@ -146,11 +153,21 @@ class Projectile{
 		return $this->xacc->setTo($x).
 			$this->yacc->setTo($y);
 	}
+	function addAcceleration($x, $y){
+		return $this->xacc->add($x) . $this->yacc->add($y).
+				$this->xacc->subtract(800). $this->yacc->subtract(800);
+	}
 	function setDuration($n){
 		return $this->duration->setTo($n);
 	}
+	function addDuration($n){
+		return $this->duration->add($n);
+	}
 	function setEventTime($n){
 		return $this->eventTime->setTo($n);
+	}
+	function addEventTime($n){
+		return $this->eventTime->add($n);
 	}
 	
 	function setSpellID($n){
@@ -176,8 +193,10 @@ class Projectile{
 			$switch->set(),
 			
 			// some spells clear movement at times...
+			_if( $this->spellid->exactly(self::_Firewall), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // firewall
 			_if( $this->spellid->exactly(self::_DanceOfFlames), $this->eventTime->exactly(0) )->then( $switch->clear() ), // dance of flames
 			_if( $this->spellid->exactly(self::_Holocaust), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // holocaust
+			_if( $this->spellid->exactly(self::_Smite), $this->eventTime->exactly(0) )->then( $switch->clear() ), // smite
 		'');
 		
 		// add velocity, acceleration, and make the changes
@@ -251,6 +270,7 @@ class Projectile{
 			
 			// some spells are invisible at times...
 			_if( $this->spellid->exactly(self::_Holocaust), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // holocaust
+			_if( $this->spellid->exactly(self::_Smite), $this->eventTime->atLeast(1) )->then( $switch->clear() ), // smite
 		'');
 		
 		// output
@@ -259,57 +279,44 @@ class Projectile{
 			_if( $success->is_set() )->then(
 				
 				// Fireball
-				_if( $this->spellid->exactly(self::_Fireball), $this->duration->atLeast(2) )->then(
-					Grid::$main->explode(),
-				''),
-				_if( $this->spellid->exactly(self::_Fireball), $this->duration->exactly(1) )->then(
-					Grid::$main->largeExplode(),
-				''),
+				_if( $this->spellid->exactly(self::_Fireball), $this->duration->atLeast(2) )->then( Grid::$main->explode() ),
+				_if( $this->spellid->exactly(self::_Fireball), $this->duration->exactly(1) )->then( Grid::$main->largeExplode() ),
 				// lob
-				_if( $this->spellid->exactly(self::_Lob), $this->duration->atLeast(2) )->then(
-					Grid::$main->explode(),
-				''),
-				_if( $this->spellid->exactly(self::_Lob), $this->duration->exactly(1) )->then(
-					Grid::$main->largeExplode(),
-				''),
+				_if( $this->spellid->exactly(self::_Lob), $this->duration->atLeast(2) )->then( Grid::$main->explode() ),
+				_if( $this->spellid->exactly(self::_Lob), $this->duration->exactly(1) )->then( Grid::$main->largeExplode() ),
 				// Lunge
 				// Teleport
 				// Meteor
+				_if( $this->spellid->exactly(self::_Meteor), $this->duration->atLeast(2) )->then( Grid::$main->explode() ),
+				_if( $this->spellid->exactly(self::_Meteor), $this->duration->exactly(1) )->then( Grid::$main->largeExplode() ),
 				// Block
+				_if( $this->spellid->exactly(self::_Block), $this->duration->atLeast(1) )->then( Grid::$main->airPuff() ),
 				// Disruption
 				// Firewall
+				_if( $this->spellid->exactly(self::_Firewall), $this->duration->atLeast(1), $this->eventTime->atLeast(1) )->then( Grid::$main->airPuff() ),
+				_if( $this->spellid->exactly(self::_Firewall), $this->duration->atLeast(1), $this->eventTime->atMost(0) )->then( Grid::$main->explode() ),
 				// Barrier
 				// Zap
-				_if( $this->spellid->exactly(self::_Zap), $this->duration->atLeast(1) )->then(
-					Grid::$main->blueExplode(),
-				''),
+				_if( $this->spellid->exactly(self::_Zap), $this->duration->atLeast(1) )->then( Grid::$main->blueExplode() ),
 				// Blaze
 				// Dance of Flames
-				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->atLeast(2) )->then(
-					Grid::$main->explode(),
-				''),
-				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->exactly(1) )->then(
-					Grid::$main->largeExplode(),
-				''),
+				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->atLeast(2) )->then( Grid::$main->explode() ),
+				_if( $this->spellid->exactly(self::_DanceOfFlames), $this->duration->exactly(1) )->then( Grid::$main->largeExplode() ),
 				// Holocaust
-				_if( $this->spellid->exactly(self::_Holocaust), $this->duration->atLeast(1) )->then(
-					Grid::$main->largeExplode(),
-				''),
+				_if( $this->spellid->exactly(self::_Holocaust), $this->duration->atLeast(1) )->then( Grid::$main->largeExplode() ),
 				// Explosion
 				// Claim
 				// Rain of Fire
 				// Firebreath
-				_if( $this->spellid->exactly(self::_Firebreath), $this->duration->atLeast(1) )->then(
-					Grid::$main->explode(),
-				''),
+				_if( $this->spellid->exactly(self::_Firebreath), $this->duration->atLeast(1) )->then( Grid::$main->explode() ),
 				// Guided
-				_if( $this->spellid->exactly(self::_Guided), $this->duration->atLeast(2) )->then(
-					Grid::$main->explode(),
-				''),
-				_if( $this->spellid->exactly(self::_Guided), $this->duration->exactly(1) )->then(
-					Grid::$main->largeExplode(),
-				''),
-				
+				_if( $this->spellid->exactly(self::_Guided), $this->duration->atLeast(2) )->then( Grid::$main->explode() ),
+				_if( $this->spellid->exactly(self::_Guided), $this->duration->exactly(1) )->then( Grid::$main->largeExplode() ),
+				// Smite
+				_if( $this->spellid->exactly(self::_Smite), $this->duration->atLeast(1) )->then( Grid::$main->kakaru() ),
+				_if( $this->spellid->exactly(self::_Smite2), $this->duration->atLeast(1) )->then( Grid::$main->largeBlueExplode() ),
+				// Spiral
+				_if( $this->spellid->exactly(self::_Spiral), $this->duration->atLeast(1) )->then( Grid::$main->blueExplode() ),
 			''),
 			$success->release(),
 			$switch->release(),

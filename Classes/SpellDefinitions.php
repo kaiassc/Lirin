@@ -21,7 +21,8 @@
 	const _Firebreath       = 17;
 	const _Guided           = 18;
 	const _Smite            = 19;
-	const _Smite2           = 20;
+	const _Smite2           = 119;
+	const _Spiral           = 20;
 
 	
 	// Persistent DCs
@@ -290,6 +291,61 @@
 
 
 	// 05 -- METEOR
+		// cast
+		$humans->_if( $invokedspell->exactly(_Meteor), $projCount->atLeast(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Invoke Meteor"),
+			$spellCast->setTo(_Meteor),
+			$castStage->setTo(0),
+			
+			//Projectile
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Point),
+			
+			// Distance
+			$FindDistance->clear(),
+			$MaxRangeIndex->setTo(0),
+				$MaxCastRange->setTo(0),
+			
+			// Angle
+			$AngleIndex->setTo(0),
+			$angle->setTo(400),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(140),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(24),
+			
+			// Position
+			$SetPosition->set(),
+				$PositionIndex->setTo(_LoadMult1),
+				$PositionDirection->setTo(_Ahead),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult2),
+				$VelocityDirection->setTo(_Behind),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			$AddAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(5),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Meteor),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
 
 
 
@@ -1220,7 +1276,7 @@
 		'');
 
 
-	// 18 -- SMITE
+	// 19 -- SMITE
 		// stage4
 		$humans->_if( $spellCast->exactly(_Smite), $castStage->exactly(4) )->then(
 			
@@ -1405,6 +1461,105 @@
 			$castTimer->setTo(20),
 			
 			$enableSpellSystem->set(),
+		'');
+
+
+	// 01 -- SPIRAL
+		// cast
+		$humans->_if( $spellCast->exactly(_Spiral), $castStage->exactly(1) )->then(
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Proj),
+			
+			// Angle
+			$AngleIndex->setTo(_Calc),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(16),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Left),
+			
+			// Durations and ID
+			$duration->setTo(2),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Spiral),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// cast
+		$humans->_if( $invokedspell->exactly(_Spiral), $projCount->atLeast(1), $castStage->exactly(0) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Invoke Fireball"),
+			$spellCast->setTo(_Spiral),
+			$castTimer->setTo(60),
+			$castStage->setTo(1),
+			
+			//Projectile
+			$SetFirstAvailableProj->set(),
+			
+			// Coordinate
+			$OriginIndex->setTo(_Hero),
+			$DestinationIndex->setTo(_Point),
+			
+			// Distance
+			$FindDistance->clear(),
+			$MaxRangeIndex->setTo(0),
+				$MaxCastRange->setTo(0),
+			
+			// Angle
+			$AngleIndex->setTo(_Calc),
+			
+			// Component
+			$FindComponents->set(),
+			
+			// Mult Div Mult
+			$Mult1Value->setTo(16),
+			$DivValue->setTo(0),
+			$Mult2Value->setTo(0),
+			
+			// Position
+			$SetPosition->set(),
+			
+			// Velocity
+			$ClearVelocity->set(),
+			$AddVelocity->set(),
+				$VelocityIndex->setTo(_LoadMult1),
+				$VelocityDirection->setTo(_Ahead),
+			
+			// Acceleration
+			$ClearAcceleration->set(),
+			
+			// Durations and ID
+			$duration->setTo(60),
+			$eventTime->setTo(0),
+			$spellid->setTo(_Spiral),
+			
+			// Cast
+			$enableSpellSystem->set(),
+			
+		'');
+		// end
+		$humans->_if( $spellCast->exactly(_Spiral), $castStage->exactly(1), $castTimer->exactly(1) )->then(
+			
+			// Stage prep (for persistent spells)
+			Display("Ended Spiral"),
+			$spellCast->setTo(0),
+			$castTimer->setTo(0),
+			$castStage->setTo(0),
+			
 		'');
 	
 	
