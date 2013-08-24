@@ -113,13 +113,6 @@ class SpellSystem {
 			$this->Projectiles[$i+$projPerPlayer*4] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8, $eventTime->P8, $spellid->P8, $tangibility->P8));
 			
 		}
-		/*
-		foreach($this->P4projectiles as $projectile){$this->Projectiles[] = $projectile;}
-		foreach($this->P5projectiles as $projectile){$this->Projectiles[] = $projectile;}
-		foreach($this->P6projectiles as $projectile){$this->Projectiles[] = $projectile;}
-		foreach($this->P7projectiles as $projectile){$this->Projectiles[] = $projectile;}
-		foreach($this->P8projectiles as $projectile){$this->Projectiles[] = $projectile;}
-		*/
 		
 		
 		// Create Spell Slot Caster Units
@@ -1026,10 +1019,11 @@ class SpellSystem {
 		$tempy = new TempDC($this->Projectiles[0]->ypos->Max);
 		
 		$numelement = count($this->Projectiles);
+		$projPerPlayer = count($this->P4projectiles);
 		for($i=0; $i<$numelement; $i++){
 			// other projectiles
 			$DCx = $DCy = $DCduration = $DCtang = array();
-			for($j=$i+4-$i%4; $j<$numelement; $j++){
+			for($j=$i+$projPerPlayer-$i%$projPerPlayer; $j<$numelement; $j++){
 				$DCx[] = $this->Projectiles[$j]->xpos;
 				$DCy[] = $this->Projectiles[$j]->ypos;
 				$DCduration[] = $this->Projectiles[$j]->duration;

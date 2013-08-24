@@ -57,6 +57,7 @@ class Lirin extends RPG {
 		
 		
 		
+		
 	}
 	
 	
