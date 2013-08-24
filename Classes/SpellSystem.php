@@ -1029,7 +1029,7 @@ class SpellSystem {
 		for($i=0; $i<$numelement; $i++){
 			// other projectiles
 			$DCx = $DCy = $DCduration = $DCtang = array();
-			for($j=4*ceil(($i+1)/4); $j<$numelement; $j++){
+			for($j=$i+4-$i%4; $j<$numelement; $j++){
 				$DCx[] = $this->Projectiles[$j]->xpos;
 				$DCy[] = $this->Projectiles[$j]->ypos;
 				$DCduration[] = $this->Projectiles[$j]->duration;
