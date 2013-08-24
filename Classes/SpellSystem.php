@@ -1028,8 +1028,8 @@ class SpellSystem {
 		$numelement = count($this->Projectiles);
 		for($i=0; $i<$numelement; $i++){
 			// other projectiles
-			$DCx = $DCy = $DCduration = $DCtang = '';
-			for($j=$i+1; $j<$numelement; $j++){
+			$DCx = $DCy = $DCduration = $DCtang = array();
+			for($j=4*ceil(($i+1)/4); $j<$numelement; $j++){
 				$DCx[] = $this->Projectiles[$j]->xpos;
 				$DCy[] = $this->Projectiles[$j]->ypos;
 				$DCduration[] = $this->Projectiles[$j]->duration;
@@ -1038,8 +1038,6 @@ class SpellSystem {
 			
 			// relative position
 			$text .= _if( $this->Projectiles[$i]->tangibility->atLeast(1) )->then(
-				// TODO: remove
-				Display('PROJECTILE ' . $i),
 				// relative position
 				$this->addToAll($DCx, 10000),
 				$this->addToAll($DCy, 10000),
@@ -1067,23 +1065,10 @@ class SpellSystem {
 	private function checkBorders($j, $duration, $tangibility, $DCx, $DCy, $DCduration, $DCtang){
 		/* @var Deathcounter $duration */
 		/* @var Deathcounter $tangibility */
-		$xbound = 24;
-		$ybound = 24;
+		$xbound = 48;
+		$ybound = 48;
 		$text = '';
-		
-		// no elements
-		if(count($DCx)==0){ return ''; } 
-		// 1 element
-		if(count($DCx)==1){
-			$text .= _if( $tangibility->atLeast(2), $DCtang->between(1,2), $DCx->between(10000-$xbound, 10000+$xbound), $DCy->between(10000-$ybound, 10000+$ybound) )->then(
-				$duration->setTo(1),
-			'');
-			$text .= _if( $DCtang->atLeast(2), $tangibility->between(1,2), $DCx->between(10000-$xbound, 10000+$xbound), $DCy->between(10000-$ybound, 10000+$ybound) )->then(
-				$DCduration->setTo(1),
-			'');
-			
-			return $text;
-		}
+
 		// multiple elements
 		for($i=0; $i<count($DCx); $i++){
 			// foreign projectile's effect on this projectile

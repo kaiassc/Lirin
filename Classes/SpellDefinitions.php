@@ -196,7 +196,7 @@
 			$FindComponents->set(),
 			
 			// Mult Div Mult
-			$Mult1Value->setTo(4),
+			$Mult1Value->setTo(16),
 			$DivValue->setTo(0),
 			$Mult2Value->setTo(0),
 			
@@ -213,7 +213,7 @@
 			$ClearAcceleration->set(),
 			
 			// Durations and ID
-			$duration->setTo(96),
+			$duration->setTo(24),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Fireball),
 			$tangibility->setTo(2),
@@ -858,6 +858,7 @@
 			$duration->setTo(60),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Holocaust),
+			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -913,6 +914,7 @@
 			$duration->setTo(60+1),
 			$eventTime->setTo(1),
 			$spellid->setTo(_Holocaust),
+			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -968,6 +970,7 @@
 			$duration->setTo(60+2),
 			$eventTime->setTo(2),
 			$spellid->setTo(_Holocaust),
+			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -1025,6 +1028,7 @@
 			$duration->setTo(60+3),
 			$eventTime->setTo(3),
 			$spellid->setTo(_Holocaust),
+			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
