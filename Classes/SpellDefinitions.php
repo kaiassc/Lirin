@@ -50,6 +50,7 @@
 	/* @var TempDC          $duration                   */
 	/* @var TempDC          $eventTime                  */
 	/* @var TempDC          $spellid                    */
+	/* @var TempDC          $tangibility                */
 	
 	
 	// SPELL VARIABLES
@@ -195,7 +196,7 @@
 			$FindComponents->set(),
 			
 			// Mult Div Mult
-			$Mult1Value->setTo(16),
+			$Mult1Value->setTo(4),
 			$DivValue->setTo(0),
 			$Mult2Value->setTo(0),
 			
@@ -212,9 +213,10 @@
 			$ClearAcceleration->set(),
 			
 			// Durations and ID
-			$duration->setTo(24),
+			$duration->setTo(96),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Fireball),
+			$tangibility->setTo(2),
 			
 			// Cast
 			$enableSpellSystem->set(),

@@ -15,6 +15,7 @@ class Projectile{
 	/* @var Deathcounter */ public $duration;
 	/* @var Deathcounter */ public $eventTime;
 	/* @var Deathcounter */ public $spellid;
+	/* @var Deathcounter */ public $tangibility;
 	
 	function __construct(Array $dcarray = null){
 		
@@ -30,9 +31,10 @@ class Projectile{
 			$this->duration  = new Deathcounter(720);
 			$this->eventTime = new Deathcounter(720);
 			$this->spellid   = new Deathcounter(100);
+			$this->tangibility = new Deathcounter(3);
 		}
 		else if(is_array($dcarray)) {
-			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration, $eventTime, $spellid) = $dcarray;
+			list($xpos, $ypos, $xpospart, $ypospart, $xvel, $yvel, $xacc, $yacc, $duration, $eventTime, $spellid, $tangibility) = $dcarray;
 			$this->xpos      = $xpos;
 			$this->ypos      = $ypos;
 			$this->xpospart  = $xpospart;
@@ -44,6 +46,7 @@ class Projectile{
 			$this->duration  = $duration;
 			$this->eventTime = $eventTime;
 			$this->spellid   = $spellid;
+			$this->tangibility = $tangibility;
 		}
 		else {
 			Error("\$dcarray must be an array");
@@ -172,6 +175,9 @@ class Projectile{
 	
 	function setSpellID($n){
 		return $this->spellid->setTo($n);
+	}
+	function setTangibility($n){
+		return $this->tangibility->setTo($n);
 	}
 	
 	
@@ -325,34 +331,26 @@ class Projectile{
 		return $text;
 	}
 	
+	
+	
+	
 		
 	//kill projectile
 	function kill(){
 		$text = '';
 		
 		$text .= _if( $this->duration->exactly(1) )->then(
-			#$this->xpos->setTo(0),
-			#$this->ypos->setTo(0),
-			#$this->xpospart->setTo(0),
-			#$this->ypospart->setTo(0),
 			$this->xvel->setTo(0),
 			$this->yvel->setTo(0),
 			$this->xacc->setTo(0),
 			$this->yacc->setTo(0),
 			$this->duration->setTo(0),
+			$this->eventTime->setTo(0),
+			$this->spellid->setTo(0),
+			$this->tangibility->setTo(0),
 		'');
 		
 		return $text;
-	}
-	
-	
-	// combined engine
-	function engine(){
-		return
-			$this->move().
-			$this->show().
-			$this->kill().
-			$this->tickDown();
 	}
 	
 	

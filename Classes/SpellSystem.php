@@ -29,6 +29,7 @@ class SpellSystem {
 	/* @var Deathcounter[] */ private $yaccDCs = array();
 	/* @var Deathcounter[] */ private $durationDCs = array();
 	/* @var Deathcounter[] */ private $spellidDCs = array();
+	/* @var Deathcounter[] */ private $tangibilityDCs = array();
 	
 	
 	
@@ -102,15 +103,23 @@ class SpellSystem {
 			$this->durationDCs[]    = $duration  = new Deathcounter($projowners, 720);
 			$this->eventTime[]      = $eventTime = new Deathcounter($projowners, 720);
 			$this->spellidDCs[]     = $spellid   = new Deathcounter($projowners, 100);
+			$this->tangibilityDCs[] = $tangibility = new Deathcounter($projowners, 3);
 			
-			$this->CPprojectiles[] = new Projectile(array($xpos->CP, $ypos->CP, $xpospart->CP, $ypospart->CP, $xvel->CP, $yvel->CP, $xacc->CP, $yacc->CP, $duration->CP, $eventTime->CP, $spellid->CP));
-			$this->Projectiles[] = $this->P4projectiles[] = new Projectile(array($xpos->P4, $ypos->P4, $xpospart->P4, $ypospart->P4, $xvel->P4, $yvel->P4, $xacc->P4, $yacc->P4, $duration->P4, $eventTime->P4, $spellid->P4));
-			$this->Projectiles[] = $this->P5projectiles[] = new Projectile(array($xpos->P5, $ypos->P5, $xpospart->P5, $ypospart->P5, $xvel->P5, $yvel->P5, $xacc->P5, $yacc->P5, $duration->P5, $eventTime->P5, $spellid->P5));
-			$this->Projectiles[] = $this->P6projectiles[] = new Projectile(array($xpos->P6, $ypos->P6, $xpospart->P6, $ypospart->P6, $xvel->P6, $yvel->P6, $xacc->P6, $yacc->P6, $duration->P6, $eventTime->P6, $spellid->P6));
-			$this->Projectiles[] = $this->P7projectiles[] = new Projectile(array($xpos->P7, $ypos->P7, $xpospart->P7, $ypospart->P7, $xvel->P7, $yvel->P7, $xacc->P7, $yacc->P7, $duration->P7, $eventTime->P7, $spellid->P7));
-			$this->Projectiles[] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8, $eventTime->P8, $spellid->P8));
+			$this->CPprojectiles[] = new Projectile(array($xpos->CP, $ypos->CP, $xpospart->CP, $ypospart->CP, $xvel->CP, $yvel->CP, $xacc->CP, $yacc->CP, $duration->CP, $eventTime->CP, $spellid->CP, $tangibility->CP));
+			$this->Projectiles[$i+$projPerPlayer*0] = $this->P4projectiles[] = new Projectile(array($xpos->P4, $ypos->P4, $xpospart->P4, $ypospart->P4, $xvel->P4, $yvel->P4, $xacc->P4, $yacc->P4, $duration->P4, $eventTime->P4, $spellid->P4, $tangibility->P4));
+			$this->Projectiles[$i+$projPerPlayer*1] = $this->P5projectiles[] = new Projectile(array($xpos->P5, $ypos->P5, $xpospart->P5, $ypospart->P5, $xvel->P5, $yvel->P5, $xacc->P5, $yacc->P5, $duration->P5, $eventTime->P5, $spellid->P5, $tangibility->P5));
+			$this->Projectiles[$i+$projPerPlayer*2] = $this->P6projectiles[] = new Projectile(array($xpos->P6, $ypos->P6, $xpospart->P6, $ypospart->P6, $xvel->P6, $yvel->P6, $xacc->P6, $yacc->P6, $duration->P6, $eventTime->P6, $spellid->P6, $tangibility->P6));
+			$this->Projectiles[$i+$projPerPlayer*3] = $this->P7projectiles[] = new Projectile(array($xpos->P7, $ypos->P7, $xpospart->P7, $ypospart->P7, $xvel->P7, $yvel->P7, $xacc->P7, $yacc->P7, $duration->P7, $eventTime->P7, $spellid->P7, $tangibility->P7));
+			$this->Projectiles[$i+$projPerPlayer*4] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8, $eventTime->P8, $spellid->P8, $tangibility->P8));
 			
 		}
+		/*
+		foreach($this->P4projectiles as $projectile){$this->Projectiles[] = $projectile;}
+		foreach($this->P5projectiles as $projectile){$this->Projectiles[] = $projectile;}
+		foreach($this->P6projectiles as $projectile){$this->Projectiles[] = $projectile;}
+		foreach($this->P7projectiles as $projectile){$this->Projectiles[] = $projectile;}
+		foreach($this->P8projectiles as $projectile){$this->Projectiles[] = $projectile;}
+		*/
 		
 		
 		// Create Spell Slot Caster Units
@@ -134,8 +143,8 @@ class SpellSystem {
 		$humans->justonce(
 			$this->SpellSlotDCs[1]->setTo(self::_Fireball),
 			$this->SpellSlotDCs[2]->setTo(self::_Lob),
-			$this->SpellSlotDCs[3]->setTo(self::_Meteor),
-			$this->SpellSlotDCs[4]->setTo(self::_Spiral),
+			$this->SpellSlotDCs[3]->setTo(self::_Zap),
+			$this->SpellSlotDCs[4]->setTo(self::_Holocaust),
 		'');
 		
 	}
@@ -206,6 +215,7 @@ class SpellSystem {
 		$duration =                     new TempDC(720);
 		$eventTime =                    new TempDC(720);
 		$spellid =                      new TempDC(127);
+		$tangibility =                  new TempDC(3);
 		
 		
 		// SPELL VARIABLES
@@ -731,7 +741,7 @@ class SpellSystem {
 			
 			
 			// LOAD PROJECTILE
-			$this->loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid),
+			$this->loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid, $tangibility),
 			
 		'');
 		
@@ -791,6 +801,7 @@ class SpellSystem {
 			$duration->release(),
 			$eventTime->release(),
 			$spellid->release(),
+			$tangibility->release(),
 			$enableSpellSystem->release(),
 			$SetFirstAvailableProj->release(),
 			$SetSelectProj->release(),
@@ -835,13 +846,40 @@ class SpellSystem {
 		
 		
 		// Engine
+		$move = $collide = $show = $kill = $tickDown = '';
+		foreach($this->CPprojectiles as $projectile){
+			$move .= $projectile->move();
+		}
+		
+		$collide .= $this->collision();
+		
+		foreach($this->Projectiles as $projectile){
+			$show .= $projectile->show();
+			$kill .= $projectile->kill();
+			$tickDown .= $projectile->tickDown();
+		}
+		
+		
+		$P8 = new Player(P8);
+		
 		$projowners->always(
-			$this->projectileEngine(),
+			$move,
+		'');
+		$P8->always(
+			$collide,
+			$show,
+			$kill,
+			$tickDown,
 		'');
 		
+		$P4 = new Player(P4);
+		$P4->setOre($this->Projectiles[0]->xpos);
+		$P4->setGas($this->Projectiles[0]->ypos);
 
 		
 	}
+	
+	
 	
 	
 	
@@ -916,7 +954,7 @@ class SpellSystem {
 	
 
 	
-	function loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid){
+	function loadIntoProjectiles($savedProj, $SetPosition, $positionx, $positiony, $ClearVelocity, $AddVelocity, $velocityx, $velocityy, $ClearAcceleration, $AddAcceleration, $accelerationx, $accelerationy, $duration, $eventTime, $spellid, $tangibility){
 		
 		/* @var Deathcounter    $savedProj          */
 		/* @var TempSwitch      $SetPosition        */
@@ -933,6 +971,7 @@ class SpellSystem {
 		/* @var TempDC          $duration           */
 		/* @var TempDC          $eventTime          */
 		/* @var TempDC          $spellid            */
+		/* @var TempDC          $tangibility        */
 				
 		$text = '';
 				
@@ -950,6 +989,7 @@ class SpellSystem {
 					$projectile->addDuration($duration),
 				''),
 				_if( $spellid->atLeast(1) )->then( $projectile->setSpellID($spellid) ),
+				_if( $tangibility->atLeast(1) )->then( $projectile->settangibility($tangibility) ),
 			'');
 		}
 		
@@ -969,15 +1009,149 @@ class SpellSystem {
 		return $text;
 	}
 	
-	function projectileEngine(){
+	
+	
+	
+	
+	
+	
+	
+	
+	// detect projectile hit
+	function collision(){
+		
 		$text = '';
 		
-		foreach($this->CPprojectiles as $projectile){
-			$text .= $projectile->engine();
+		$tempx = new TempDC($this->Projectiles[0]->xpos->Max);
+		$tempy = new TempDC($this->Projectiles[0]->ypos->Max);
+		
+		$numelement = count($this->Projectiles);
+		for($i=0; $i<$numelement; $i++){
+			// other projectiles
+			$DCx = $DCy = $DCduration = $DCtang = '';
+			for($j=$i+1; $j<$numelement; $j++){
+				$DCx[] = $this->Projectiles[$j]->xpos;
+				$DCy[] = $this->Projectiles[$j]->ypos;
+				$DCduration[] = $this->Projectiles[$j]->duration;
+				$DCtang[] = $this->Projectiles[$j]->tangibility;
+			}
+			
+			// relative position
+			$text .= _if( $this->Projectiles[$i]->tangibility->atLeast(1) )->then(
+				// TODO: remove
+				Display('PROJECTILE ' . $i),
+				// relative position
+				$this->addToAll($DCx, 10000),
+				$this->addToAll($DCy, 10000),
+				$this->countoffDCs($DCx, $this->Projectiles[$i]->xpos, $tempx),
+				$this->countoffDCs($DCy, $this->Projectiles[$i]->ypos, $tempy),
+				
+				// within bounds?
+				$this->checkBorders($i, $this->Projectiles[$i]->duration, $this->Projectiles[$i]->tangibility, $DCx, $DCy, $DCduration, $DCtang),
+				
+				// restore
+				$this->countUpDCs($DCx, $this->Projectiles[$i]->xpos, $tempx),
+				$this->countUpDCs($DCy, $this->Projectiles[$i]->ypos, $tempy),
+				$this->subFromAll($DCx, 10000),
+				$this->subFromAll($DCy, 10000),
+			'');
+		}
+		
+		$tempx->release();
+		$tempy->release();
+		
+		return $text;
+	}
+	
+	
+	private function checkBorders($j, $duration, $tangibility, $DCx, $DCy, $DCduration, $DCtang){
+		/* @var Deathcounter $duration */
+		/* @var Deathcounter $tangibility */
+		$xbound = 24;
+		$ybound = 24;
+		$text = '';
+		
+		// no elements
+		if(count($DCx)==0){ return ''; } 
+		// 1 element
+		if(count($DCx)==1){
+			$text .= _if( $tangibility->atLeast(2), $DCtang->between(1,2), $DCx->between(10000-$xbound, 10000+$xbound), $DCy->between(10000-$ybound, 10000+$ybound) )->then(
+				$duration->setTo(1),
+			'');
+			$text .= _if( $DCtang->atLeast(2), $tangibility->between(1,2), $DCx->between(10000-$xbound, 10000+$xbound), $DCy->between(10000-$ybound, 10000+$ybound) )->then(
+				$DCduration->setTo(1),
+			'');
+			
+			return $text;
+		}
+		// multiple elements
+		for($i=0; $i<count($DCx); $i++){
+			// foreign projectile's effect on this projectile
+			$text .= _if( $tangibility->atLeast(2), $DCtang[$i]->between(1,2), $DCx[$i]->between(10000-$xbound, 10000+$xbound), $DCy[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+				$duration->setTo(1),
+			'');
+			// this projectile's effect on foreign projectile
+			$text .= _if( $DCtang[$i]->atLeast(2), $tangibility->between(1,2), $DCx[$i]->between(10000-$xbound, 10000+$xbound), $DCy[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+				$DCduration[$i]->setTo(1),
+			'');
 		}
 		
 		return $text;
 	}
+	
+	private function addToAll($DCArray, $amount){
+		$text = '';
+		/** @var Deathcounter[] $DCArray */
+		foreach($DCArray as $dc){
+			$text .= $dc->add($amount);
+		}
+		return $text;
+	}
+	
+	private function subFromAll($DCArray, $amount){
+		$text = '';
+		/** @var Deathcounter[] $DCArray */
+		foreach($DCArray as $dc){
+			$text .= $dc->subtract($amount);
+		}
+		return $text;
+	}
+	
+	private function countOffDCs($otherdcs, Deathcounter $basedc, Deathcounter $tempdc){
+		$text = '';
+		
+		$maxbit = $basedc->binaryPower();
+		for($i=$maxbit;$i>=0;$i--){
+			$power = pow(2,$i);
+			$text .= _if( $basedc->atLeast($power) )->then(
+				$this->subFromAll($otherdcs, $power),
+				$basedc->sub($power),
+				$tempdc->add($power),
+			'');
+			
+		}
+		return $text;
+	}
+	
+	private function countUpDCs($otherdcs, Deathcounter $basedc, Deathcounter $tempdc){
+		/** @var Deathcounter[] $otherdcs */
+		
+		$text = '';
+		
+		$maxbit = $basedc->binaryPower();
+		for($i=$maxbit;$i>=0;$i--){
+			$power = pow(2,$i);
+			$text .= _if( $tempdc->atLeast($power) )->then(
+				$this->addToAll($otherdcs, $power),
+				$basedc->add($power),
+				$tempdc->sub($power),
+			'');
+			
+		}
+		return $text;
+	}
+	
+	
 	
 	
 }
