@@ -1020,6 +1020,7 @@ class SpellSystem {
 		
 		$numelement = count($this->Projectiles);
 		$projPerPlayer = count($this->P4projectiles);
+		
 		for($i=0; $i<$numelement; $i++){
 			// other projectiles
 			$DCx = $DCy = $DCduration = $DCtang = array();
