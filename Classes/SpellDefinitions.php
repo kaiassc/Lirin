@@ -50,7 +50,8 @@
 	/* @var TempDC          $duration                   */
 	/* @var TempDC          $eventTime                  */
 	/* @var TempDC          $spellid                    */
-	/* @var TempDC          $tangibility                */
+	/* @var TempDC          $collideProj                */
+	/* @var TempDC          $collideUnit                */
 	
 	
 	// SPELL VARIABLES
@@ -216,7 +217,7 @@
 			$duration->setTo(24),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Fireball),
-			$tangibility->setTo(2),
+			$collideProj->setTo(2),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -858,7 +859,6 @@
 			$duration->setTo(60),
 			$eventTime->setTo(0),
 			$spellid->setTo(_Holocaust),
-			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -914,7 +914,6 @@
 			$duration->setTo(60+1),
 			$eventTime->setTo(1),
 			$spellid->setTo(_Holocaust),
-			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -970,7 +969,6 @@
 			$duration->setTo(60+2),
 			$eventTime->setTo(2),
 			$spellid->setTo(_Holocaust),
-			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
@@ -1028,7 +1026,6 @@
 			$duration->setTo(60+3),
 			$eventTime->setTo(3),
 			$spellid->setTo(_Holocaust),
-			$tangibility->setTo(1),
 			
 			// Cast
 			$enableSpellSystem->set(),
