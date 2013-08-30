@@ -33,6 +33,10 @@ class SpellSystem {
 	/* @var Deathcounter[] */ private $collideUnitDCs = array();
 	
 	
+	public $projectilesPerPlayer;
+	public $numProjectiles;
+	
+	
 	
 	// Spell Constants
 	const _Fireball         = 1;
@@ -115,6 +119,9 @@ class SpellSystem {
 			$this->Projectiles[$i+$projPerPlayer*4] = $this->P8projectiles[] = new Projectile(array($xpos->P8, $ypos->P8, $xpospart->P8, $ypospart->P8, $xvel->P8, $yvel->P8, $xacc->P8, $yacc->P8, $duration->P8, $eventTime->P8, $spellid->P8, $collideProj->P8, $collideUnit->P8));
 			
 		}
+		
+		$this->projectilesPerPlayer = $projPerPlayer;
+		$this->numProjectiles = $projPerPlayer*5;
 		
 		
 		// Create Spell Slot Caster Units
@@ -1018,19 +1025,19 @@ class SpellSystem {
 	
 	
 	// detect projectile hit
-	function collision(){
+	private function collision(){
 		
 		$text = '';
 		
 		$tempx = new TempDC($this->Projectiles[0]->xpos->Max);
 		$tempy = new TempDC($this->Projectiles[0]->ypos->Max);
 		
-		$numelement = count($this->Projectiles);
-		$projPerPlayer = count($this->P4projectiles);
-		for($i=0; $i<$numelement; $i++){
+		$bsunits = BattleSystem::getBSUnits();
+		
+		for($i=0; $i<$this->numProjectiles; $i++){
 			// other projectiles
 			$DCx = $DCy = $ProjX = $ProjY = $DCduration = $DCcollideProj = $UnitX = $UnitY = $unitType = array();
-			for($j=$i+$projPerPlayer-$i%$projPerPlayer; $j<$numelement; $j++){
+			for($j=$i+$this->projectilesPerPlayer-$i%$this->projectilesPerPlayer; $j<$this->numProjectiles; $j++){
 				$DCx[] = $this->Projectiles[$j]->xpos;
 				$DCy[] = $this->Projectiles[$j]->ypos;
 				$ProjX[] = $this->Projectiles[$j]->xpos;
@@ -1038,12 +1045,12 @@ class SpellSystem {
 				$DCduration[] = $this->Projectiles[$j]->duration;
 				$DCcollideProj[] = $this->Projectiles[$j]->collideProj;
 			}
-			for($j=0; $j<count(BattleSystem::$xDCs); $j++){
-				$DCx[] = BattleSystem::$xDCs[$j];
-				$DCy[] = BattleSystem::$yDCs[$j];
-				$UnitX[] = BattleSystem::$xDCs[$j];
-				$UnitY[] = BattleSystem::$yDCs[$j];
-				$unitType[] = BattleSystem::$typeDCs[$j];
+			for($j=0; $j<count($bsunits); $j++){
+				$DCx[] = $bsunits[$j]->x;
+				$DCy[] = $bsunits[$j]->y;
+				$UnitX[] = $bsunits[$j]->x;
+				$UnitY[] = $bsunits[$j]->y;
+				$unitType[] = $bsunits[$j]->type;
 			}
 			
 			// relative position
@@ -1058,7 +1065,7 @@ class SpellSystem {
 				
 				// within bounds?
 				$this->collideProj($this->Projectiles[$i]->duration, $this->Projectiles[$i]->collideProj, $ProjX, $ProjY, $DCduration, $DCcollideProj),
-				$this->collideUnit($this->Projectiles[$i]->duration, $this->Projectiles[$i]->collideUnit, $UnitX, $UnitY, $unitType),
+				$this->collideUnit($this->Projectiles[$i]->duration, $this->Projectiles[$i]->collideUnit, $UnitX, $UnitY, $unitType, $i),
 				
 				// restore
 				$this->countUpDCs($ProjX, $this->Projectiles[$i]->xpos, $tempx),
@@ -1097,19 +1104,100 @@ class SpellSystem {
 		return $text;
 	}
 	
-	private function collideUnit($duration, $collideUnit, $UnitX, $UnitY, $unitType){
+	private function collideUnit($duration, $collideUnit, $UnitX, $UnitY, $unitType, $j){
 		/* @var Deathcounter $duration */
-		/* @var Deathcounter $collideProj */
+		/* @var Deathcounter $collideUnit */
 		$xbound = 48;
 		$ybound = 48;
 		$text = '';
 		
+		$hitEnemies = new TempSwitch();
+		$hitAllies = new TempSwitch();
+		$hitSelf = new TempSwitch();
+		
+		// unpack flags
+		$text .= _if( $collideUnit->atLeast(4) )->then(
+			$collideUnit->subtract(4),
+			$hitEnemies->set(),
+		'');
+		$text .= _if( $collideUnit->atLeast(2) )->then(
+			$collideUnit->subtract(2),
+			$hitAllies->set(),
+		'');
+		$text .= _if( $collideUnit->atLeast(1) )->then(
+			$collideUnit->subtract(1),
+			$hitSelf->set(),
+		'');
+		
 		// collide with units
 		for($i=0; $i<count($unitType); $i++){
-			$text .= _if( $unitType[$i]->atLeast(2), $collideUnit->atLeast(2), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
-				$duration->setTo(1),
-			'');
+			// TODO: change to valid unit type
+			// P4 self
+			if ($j < $this->projectilesPerPlayer*1 && $i == 0) {
+				$text .= _if( $unitType[$i]->atLeast(0), $hitSelf->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// P5 self
+			elseif ($j >= $this->projectilesPerPlayer*1 && $j < $this->projectilesPerPlayer*2 && $i == 1) {
+				$text .= _if( $unitType[$i]->atLeast(0), $hitSelf->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// P6 self
+			elseif ($j >= $this->projectilesPerPlayer*2 && $j < $this->projectilesPerPlayer*3 && $i == 2) {
+				$text .= _if( $unitType[$i]->atLeast(0), $hitSelf->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// P7 self
+			elseif ($j >= $this->projectilesPerPlayer*3 && $j < $this->projectilesPerPlayer*4 && $i >= 3 && $i < 6) {
+				$text .= _if( $unitType[$i]->atLeast(0), $hitSelf->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// Player and P7 allies
+			elseif ($j < $this->projectilesPerPlayer*4 && $i < 6){
+				$text .= _if( $unitType[$i]->atLeast(0), $hitAllies->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// Player and P7 allies
+			elseif ($j < $this->projectilesPerPlayer*4){
+				$text .= _if( $unitType[$i]->atLeast(0), $hitEnemies->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// P8 enemies
+			elseif ($j >= $this->projectilesPerPlayer*4 && $i < 6){
+				$text .= _if( $unitType[$i]->atLeast(0), $hitEnemies->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
+			// P8 allies
+			else{
+				$text .= _if( $unitType[$i]->atLeast(0), $hitAllies->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
+					$duration->setTo(1),
+				'');
+			}
 		}
+		
+		// pack flags
+		$text .= _if( $hitEnemies->is_set() )->then(
+			$collideUnit->add(4),
+			$hitEnemies->clear(),
+		'');
+		$text .= _if( $hitAllies->is_set() )->then(
+			$collideUnit->add(2),
+			$hitAllies->clear(),
+		'');
+		$text .= _if( $hitSelf->is_set() )->then(
+			$collideUnit->add(1),
+			$hitSelf->clear(),
+		'');
+		$hitEnemies->release();
+		$hitAllies->release();
+		$hitSelf->release();
 		
 		return $text;
 	}
