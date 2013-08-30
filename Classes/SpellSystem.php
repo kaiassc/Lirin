@@ -1055,21 +1055,21 @@ class SpellSystem {
 			
 			// relative position
 			$text .= _if( $this->Projectiles[$i]->inUse() )->then(
-				// TODO: remove
+				// TODO: remove display
 				Display('PROJECTILE ' . ($i+1)),
 				// relative position
 				_if( Always() )->then( $this->addToAll($DCx, 10000) ),
 				_if( Always() )->then( $this->addToAll($DCy, 10000) ),
-				$this->countoffDCs($ProjX, $this->Projectiles[$i]->xpos, $tempx),
-				$this->countoffDCs($ProjY, $this->Projectiles[$i]->ypos, $tempy),
+				$this->countoffDCs($DCx, $this->Projectiles[$i]->xpos, $tempx),
+				$this->countoffDCs($DCy, $this->Projectiles[$i]->ypos, $tempy),
 				
 				// within bounds?
 				$this->collideProj($this->Projectiles[$i]->duration, $this->Projectiles[$i]->collideProj, $ProjX, $ProjY, $DCduration, $DCcollideProj),
 				$this->collideUnit($this->Projectiles[$i]->duration, $this->Projectiles[$i]->collideUnit, $UnitX, $UnitY, $unitType, $i),
 				
 				// restore
-				$this->countUpDCs($ProjX, $this->Projectiles[$i]->xpos, $tempx),
-				$this->countUpDCs($ProjY, $this->Projectiles[$i]->ypos, $tempy),
+				$this->countUpDCs($DCx, $this->Projectiles[$i]->xpos, $tempx),
+				$this->countUpDCs($DCy, $this->Projectiles[$i]->ypos, $tempy),
 				_if( Always() )->then( $this->subFromAll($DCx, 10000) ),
 				_if( Always() )->then( $this->subFromAll($DCy, 10000) ),
 			'');
@@ -1115,6 +1115,7 @@ class SpellSystem {
 		$hitAllies = new TempSwitch();
 		$hitSelf = new TempSwitch();
 		
+		
 		// unpack flags
 		$text .= _if( $collideUnit->atLeast(4) )->then(
 			$collideUnit->subtract(4),
@@ -1128,6 +1129,7 @@ class SpellSystem {
 			$collideUnit->subtract(1),
 			$hitSelf->set(),
 		'');
+		
 		
 		// collide with units
 		for($i=0; $i<count($unitType); $i++){
@@ -1162,7 +1164,7 @@ class SpellSystem {
 					$duration->setTo(1),
 				'');
 			}
-			// Player and P7 allies
+			// Player and P7 enemies
 			elseif ($j < $this->projectilesPerPlayer*4){
 				$text .= _if( $unitType[$i]->atLeast(0), $hitEnemies->is_set(), $UnitX[$i]->between(10000-$xbound, 10000+$xbound), $UnitY[$i]->between(10000-$ybound, 10000+$ybound) )->then(
 					$duration->setTo(1),
